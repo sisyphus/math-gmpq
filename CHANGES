@@ -1,6 +1,8 @@
 0.38
  - Tweaks to Math::GMPq::gmp_v() and Math::GMPq::V::gmp_v()
  - Add metadata to Makefile.PL.
+ - No longer define USE_64_BIT_INT if ivtype is 'long'.
+ - Rename USE_64_BIT_INT #define to MATH_GMPQ_NEED_LONG_LONG_INT
 
 0.37
  - Alter wrap_gmp_sprintf and wrap_gmp_snprintf to take an extra arg (length of
