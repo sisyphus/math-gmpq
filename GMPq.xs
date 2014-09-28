@@ -1,3 +1,10 @@
+
+#ifdef  __MINGW32__
+#ifndef __USE_MINGW_ANSI_STDIO
+#define __USE_MINGW_ANSI_STDIO 1
+#endif
+#endif
+
 #define PERL_NO_GET_CONTEXT 1
 
 #include "EXTERN.h"
@@ -12,7 +19,7 @@
 #pragma warning(disable:4700 4715 4716)
 #endif
 
-#if defined USE_64_BIT_INT
+#if defined MATH_GMPQ_NEED_LONG_LONG_INT
 #ifndef _MSC_VER
 #include <inttypes.h>
 #endif
@@ -30,7 +37,7 @@
 #  define Newxz(v,n,t) Newz(0,v,n,t)
 #endif
 
-void Rmpq_canonicalize (pTHX_ mpq_t * p) {
+void Rmpq_canonicalize (mpq_t * p) {
      mpq_canonicalize(*p);
 }
 
@@ -76,7 +83,7 @@ void Rmpq_clear(pTHX_ mpq_t * p) {
      Safefree(p);
 }
 
-void Rmpq_clear_mpq(pTHX_ mpq_t * p) {
+void Rmpq_clear_mpq(mpq_t * p) {
      mpq_clear(*p);
 }
 
@@ -84,24 +91,24 @@ void Rmpq_clear_ptr(pTHX_ mpq_t * p) {
      Safefree(p);
 }
 
-void Rmpq_set(pTHX_ mpq_t * p1, mpq_t * p2) {
+void Rmpq_set(mpq_t * p1, mpq_t * p2) {
      mpq_set(*p1, *p2);
 }
 
-void Rmpq_swap(pTHX_ mpq_t * p1, mpq_t * p2) {
+void Rmpq_swap(mpq_t * p1, mpq_t * p2) {
      mpq_swap(*p1, *p2);
 }
 
-void Rmpq_set_z(pTHX_ mpq_t * p1, mpz_t * p2) {
+void Rmpq_set_z(mpq_t * p1, mpz_t * p2) {
      mpq_set_z(*p1, *p2);
 }
 
-void Rmpq_set_ui(pTHX_ mpq_t * p1, SV * p2, SV * p3) {
-     mpq_set_ui(*p1, SvUV(p2), SvUV(p3));
+void Rmpq_set_ui(mpq_t * p1, unsigned long p2, unsigned long p3) {
+     mpq_set_ui(*p1, p2, p3);
 }
 
-void Rmpq_set_si(pTHX_ mpq_t * p1, SV * p2, SV * p3) {
-     mpq_set_si(*p1, SvIV(p2), SvIV(p3));
+void Rmpq_set_si(mpq_t * p1, int p2, int p3) {
+     mpq_set_si(*p1, p2, p3);
 }
 
 void Rmpq_set_str(pTHX_ mpq_t * p1, SV * p2, SV * base) {
@@ -112,12 +119,12 @@ void Rmpq_set_str(pTHX_ mpq_t * p1, SV * p2, SV * base) {
 }
 
 
-SV * Rmpq_get_d(pTHX_ mpq_t * p) {
-     return newSVnv(mpq_get_d(*p));
+double Rmpq_get_d(mpq_t * p) {
+     return mpq_get_d(*p);
 }
 
-void Rmpq_set_d(pTHX_ mpq_t * p, SV * d){
-     mpq_set_d(*p, SvNV(d));
+void Rmpq_set_d(mpq_t * p, double d){
+     mpq_set_d(*p, d);
 }
 
 void _Rmpq_set_ld(pTHX_ mpq_t * q, SV * p) {
@@ -144,7 +151,7 @@ void _Rmpq_set_ld(pTHX_ mpq_t * q, SV * p) {
 #endif
 }
 
-void Rmpq_set_f(pTHX_ mpq_t * p, mpf_t * f) {
+void Rmpq_set_f(mpq_t * p, mpf_t * f) {
      mpq_set_f(*p, *f);
 }
 
@@ -162,39 +169,39 @@ SV * Rmpq_get_str(pTHX_ mpq_t * p, SV * base){
      return outsv;
 }
 
-SV * Rmpq_cmp(pTHX_ mpq_t * p1, mpq_t * p2) {
-     return newSViv(mpq_cmp(*p1, *p2));
+int Rmpq_cmp(mpq_t * p1, mpq_t * p2) {
+     return mpq_cmp(*p1, *p2);
 }
 
-SV * Rmpq_cmp_ui(pTHX_ mpq_t * p1, SV * n, SV * d) {
-     return newSViv(mpq_cmp_ui(*p1, SvUV(n), SvUV(d)));
+int Rmpq_cmp_ui(mpq_t * p1, unsigned long n, unsigned long d) {
+     return mpq_cmp_ui(*p1, n, d);
 }
 
-SV * Rmpq_cmp_si(pTHX_ mpq_t * p1, SV * n, SV * d) {
-     return newSViv(mpq_cmp_si(*p1, SvIV(n), SvUV(d)));
+int Rmpq_cmp_si(mpq_t * p1, long n, unsigned long d) {
+     return mpq_cmp_si(*p1, n, d);
 }
 
-SV * Rmpq_sgn(pTHX_ mpq_t * p) {
-     return newSViv(mpq_sgn(*p));
+int Rmpq_sgn(mpq_t * p) {
+     return mpq_sgn(*p);
 }
 
-SV * Rmpq_equal(pTHX_ mpq_t * p1, mpq_t * p2) {
-     return newSViv(mpq_equal(*p1, *p2));
+int Rmpq_equal(mpq_t * p1, mpq_t * p2) {
+     return mpq_equal(*p1, *p2);
 }
 
-void Rmpq_add(pTHX_ mpq_t * p1, mpq_t * p2, mpq_t * p3) {
+void Rmpq_add(mpq_t * p1, mpq_t * p2, mpq_t * p3) {
      mpq_add(*p1, *p2, *p3);
 }
 
-void Rmpq_sub(pTHX_ mpq_t * p1, mpq_t * p2, mpq_t * p3) {
+void Rmpq_sub(mpq_t * p1, mpq_t * p2, mpq_t * p3) {
      mpq_sub(*p1, *p2, *p3);
 }
 
-void Rmpq_mul(pTHX_ mpq_t * p1, mpq_t * p2, mpq_t * p3) {
+void Rmpq_mul(mpq_t * p1, mpq_t * p2, mpq_t * p3) {
      mpq_mul(*p1, *p2, *p3);
 }
 
-void Rmpq_div(pTHX_ mpq_t * p1, mpq_t * p2, mpq_t * p3) {
+void Rmpq_div(mpq_t * p1, mpq_t * p2, mpq_t * p3) {
      mpq_div(*p1, *p2, *p3);
 }
 
@@ -206,90 +213,90 @@ void Rmpq_div_2exp(pTHX_ mpq_t * p1, mpq_t * p2, SV * p3) {
      mpq_div_2exp(*p1, *p2, SvUV(p3));
 }
 
-void Rmpq_neg(pTHX_ mpq_t * p1, mpq_t * p2) {
+void Rmpq_neg(mpq_t * p1, mpq_t * p2) {
      mpq_neg(*p1, *p2);
 }
 
-void Rmpq_abs(pTHX_ mpq_t * p1, mpq_t * p2) {
+void Rmpq_abs(mpq_t * p1, mpq_t * p2) {
      mpq_abs(*p1, *p2);
 }
 
-void Rmpq_inv(pTHX_ mpq_t * p1, mpq_t * p2) {
+void Rmpq_inv(mpq_t * p1, mpq_t * p2) {
      mpq_inv(*p1, *p2);
 }
 
-SV * _Rmpq_out_str(pTHX_ mpq_t * p, SV *base){
-     unsigned long ret;
-     if(SvIV(base) < 2 || SvIV(base) > 36)
-       croak("2nd argument supplied to Rmpq_out_str is out of allowable range (must be between 2 and 36 inclusive)");
-     ret = mpq_out_str(NULL, SvUV(base), *p);
-     fflush(stdout);
-     return newSVuv(ret);
-}
-
-SV * _Rmpq_out_strS(pTHX_ mpq_t * p, SV * base, SV * suff) {
-     unsigned long ret;
-     if(SvIV(base) < 2 || SvIV(base) > 36)
-       croak("2nd argument supplied to Rmpq_out_str is out of allowable range (must be between 2 and 36 inclusive)");
-     ret = mpq_out_str(NULL, SvUV(base), *p);
-     printf("%s", SvPV_nolen(suff));
-     fflush(stdout);
-     return newSVuv(ret);
-}
-
-SV * _Rmpq_out_strP(pTHX_ SV * pre, mpq_t * p, SV * base) {
-     unsigned long ret;
-     if(SvIV(base) < 2 || SvIV(base) > 36)
-       croak("2nd argument supplied to Rmpq_out_str is out of allowable range (must be between 2 and 36 inclusive)");
-     printf("%s", SvPV_nolen(pre));
-     ret = mpq_out_str(NULL, SvUV(base), *p);
-     fflush(stdout);
-     return newSVuv(ret);
-}
-
-SV * _Rmpq_out_strPS(pTHX_ SV * pre, mpq_t * p, SV * base, SV * suff) {
-     unsigned long ret;
-     if(SvIV(base) < 2 || SvIV(base) > 36)
-       croak("2nd argument supplied to Rmpq_out_str is out of allowable range (must be between 2 and 36 inclusive)");
-     printf("%s", SvPV_nolen(pre));
-     ret = mpq_out_str(NULL, SvUV(base), *p);
-     printf("%s", SvPV_nolen(suff));
-     fflush(stdout);
-     return newSVuv(ret);
-}
-
-
-
-SV * _TRmpq_out_str(pTHX_ FILE * stream, SV * base, mpq_t * p) {
+SV * _Rmpq_out_str(pTHX_ mpq_t * p, int base){
      size_t ret;
-     ret = mpq_out_str(stream, (int)SvIV(base), *p);
+     if(base < 2 || base > 36)
+       croak("2nd argument supplied to Rmpq_out_str is out of allowable range (must be between 2 and 36 inclusive)");
+     ret = mpq_out_str(NULL, base, *p);
+     fflush(stdout);
+     return newSVuv(ret);
+}
+
+SV * _Rmpq_out_strS(pTHX_ mpq_t * p, int base, SV * suff) {
+     size_t ret;
+     if(base < 2 || base > 36)
+       croak("2nd argument supplied to Rmpq_out_str is out of allowable range (must be between 2 and 36 inclusive)");
+     ret = mpq_out_str(NULL, base, *p);
+     printf("%s", SvPV_nolen(suff));
+     fflush(stdout);
+     return newSVuv(ret);
+}
+
+SV * _Rmpq_out_strP(pTHX_ SV * pre, mpq_t * p, int base) {
+     size_t ret;
+     if(base < 2 || base > 36)
+       croak("2nd argument supplied to Rmpq_out_str is out of allowable range (must be between 2 and 36 inclusive)");
+     printf("%s", SvPV_nolen(pre));
+     ret = mpq_out_str(NULL, base, *p);
+     fflush(stdout);
+     return newSVuv(ret);
+}
+
+SV * _Rmpq_out_strPS(pTHX_ SV * pre, mpq_t * p, int base, SV * suff) {
+     size_t ret;
+     if(base < 2 || base > 36)
+       croak("2nd argument supplied to Rmpq_out_str is out of allowable range (must be between 2 and 36 inclusive)");
+     printf("%s", SvPV_nolen(pre));
+     ret = mpq_out_str(NULL, base, *p);
+     printf("%s", SvPV_nolen(suff));
+     fflush(stdout);
+     return newSVuv(ret);
+}
+
+
+
+SV * _TRmpq_out_str(pTHX_ FILE * stream, int base, mpq_t * p) {
+     size_t ret;
+     ret = mpq_out_str(stream, base, *p);
      fflush(stream);
      return newSVuv(ret);
 }
 
-SV * _TRmpq_out_strS(pTHX_ FILE * stream, SV * base, mpq_t * p, SV * suff) {
+SV * _TRmpq_out_strS(pTHX_ FILE * stream, int base, mpq_t * p, SV * suff) {
      size_t ret;
-     ret = mpq_out_str(stream, (int)SvIV(base), *p);
+     ret = mpq_out_str(stream, base, *p);
      fflush(stream);
      fprintf(stream, "%s", SvPV_nolen(suff));
      fflush(stream);
      return newSVuv(ret);
 }
 
-SV * _TRmpq_out_strP(pTHX_ SV * pre, FILE * stream, SV * base, mpq_t * p) {
+SV * _TRmpq_out_strP(pTHX_ SV * pre, FILE * stream, int base, mpq_t * p) {
      size_t ret;
      fprintf(stream, "%s", SvPV_nolen(pre));
      fflush(stream);
-     ret = mpq_out_str(stream, (int)SvIV(base), *p);
+     ret = mpq_out_str(stream, base, *p);
      fflush(stream);
      return newSVuv(ret);
 }
 
-SV * _TRmpq_out_strPS(pTHX_ SV * pre, FILE * stream, SV * base, mpq_t * p, SV * suff) {
+SV * _TRmpq_out_strPS(pTHX_ SV * pre, FILE * stream, int base, mpq_t * p, SV * suff) {
      size_t ret;
      fprintf(stream, "%s", SvPV_nolen(pre));
      fflush(stream);
-     ret = mpq_out_str(stream, (int)SvIV(base), *p);
+     ret = mpq_out_str(stream, base, *p);
      fflush(stream);
      fprintf(stream, "%s", SvPV_nolen(suff));
      fflush(stream);
@@ -303,34 +310,34 @@ SV * TRmpq_inp_str(pTHX_ mpq_t * p, FILE * stream, SV * base) {
      return newSVuv(ret);
 }
 
-SV * Rmpq_inp_str(pTHX_ mpq_t * p, SV *base){
+SV * Rmpq_inp_str(pTHX_ mpq_t * p, int base){
      size_t ret;
-     ret = mpq_inp_str(*p, NULL, SvUV(base));
+     ret = mpq_inp_str(*p, NULL, base);
      /* fflush(stdin); */
      return newSVuv(ret);
 }
 
-void Rmpq_numref(pTHX_ mpz_t * z, mpq_t * r) {
+void Rmpq_numref(mpz_t * z, mpq_t * r) {
      mpz_set(*z, mpq_numref(*r));
 }
 
-void Rmpq_denref(pTHX_ mpz_t * z, mpq_t * r) {
+void Rmpq_denref(mpz_t * z, mpq_t * r) {
      mpz_set(*z, mpq_denref(*r));
 }
 
-void Rmpq_get_num(pTHX_ mpz_t * z, mpq_t * r) {
+void Rmpq_get_num(mpz_t * z, mpq_t * r) {
      mpq_get_num(*z, *r);
 }
 
-void Rmpq_get_den(pTHX_ mpz_t * z, mpq_t * r) {
+void Rmpq_get_den(mpz_t * z, mpq_t * r) {
      mpq_get_den(*z, *r);
 }
 
-void Rmpq_set_num(pTHX_ mpq_t * r, mpz_t * z) {
+void Rmpq_set_num(mpq_t * r, mpz_t * z) {
      mpq_set_num(*r, *z);
 }
 
-void Rmpq_set_den(pTHX_ mpq_t * r, mpz_t * z) {
+void Rmpq_set_den(mpq_t * r, mpz_t * z) {
      mpq_set_den(*r, *z);
 }
 
@@ -357,7 +364,7 @@ SV * overload_mul(pTHX_ SV * a, SV * b, SV * third) {
        SvREADONLY_on(obj);
      }
 
-#ifndef USE_64_BIT_INT
+#ifndef MATH_GMPQ_NEED_LONG_LONG_INT
      if(SvIOK(b)) {
        mpq_set_d(*mpq_t_obj, SvNV(b));
        mpq_mul(*mpq_t_obj, *(INT2PTR(mpq_t *, SvIV(SvRV(a)))), *mpq_t_obj);
@@ -444,7 +451,7 @@ SV * overload_add(pTHX_ SV * a, SV * b, SV * third) {
        SvREADONLY_on(obj);
      }
 
-#ifndef USE_64_BIT_INT
+#ifndef MATH_GMPQ_NEED_LONG_LONG_INT
      if(SvIOK(b)) {
        mpq_set_d(*mpq_t_obj, SvNV(b));
        mpq_add(*mpq_t_obj, *(INT2PTR(mpq_t *, SvIV(SvRV(a)))), *mpq_t_obj);
@@ -532,7 +539,7 @@ SV * overload_sub(pTHX_ SV * a, SV * b, SV * third) {
        SvREADONLY_on(obj);
      }
 
-#ifndef USE_64_BIT_INT
+#ifndef MATH_GMPQ_NEED_LONG_LONG_INT
      if(SvIOK(b)) {
        mpq_set_d(*mpq_t_obj, SvNV(b));
        if(third == &PL_sv_yes) mpq_sub(*mpq_t_obj, *mpq_t_obj, *(INT2PTR(mpq_t *, SvIV(SvRV(a)))));
@@ -624,7 +631,7 @@ SV * overload_div(pTHX_ SV * a, SV * b, SV * third) {
        SvREADONLY_on(obj);
      }
 
-#ifndef USE_64_BIT_INT
+#ifndef MATH_GMPQ_NEED_LONG_LONG_INT
      if(SvIOK(b)) {
        mpq_set_d(*mpq_t_obj, SvNV(b));
        if(third == &PL_sv_yes) mpq_div(*mpq_t_obj, *mpq_t_obj, *(INT2PTR(mpq_t *, SvIV(SvRV(a)))));
@@ -749,7 +756,7 @@ SV * overload_gt(pTHX_ mpq_t * a, SV * b, SV * third) {
      mpq_t t;
      int ret;
 
-#ifdef USE_64_BIT_INT
+#ifdef MATH_GMPQ_NEED_LONG_LONG_INT
      if(SvIOK(b)) {
        mpq_init(t);
        if(mpq_set_str(t, SvPV_nolen(b), 0))
@@ -818,7 +825,7 @@ SV * overload_gte(pTHX_ mpq_t * a, SV * b, SV * third) {
      mpq_t t;
      int ret;
 
-#ifdef USE_64_BIT_INT
+#ifdef MATH_GMPQ_NEED_LONG_LONG_INT
      if(SvIOK(b)) {
        mpq_init(t);
        if(mpq_set_str(t, SvPV_nolen(b), 0))
@@ -887,7 +894,7 @@ SV * overload_lt(pTHX_ mpq_t * a, SV * b, SV * third) {
      mpq_t t;
      int ret;
 
-#ifdef USE_64_BIT_INT
+#ifdef MATH_GMPQ_NEED_LONG_LONG_INT
      if(SvIOK(b)) {
        mpq_init(t);
        if(mpq_set_str(t, SvPV_nolen(b), 0))
@@ -956,7 +963,7 @@ SV * overload_lte(pTHX_ mpq_t * a, SV * b, SV * third) {
      mpq_t t;
      int ret;
 
-#ifdef USE_64_BIT_INT
+#ifdef MATH_GMPQ_NEED_LONG_LONG_INT
      if(SvIOK(b)) {
        mpq_init(t);
        if(mpq_set_str(t, SvPV_nolen(b), 0))
@@ -1025,7 +1032,7 @@ SV * overload_spaceship(pTHX_ mpq_t * a, SV * b, SV * third) {
      mpq_t t;
      int ret;
 
-#ifdef USE_64_BIT_INT
+#ifdef MATH_GMPQ_NEED_LONG_LONG_INT
      if(SvIOK(b)) {
        mpq_init(t);
        if(mpq_set_str(t, SvPV_nolen(b), 0))
@@ -1088,9 +1095,7 @@ SV * overload_equiv(pTHX_ mpq_t * a, SV * b, SV * third) {
      mpq_t t;
      int ret;
 
-
-
-#ifdef USE_64_BIT_INT
+#ifdef MATH_GMPQ_NEED_LONG_LONG_INT
      if(SvIOK(b)) {
        mpq_init(t);
        if(mpq_set_str(t, SvPV_nolen(b), 0))
@@ -1154,7 +1159,7 @@ SV * overload_not_equiv(pTHX_ mpq_t * a, SV * b, SV * third) {
      mpq_t t;
      int ret;
 
-#ifdef USE_64_BIT_INT
+#ifdef MATH_GMPQ_NEED_LONG_LONG_INT
      if(SvIOK(b)) {
        mpq_init(t);
        if(mpq_set_str(t, SvPV_nolen(b), 0))
@@ -1256,7 +1261,7 @@ SV * overload_mul_eq(pTHX_ SV * a, SV * b, SV * third) {
 
      SvREFCNT_inc(a);
 
-#ifndef USE_64_BIT_INT
+#ifndef MATH_GMPQ_NEED_LONG_LONG_INT
      if(SvIOK(b)) {
        mpq_init(t);
        mpq_set_d(t, SvNV(b));
@@ -1319,7 +1324,7 @@ SV * overload_add_eq(pTHX_ SV * a, SV * b, SV * third) {
 
      SvREFCNT_inc(a);
 
-#ifndef USE_64_BIT_INT
+#ifndef MATH_GMPQ_NEED_LONG_LONG_INT
      if(SvIOK(b)) {
        mpq_init(t);
        mpq_set_d(t, SvNV(b));
@@ -1381,7 +1386,7 @@ SV * overload_sub_eq(pTHX_ SV * a, SV * b, SV * third) {
 
      SvREFCNT_inc(a);
 
-#ifndef USE_64_BIT_INT
+#ifndef MATH_GMPQ_NEED_LONG_LONG_INT
      if(SvIOK(b)) {
        mpq_init(t);
        mpq_set_d(t, SvNV(b));
@@ -1444,7 +1449,7 @@ SV * overload_div_eq(pTHX_ SV * a, SV * b, SV * third) {
 
      SvREFCNT_inc(a);
 
-#ifndef USE_64_BIT_INT
+#ifndef MATH_GMPQ_NEED_LONG_LONG_INT
      if(SvIOK(b)) {
        mpq_init(t);
        mpq_set_d(t, SvNV(b));
@@ -1503,7 +1508,12 @@ SV * overload_div_eq(pTHX_ SV * a, SV * b, SV * third) {
 }
 
 SV * gmp_v(pTHX) {
+#if __GNU_MP_VERSION >= 4
      return newSVpv(gmp_version, 0);
+#else
+     warn("From Math::GMPq::gmp_v(aTHX): 'gmp_version' is not implemented - returning '0'");
+     return newSVpv("0", 0);
+#endif
 }
 
 SV * wrap_gmp_printf(pTHX_ SV * a, SV * b) {
@@ -1742,20 +1752,20 @@ SV * wrap_gmp_snprintf(pTHX_ SV * s, SV * bytes, SV * a, SV * b, int buflen) {
      croak("Unrecognised type supplied as argument to Rmpq_snprintf");
 }
 
-SV * _itsa(pTHX_ SV * a) {
-     if(SvUOK(a)) return newSVuv(1);
-     if(SvIOK(a)) return newSVuv(2);
-     if(SvNOK(a)) return newSVuv(3);
-     if(SvPOK(a)) return newSVuv(4);
+int _itsa(pTHX_ SV * a) {
+     if(SvUOK(a)) return 1;
+     if(SvIOK(a)) return 2;
+     if(SvNOK(a)) return 3;
+     if(SvPOK(a)) return 4;
      if(sv_isobject(a)) {
        const char *h = HvNAME(SvSTASH(SvRV(a)));
-       if(strEQ(h, "Math::GMPq")) return newSVuv(7);
+       if(strEQ(h, "Math::GMPq")) return 7;
        }
-     return newSVuv(0);
+     return 0;
 }
 
 int _has_longlong(void) {
-#ifdef USE_64_BIT_INT
+#ifdef MATH_GMPQ_NEED_LONG_LONG_INT
     return 1;
 #else
     return 0;
@@ -1775,7 +1785,7 @@ int _has_inttypes(void) {
 #ifdef _MSC_VER
 return 0;
 #else
-#if defined USE_64_BIT_INT
+#if defined MATH_GMPQ_NEED_LONG_LONG_INT
 return 1;
 #else
 return 0;
@@ -1888,7 +1898,7 @@ SV * _get_xs_version(pTHX) {
      return newSVpv(XS_VERSION, 0);
 }
 
-MODULE = Math::GMPq	PACKAGE = Math::GMPq
+MODULE = Math::GMPq  PACKAGE = Math::GMPq
 
 PROTOTYPES: DISABLE
 
@@ -1896,18 +1906,18 @@ PROTOTYPES: DISABLE
 void
 Rmpq_canonicalize (p)
 	mpq_t *	p
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	Rmpq_canonicalize(aTHX_ p);
-	if (PL_markstack_ptr != temp) {
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_canonicalize(p);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
 SV *
 Rmpq_init ()
@@ -1926,229 +1936,226 @@ OUTPUT:  RETVAL
 void
 DESTROY (p)
 	mpq_t *	p
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	DESTROY(aTHX_ p);
-	if (PL_markstack_ptr != temp) {
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        DESTROY(aTHX_ p);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
 void
 Rmpq_clear (p)
 	mpq_t *	p
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	Rmpq_clear(aTHX_ p);
-	if (PL_markstack_ptr != temp) {
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_clear(aTHX_ p);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
 void
 Rmpq_clear_mpq (p)
 	mpq_t *	p
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	Rmpq_clear_mpq(aTHX_ p);
-	if (PL_markstack_ptr != temp) {
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_clear_mpq(p);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
 void
 Rmpq_clear_ptr (p)
 	mpq_t *	p
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	Rmpq_clear_ptr(aTHX_ p);
-	if (PL_markstack_ptr != temp) {
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_clear_ptr(aTHX_ p);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
 void
 Rmpq_set (p1, p2)
 	mpq_t *	p1
 	mpq_t *	p2
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	Rmpq_set(aTHX_ p1, p2);
-	if (PL_markstack_ptr != temp) {
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_set(p1, p2);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
 void
 Rmpq_swap (p1, p2)
 	mpq_t *	p1
 	mpq_t *	p2
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	Rmpq_swap(aTHX_ p1, p2);
-	if (PL_markstack_ptr != temp) {
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_swap(p1, p2);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
 void
 Rmpq_set_z (p1, p2)
 	mpq_t *	p1
 	mpz_t *	p2
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	Rmpq_set_z(aTHX_ p1, p2);
-	if (PL_markstack_ptr != temp) {
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_set_z(p1, p2);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
 void
 Rmpq_set_ui (p1, p2, p3)
 	mpq_t *	p1
-	SV *	p2
-	SV *	p3
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	Rmpq_set_ui(aTHX_ p1, p2, p3);
-	if (PL_markstack_ptr != temp) {
+	unsigned long	p2
+	unsigned long	p3
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_set_ui(p1, p2, p3);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
 void
 Rmpq_set_si (p1, p2, p3)
 	mpq_t *	p1
-	SV *	p2
-	SV *	p3
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	Rmpq_set_si(aTHX_ p1, p2, p3);
-	if (PL_markstack_ptr != temp) {
+	int	p2
+	int	p3
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_set_si(p1, p2, p3);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
 void
 Rmpq_set_str (p1, p2, base)
 	mpq_t *	p1
 	SV *	p2
 	SV *	base
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	Rmpq_set_str(aTHX_ p1, p2, base);
-	if (PL_markstack_ptr != temp) {
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_set_str(aTHX_ p1, p2, base);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
-SV *
+double
 Rmpq_get_d (p)
 	mpq_t *	p
-CODE:
-  RETVAL = Rmpq_get_d (aTHX_ p);
-OUTPUT:  RETVAL
 
 void
 Rmpq_set_d (p, d)
 	mpq_t *	p
-	SV *	d
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	Rmpq_set_d(aTHX_ p, d);
-	if (PL_markstack_ptr != temp) {
+	double	d
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_set_d(p, d);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
 void
 _Rmpq_set_ld (q, p)
 	mpq_t *	q
 	SV *	p
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	_Rmpq_set_ld(aTHX_ q, p);
-	if (PL_markstack_ptr != temp) {
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        _Rmpq_set_ld(aTHX_ q, p);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
 void
 Rmpq_set_f (p, f)
 	mpq_t *	p
 	mpf_t *	f
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	Rmpq_set_f(aTHX_ p, f);
-	if (PL_markstack_ptr != temp) {
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_set_f(p, f);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
 SV *
 Rmpq_get_str (p, base)
@@ -2158,210 +2165,195 @@ CODE:
   RETVAL = Rmpq_get_str (aTHX_ p, base);
 OUTPUT:  RETVAL
 
-SV *
+int
 Rmpq_cmp (p1, p2)
 	mpq_t *	p1
 	mpq_t *	p2
-CODE:
-  RETVAL = Rmpq_cmp (aTHX_ p1, p2);
-OUTPUT:  RETVAL
 
-SV *
+int
 Rmpq_cmp_ui (p1, n, d)
 	mpq_t *	p1
-	SV *	n
-	SV *	d
-CODE:
-  RETVAL = Rmpq_cmp_ui (aTHX_ p1, n, d);
-OUTPUT:  RETVAL
+	unsigned long	n
+	unsigned long	d
 
-SV *
+int
 Rmpq_cmp_si (p1, n, d)
 	mpq_t *	p1
-	SV *	n
-	SV *	d
-CODE:
-  RETVAL = Rmpq_cmp_si (aTHX_ p1, n, d);
-OUTPUT:  RETVAL
+	long	n
+	unsigned long	d
 
-SV *
+int
 Rmpq_sgn (p)
 	mpq_t *	p
-CODE:
-  RETVAL = Rmpq_sgn (aTHX_ p);
-OUTPUT:  RETVAL
 
-SV *
+int
 Rmpq_equal (p1, p2)
 	mpq_t *	p1
 	mpq_t *	p2
-CODE:
-  RETVAL = Rmpq_equal (aTHX_ p1, p2);
-OUTPUT:  RETVAL
 
 void
 Rmpq_add (p1, p2, p3)
 	mpq_t *	p1
 	mpq_t *	p2
 	mpq_t *	p3
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	Rmpq_add(aTHX_ p1, p2, p3);
-	if (PL_markstack_ptr != temp) {
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_add(p1, p2, p3);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
 void
 Rmpq_sub (p1, p2, p3)
 	mpq_t *	p1
 	mpq_t *	p2
 	mpq_t *	p3
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	Rmpq_sub(aTHX_ p1, p2, p3);
-	if (PL_markstack_ptr != temp) {
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_sub(p1, p2, p3);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
 void
 Rmpq_mul (p1, p2, p3)
 	mpq_t *	p1
 	mpq_t *	p2
 	mpq_t *	p3
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	Rmpq_mul(aTHX_ p1, p2, p3);
-	if (PL_markstack_ptr != temp) {
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_mul(p1, p2, p3);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
 void
 Rmpq_div (p1, p2, p3)
 	mpq_t *	p1
 	mpq_t *	p2
 	mpq_t *	p3
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	Rmpq_div(aTHX_ p1, p2, p3);
-	if (PL_markstack_ptr != temp) {
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_div(p1, p2, p3);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
 void
 Rmpq_mul_2exp (p1, p2, p3)
 	mpq_t *	p1
 	mpq_t *	p2
 	SV *	p3
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	Rmpq_mul_2exp(aTHX_ p1, p2, p3);
-	if (PL_markstack_ptr != temp) {
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_mul_2exp(aTHX_ p1, p2, p3);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
 void
 Rmpq_div_2exp (p1, p2, p3)
 	mpq_t *	p1
 	mpq_t *	p2
 	SV *	p3
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	Rmpq_div_2exp(aTHX_ p1, p2, p3);
-	if (PL_markstack_ptr != temp) {
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_div_2exp(aTHX_ p1, p2, p3);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
 void
 Rmpq_neg (p1, p2)
 	mpq_t *	p1
 	mpq_t *	p2
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	Rmpq_neg(aTHX_ p1, p2);
-	if (PL_markstack_ptr != temp) {
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_neg(p1, p2);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
 void
 Rmpq_abs (p1, p2)
 	mpq_t *	p1
 	mpq_t *	p2
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	Rmpq_abs(aTHX_ p1, p2);
-	if (PL_markstack_ptr != temp) {
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_abs(p1, p2);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
 void
 Rmpq_inv (p1, p2)
 	mpq_t *	p1
 	mpq_t *	p2
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	Rmpq_inv(aTHX_ p1, p2);
-	if (PL_markstack_ptr != temp) {
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_inv(p1, p2);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
 SV *
 _Rmpq_out_str (p, base)
 	mpq_t *	p
-	SV *	base
+	int	base
 CODE:
   RETVAL = _Rmpq_out_str (aTHX_ p, base);
 OUTPUT:  RETVAL
@@ -2369,7 +2361,7 @@ OUTPUT:  RETVAL
 SV *
 _Rmpq_out_strS (p, base, suff)
 	mpq_t *	p
-	SV *	base
+	int	base
 	SV *	suff
 CODE:
   RETVAL = _Rmpq_out_strS (aTHX_ p, base, suff);
@@ -2379,7 +2371,7 @@ SV *
 _Rmpq_out_strP (pre, p, base)
 	SV *	pre
 	mpq_t *	p
-	SV *	base
+	int	base
 CODE:
   RETVAL = _Rmpq_out_strP (aTHX_ pre, p, base);
 OUTPUT:  RETVAL
@@ -2388,7 +2380,7 @@ SV *
 _Rmpq_out_strPS (pre, p, base, suff)
 	SV *	pre
 	mpq_t *	p
-	SV *	base
+	int	base
 	SV *	suff
 CODE:
   RETVAL = _Rmpq_out_strPS (aTHX_ pre, p, base, suff);
@@ -2397,7 +2389,7 @@ OUTPUT:  RETVAL
 SV *
 _TRmpq_out_str (stream, base, p)
 	FILE *	stream
-	SV *	base
+	int	base
 	mpq_t *	p
 CODE:
   RETVAL = _TRmpq_out_str (aTHX_ stream, base, p);
@@ -2406,7 +2398,7 @@ OUTPUT:  RETVAL
 SV *
 _TRmpq_out_strS (stream, base, p, suff)
 	FILE *	stream
-	SV *	base
+	int	base
 	mpq_t *	p
 	SV *	suff
 CODE:
@@ -2417,7 +2409,7 @@ SV *
 _TRmpq_out_strP (pre, stream, base, p)
 	SV *	pre
 	FILE *	stream
-	SV *	base
+	int	base
 	mpq_t *	p
 CODE:
   RETVAL = _TRmpq_out_strP (aTHX_ pre, stream, base, p);
@@ -2427,7 +2419,7 @@ SV *
 _TRmpq_out_strPS (pre, stream, base, p, suff)
 	SV *	pre
 	FILE *	stream
-	SV *	base
+	int	base
 	mpq_t *	p
 	SV *	suff
 CODE:
@@ -2446,7 +2438,7 @@ OUTPUT:  RETVAL
 SV *
 Rmpq_inp_str (p, base)
 	mpq_t *	p
-	SV *	base
+	int	base
 CODE:
   RETVAL = Rmpq_inp_str (aTHX_ p, base);
 OUTPUT:  RETVAL
@@ -2455,103 +2447,103 @@ void
 Rmpq_numref (z, r)
 	mpz_t *	z
 	mpq_t *	r
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	Rmpq_numref(aTHX_ z, r);
-	if (PL_markstack_ptr != temp) {
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_numref(z, r);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
 void
 Rmpq_denref (z, r)
 	mpz_t *	z
 	mpq_t *	r
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	Rmpq_denref(aTHX_ z, r);
-	if (PL_markstack_ptr != temp) {
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_denref(z, r);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
 void
 Rmpq_get_num (z, r)
 	mpz_t *	z
 	mpq_t *	r
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	Rmpq_get_num(aTHX_ z, r);
-	if (PL_markstack_ptr != temp) {
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_get_num(z, r);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
 void
 Rmpq_get_den (z, r)
 	mpz_t *	z
 	mpq_t *	r
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	Rmpq_get_den(aTHX_ z, r);
-	if (PL_markstack_ptr != temp) {
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_get_den(z, r);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
 void
 Rmpq_set_num (r, z)
 	mpq_t *	r
 	mpz_t *	z
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	Rmpq_set_num(aTHX_ r, z);
-	if (PL_markstack_ptr != temp) {
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_set_num(r, z);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
 void
 Rmpq_set_den (r, z)
 	mpq_t *	r
 	mpz_t *	z
-	PREINIT:
-	I32* temp;
-	PPCODE:
-	temp = PL_markstack_ptr++;
-	Rmpq_set_den(aTHX_ r, z);
-	if (PL_markstack_ptr != temp) {
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_set_den(r, z);
+        if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
-	  PL_markstack_ptr = temp;
-	  XSRETURN_EMPTY; /* return empty stack */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-	return; /* assume stack size is correct */
+        return; /* assume stack size is correct */
 
 SV *
 get_refcnt (s)
@@ -2785,7 +2777,7 @@ CODE:
   RETVAL = wrap_gmp_snprintf (aTHX_ s, bytes, a, b, buflen);
 OUTPUT:  RETVAL
 
-SV *
+int
 _itsa (a)
 	SV *	a
 CODE:
