@@ -121,19 +121,13 @@ else{warn "3h: Expected $d\n    Got $f26\n"}
 my $f27 = Math::GMPq->new(36028797018964023);
 my $f28 = Math::GMPq->new('36028797018964023');
 
-if($Config{ivsize} > 4) {
+if($Config{ivsize} > 4 || Math::GMPq::_has_longdouble()) {
   if($f27 == $f28) {$ok .= 'i'}
   else{warn "3i: Should have $f27 == $f28\n"}
 }
 else {
-  if(Math::GMPq::_has_longdouble()) {
-    if($f27 == $f28) {$ok .= 'i'}
-    else{warn "3i: Should have $f27 == $f28\n"}
-  }
-  else {
-    if($f27 != $f28) {$ok .= 'i'}
-    else{warn "3i: Should have $f27 != $f28\n"}
-  }
+  if($f27 != $f28) {$ok .= 'i'}
+  else{warn "3i: Should have $f27 != $f28\n"}
 }
 
 if($ok eq 'abcdefghi') {print "ok 3\n"}
