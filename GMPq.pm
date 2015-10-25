@@ -47,6 +47,7 @@ use overload
 __GNU_MP_VERSION __GNU_MP_VERSION_MINOR __GNU_MP_VERSION_PATCHLEVEL
 __GNU_MP_RELEASE __GMP_CC __GMP_CFLAGS
 Rmpq_abs Rmpq_add Rmpq_canonicalize Rmpq_clear Rmpq_cmp Rmpq_cmp_si Rmpq_cmp_ui
+Rmpq_cmp_z
 Rmpq_create_noval Rmpq_denref Rmpq_div Rmpq_div_2exp Rmpq_equal
 Rmpq_fprintf
 Rmpq_get_d
@@ -70,6 +71,7 @@ qgmp_urandomb_ui qgmp_urandomm_ui
 
     %Math::GMPq::EXPORT_TAGS =(mpq => [qw(
 Rmpq_abs Rmpq_add Rmpq_canonicalize Rmpq_clear Rmpq_cmp Rmpq_cmp_si Rmpq_cmp_ui
+Rmpq_cmp_z
 Rmpq_create_noval Rmpq_denref Rmpq_div Rmpq_div_2exp Rmpq_equal
 Rmpq_fprintf
 Rmpq_get_d
@@ -419,10 +421,8 @@ __END__
    the only interest is whether it evaluates as true or false.
 
    "$str" simply means a string of symbols that represent a number,
-   eg "1234567890987654321234567/7" which might be a base 10 number,
-   or "zsa34760sdfgq123r5/11" which would have to represent at least
-   a base 36 number (because "z" is a valid digit only in bases 36
-   and above). Valid bases for GMP numbers are 2 to 62 (inclusive).
+   eg "1234567890987654321234567/7".
+   Valid bases for GMP numbers are 2 to 62 (inclusive).
 
    ############
 
@@ -591,6 +591,11 @@ __END__
     are non-equal.  Although `Rmpq_cmp' can be used for the
     same purpose, this function is much faster.
 
+   $si = Rmpq_cmp_z($op, $z);# $z is Math::GMPz or Math::GMP object
+    Return a positive value if $op > $z.
+    Return zero if $op == $z.
+    Return a negative value if $op < $z.
+
    ################
 
    I/O of RATIONALS
@@ -735,8 +740,9 @@ __END__
    OPERATOR OVERLOADING
 
    Overloading occurs with numbers, strings,Math::GMPq objects and, to a
-   limited extent, Math::MPFR objects (iff version 3.13 or later of
-   Math::MPFR has been installed).
+   limited extent, Math::GMP or Math::GMPz objects (iff the gmp library is
+   version 6.1.0 or later) and Math::MPFR objects (iff version 3.13 or
+   later of Math::MPFR has been installed).
    Strings are first converted to Math::GMPq objects, then canonicalized.
    See the Rmpq_set_str documentation (above) in the section "ASSIGNMENT
    FUNCTIONS" regarding permissible string formats.
@@ -755,7 +761,9 @@ __END__
     and '**' operators, and will work only if Math::MPFR is at
     version 3.13 or later - in which case the operation will
     return a Math::MPFR object.
-
+    Math::GMP or Math::GMPz objects can be used only with the
+    comparison operators ( == != < <= > >= <=> ), and only if Math::GMPq
+    has been built against gmp-6.1.0 or later.
     In those situations where the overload subroutine operates on 2
     perl variables, then obviously one of those perl variables is
     a Math::GMPq object. To determine the value of the other variable
@@ -790,8 +798,8 @@ __END__
        be rewritten as '0xa123/0xff'.
 
     5. If the variable is a Math::GMPq object (or, for operators
-       specified above, a Math::MPFR object) then the value of that
-       object is used.
+       specified above, a Math::MPFR/Math::GMP/Math::GMPz object)
+       then the value of that object is used.
 
     6. If none of the above is true, then the second variable is
        deemed to be of an invalid type. The subroutine croaks with
@@ -914,7 +922,7 @@ __END__
 
     This program is free software; you may redistribute it and/or
     modify it under the same terms as Perl itself.
-    Copyright 2006-2011, 2013 Sisyphus
+    Copyright 2006-2011, 2013-14, Sisyphus
 
 =head1 AUTHOR
 
