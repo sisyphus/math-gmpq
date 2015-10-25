@@ -13,6 +13,7 @@ Random/t/gmp_random.t
 README
 t/_1aaa_v.t
 t/_1basic.t
+t/cmp_z.t
 t/test1.t
 t/longdouble.t
 t/overload.t
