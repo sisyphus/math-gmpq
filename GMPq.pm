@@ -57,6 +57,7 @@ Rmpq_set Rmpq_set_d Rmpq_set_den Rmpq_set_f Rmpq_set_num Rmpq_set_si Rmpq_set_st
 Rmpq_set_ui Rmpq_set_z Rmpq_sgn
 Rmpq_sprintf Rmpq_snprintf
 Rmpq_sub Rmpq_swap
+Rmpq_integer_p
 TRmpq_out_str TRmpq_inp_str
 qgmp_randseed qgmp_randseed_ui qgmp_randclear
 qgmp_randinit_default qgmp_randinit_mt qgmp_randinit_lc_2exp qgmp_randinit_lc_2exp_size
@@ -81,6 +82,7 @@ Rmpq_set Rmpq_set_d Rmpq_set_den Rmpq_set_f Rmpq_set_num Rmpq_set_si Rmpq_set_st
 Rmpq_set_ui Rmpq_set_z Rmpq_sgn
 Rmpq_sprintf Rmpq_snprintf
 Rmpq_sub Rmpq_swap
+Rmpq_integer_p
 TRmpq_out_str TRmpq_inp_str
 qgmp_randseed qgmp_randseed_ui qgmp_randclear
 qgmp_randinit_default qgmp_randinit_mt qgmp_randinit_lc_2exp qgmp_randinit_lc_2exp_size
@@ -804,6 +806,15 @@ __END__
     6. If none of the above is true, then the second variable is
        deemed to be of an invalid type. The subroutine croaks with
        an appropriate error message.
+
+   ##############
+
+   MISCELLANEOUS
+
+   $bool = Rmpq_integer_p($op);
+    Returns true if $op is an integer (ie denominator of $op is 1).
+    Else returns false. The mpq_integer_p function is not
+    implemented in gmp.
 
    #####
 
