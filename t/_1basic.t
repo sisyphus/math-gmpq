@@ -9,6 +9,8 @@ warn "\n# Using Math::GMPq version ", $Math::GMPq::VERSION, "\n";
 warn "# Using gmp library version ", Math::GMPq::gmp_v(), "\n";
 warn "# CC is ", Math::GMPq::__GMP_CC, "\n" if defined Math::GMPq::__GMP_CC;
 warn "# CFLAGS are ", Math::GMPq::__GMP_CFLAGS, "\n" if defined Math::GMPq::__GMP_CFLAGS;
+warn "# GMP_LIMB_BITS is ", Math::GMPq::_GMP_LIMB_BITS, "\n" if defined Math::GMPq::_GMP_LIMB_BITS;
+warn "# GMP_NAIL_BITS is ", Math::GMPq::_GMP_NAIL_BITS, "\n" if defined Math::GMPq::_GMP_NAIL_BITS;
 
 if($Math::GMPq::VERSION eq '0.38' && $Math::GMPq::Random::VERSION eq '0.38' &&
    $Math::GMPq::V::VERSION eq '0.38' &&
