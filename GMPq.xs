@@ -1963,6 +1963,29 @@ SV * _get_xs_version(pTHX) {
      return newSVpv(XS_VERSION, 0);
 }
 
+int Rmpq_integer_p(mpq_t * q) {
+    if(mpz_cmp_si(mpq_denref(*q), 1)) return 0;
+    return 1;
+}
+
+SV * _GMP_LIMB_BITS(pTHX) {
+#ifdef GMP_LIMB_BITS
+     return newSVuv(GMP_LIMB_BITS);
+#else
+     return &PL_sv_undef;
+#endif
+}
+
+SV * _GMP_NAIL_BITS(pTHX) {
+#ifdef GMP_NAIL_BITS
+     return newSVuv(GMP_NAIL_BITS);
+#else
+     return &PL_sv_undef;
+#endif
+}
+
+
+
 MODULE = Math::GMPq  PACKAGE = Math::GMPq
 
 PROTOTYPES: DISABLE
@@ -2946,6 +2969,24 @@ SV *
 _get_xs_version ()
 CODE:
   RETVAL = _get_xs_version (aTHX);
+OUTPUT:  RETVAL
+
+
+int
+Rmpq_integer_p (q)
+	mpq_t *	q
+
+SV *
+_GMP_LIMB_BITS ()
+CODE:
+  RETVAL = _GMP_LIMB_BITS (aTHX);
+OUTPUT:  RETVAL
+
+
+SV *
+_GMP_NAIL_BITS ()
+CODE:
+  RETVAL = _GMP_NAIL_BITS (aTHX);
 OUTPUT:  RETVAL
 
 
