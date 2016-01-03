@@ -1,3 +1,8 @@
+0.39
+ - Add Rmpq_integer_p(), though mpq_integer_p() is not currently implemented in gmp.
+ - PREREQ_PM => {'Exporter' => '5.58'} to avoid test failures on pre perl-5.8.4
+   (Thanks Peter Acklam.)
+
 0.38
  - Tweaks to Math::GMPq::gmp_v() and Math::GMPq::V::gmp_v()
  - Add metadata to Makefile.PL.
@@ -6,9 +11,6 @@
  - Replace mpq_cmp() with the faster mpq_equal() in overload_equiv and overload_not_equiv.
  - Add mpq_cmp_z support. (Added in gmp-6.1.0.)
  - Modify overloaded comparison functions to cover comparison with mpz_t (gmp-6.0.99 and later only)
- - Add Rmpq_integer_p(), though mpq_integer_p() is not currently implemented in gmp.
- - PREREQ_PM => {'Exporter' => '5.58'} to avoid test failures on pre perl-5.8.4
-   (Thanks Peter Acklam.)
 
 0.37
  - Alter wrap_gmp_sprintf and wrap_gmp_snprintf to take an extra arg (length of
