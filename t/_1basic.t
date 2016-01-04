@@ -12,8 +12,8 @@ warn "# CFLAGS are ", Math::GMPq::__GMP_CFLAGS, "\n" if defined Math::GMPq::__GM
 warn "# GMP_LIMB_BITS is ", Math::GMPq::GMP_LIMB_BITS, "\n" if defined Math::GMPq::GMP_LIMB_BITS;
 warn "# GMP_NAIL_BITS is ", Math::GMPq::GMP_NAIL_BITS, "\n" if defined Math::GMPq::GMP_NAIL_BITS;
 
-if($Math::GMPq::VERSION eq '0.39' && $Math::GMPq::Random::VERSION eq '0.39' &&
-   $Math::GMPq::V::VERSION eq '0.39' &&
+if($Math::GMPq::VERSION eq '0.41' && $Math::GMPq::Random::VERSION eq '0.41' &&
+   $Math::GMPq::V::VERSION eq '0.41' &&
    Math::GMPq::_get_xs_version() eq $Math::GMPq::VERSION) {print "ok 1\n"}
 else {print "not ok 1 $Math::GMPq::VERSION $Math::GMPq::Random::VERSION ", Math::GMPq::_get_xs_version(), "\n"}
 
