@@ -1,3 +1,5 @@
+0.41
+
 0.39
  - Add Rmpq_integer_p(), though mpq_integer_p() is not currently implemented in gmp.
  - PREREQ_PM => {'Exporter' => '5.58'} to avoid test failures on pre perl-5.8.4
