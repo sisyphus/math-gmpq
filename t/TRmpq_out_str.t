@@ -87,7 +87,10 @@ while(<RD1>) {
 }
 
 if($ok && $count == 1) {print "ok 1\n"}
-else {print "not ok 1 $ok $count\n"}
+else {
+  warn "\n\$ok: $ok\n\$count: $count\n";
+  print "not ok 1\n";
+}
 
 $ok = 1;
 $count = 0;
@@ -99,7 +102,10 @@ while(<RD2>) {
 }
 
 if($ok && $count == 1) {print "ok 2\n"}
-else {print "not ok 2 $ok $count\n"}
+else {
+  warn "\$ok: $ok\n\$count: $count\n";
+  print "not ok 2\n";
+}
 
 $ok = 1;
 $count = 0;
@@ -111,7 +117,10 @@ while(<RD3>) {
 }
 
 if($ok && $count == 5) {print "ok 3\n"}
-else {print "not ok 3 $ok $count\n"}
+else {
+  warn "\n\$ok: $ok\n\$count: $count\n";
+  print "not ok 3\n";
+}
 
 $ok = 1;
 $count = 0;
