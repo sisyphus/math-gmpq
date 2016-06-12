@@ -7,8 +7,8 @@ print "1..7\n";
 
 print "# Using gmp version ", Math::GMPq::gmp_v(), "\n";
 
-open(WR1, '>', 'out1.txt') or die "Can't open WR1: $!";
-open(WR2, '>', 'out2.txt') or die "Can't open WR2: $!";
+open(WR1, '>', 'out21.txt') or die "Can't open WR1: $!";
+open(WR2, '>', 'out22.txt') or die "Can't open WR2: $!";
 
 my $mp = Math::GMPq->new(-1234567);
 my $int = -17;
@@ -37,8 +37,8 @@ Rmpq_fprintf(\*WR2, "and an mpq object in hex: %Qx\n", $mp);
 
 close(WR1) or die "Can't close WR1: $!";
 close(WR2) or die "Can't close WR2: $!";
-open(RD1, '<', 'out1.txt') or die "Can't open RD1: $!";
-open(RD2, '<', 'out2.txt') or die "Can't open RD2: $!";
+open(RD1, '<', 'out21.txt') or die "Can't open RD1: $!";
+open(RD2, '<', 'out22.txt') or die "Can't open RD2: $!";
 
 my $ok;
 
