@@ -1,5 +1,6 @@
 0.41
  - Remove gmp_v from Math::GMPq::V as we don't want any library functions in that module
+ - Replace SvUV/SvIV/SvNV with SvUVX/SvIVX/SvNVX where appropriate.
 
 0.39
  - Add Rmpq_integer_p(), though mpq_integer_p() is not currently implemented in gmp.
