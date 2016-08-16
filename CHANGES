@@ -1,3 +1,5 @@
+0.42
+
 0.41
  - Remove gmp_v from Math::GMPq::V as we don't want any library functions in that module
  - Replace SvUV/SvIV/SvNV with SvUVX/SvIVX/SvNVX where appropriate. (In typemap, too.)
