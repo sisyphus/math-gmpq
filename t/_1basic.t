@@ -11,6 +11,12 @@ warn "# CC is ", Math::GMPq::__GMP_CC, "\n" if defined Math::GMPq::__GMP_CC;
 warn "# CFLAGS are ", Math::GMPq::__GMP_CFLAGS, "\n" if defined Math::GMPq::__GMP_CFLAGS;
 warn "# GMP_LIMB_BITS is ", Math::GMPq::GMP_LIMB_BITS, "\n" if defined Math::GMPq::GMP_LIMB_BITS;
 warn "# GMP_NAIL_BITS is ", Math::GMPq::GMP_NAIL_BITS, "\n" if defined Math::GMPq::GMP_NAIL_BITS;
+warn "# INT_MIN  : ", Math::GMPq::_int_min(),   "\n";
+warn "# INT_MAX  : ", Math::GMPq::_int_max(),   "\n";
+warn "# UINT_MAX : ", Math::GMPq::_uint_max(),  "\n";
+warn "# LONG_MIN : ", Math::GMPq::_long_min(),  "\n";
+warn "# LONG_MAX : ", Math::GMPq::_long_max(),  "\n";
+warn "# ULONG_MAX: ", Math::GMPq::_ulong_max(), "\n";
 
 if($Math::GMPq::VERSION eq '0.41' && $Math::GMPq::Random::VERSION eq '0.41' &&
    $Math::GMPq::V::VERSION eq '0.41' &&
