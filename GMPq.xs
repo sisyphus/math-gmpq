@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <gmp.h>
+#include <limits.h>
 
 #ifdef _MSC_VER
 #pragma warning(disable:4700 4715 4716)
@@ -107,7 +108,7 @@ void Rmpq_set_ui(mpq_t * p1, unsigned long p2, unsigned long p3) {
      mpq_set_ui(*p1, p2, p3);
 }
 
-void Rmpq_set_si(mpq_t * p1, int p2, int p3) {
+void Rmpq_set_si(mpq_t * p1, long p2, long p3) {
      mpq_set_si(*p1, p2, p3);
 }
 
@@ -1984,6 +1985,30 @@ SV * _GMP_NAIL_BITS(pTHX) {
 #endif
 }
 
+long _long_min(void) {
+   return (long)LONG_MIN;
+}
+
+long _long_max(void) {
+   return (long)LONG_MAX;
+}
+
+unsigned long _ulong_max(void) {
+   return (unsigned long)ULONG_MAX;
+}
+
+int _int_min(void) {
+   return (int)INT_MIN;
+}
+
+int _int_max(void) {
+   return (int)INT_MAX;
+}
+
+unsigned int _uint_max(void) {
+   return (unsigned int)UINT_MAX;
+}
+
 
 
 MODULE = Math::GMPq  PACKAGE = Math::GMPq
@@ -2157,8 +2182,8 @@ Rmpq_set_ui (p1, p2, p3)
 void
 Rmpq_set_si (p1, p2, p3)
 	mpq_t *	p1
-	int	p2
-	int	p3
+	long	p2
+	long	p3
         PREINIT:
         I32* temp;
         PPCODE:
@@ -2988,5 +3013,29 @@ _GMP_NAIL_BITS ()
 CODE:
   RETVAL = _GMP_NAIL_BITS (aTHX);
 OUTPUT:  RETVAL
+
+
+long
+_long_min ()
+
+
+long
+_long_max ()
+
+
+unsigned long
+_ulong_max ()
+
+
+int
+_int_min ()
+
+
+int
+_int_max ()
+
+
+unsigned int
+_uint_max ()
 
 
