@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use Math::GMPq qw(:mpq);
 
-print "1..20\n";
+print "1..21\n";
 
 print "# Using gmp version ", Math::GMPq::gmp_v(), "\n";
 
@@ -166,3 +166,13 @@ eval {Rmpq_printf("The version is %s. Values are %d %Qx %Qx\n", $ok, 11, $x, $y)
 #select($ofh);
 if(!$@) {print "not ok 20\n"}
 else {print "ok 20\n"}
+
+my $si_test = Math::GMPq->new;
+
+Rmpq_set_si($si_test, Math::GMPq::_long_min(), 1);
+
+if($si_test == Math::GMPq::_long_min()) {print "ok 21\n"}
+else {
+  warn "\n  Expected ", Math::GMPq::_long_min(), "\n  Got $si_test\n";
+  print "not ok 21\n";
+}
