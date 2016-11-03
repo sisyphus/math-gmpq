@@ -16,6 +16,8 @@ t/_1basic.t
 t/cmp_z.t
 t/test1.t
 t/longdouble.t
+t/NV_overloading.t
+t/NOK_and_POK.t
 t/overload.t
 t/overload_cross_class.t
 t/use64bitint.t
@@ -25,4 +27,5 @@ t/out_str.t
 t/printf.t
 t/TRmpq_out_str.t
 t/pod.t
+t/Rmpq_integer_p.t
 typemap
