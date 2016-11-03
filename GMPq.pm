@@ -54,6 +54,7 @@ Rmpq_get_d
 Rmpq_get_den Rmpq_get_num Rmpq_get_str Rmpq_init Rmpq_init_nobless Rmpq_inp_str
 Rmpq_inv Rmpq_mul Rmpq_mul_2exp Rmpq_neg Rmpq_numref Rmpq_out_str Rmpq_printf
 Rmpq_set Rmpq_set_d Rmpq_set_den Rmpq_set_f Rmpq_set_num Rmpq_set_si Rmpq_set_str
+Rmpq_set_NV
 Rmpq_set_ui Rmpq_set_z Rmpq_sgn
 Rmpq_sprintf Rmpq_snprintf
 Rmpq_sub Rmpq_swap
@@ -79,6 +80,7 @@ Rmpq_get_d
 Rmpq_get_den Rmpq_get_num Rmpq_get_str Rmpq_init Rmpq_init_nobless Rmpq_inp_str
 Rmpq_inv Rmpq_mul Rmpq_mul_2exp Rmpq_neg Rmpq_numref Rmpq_out_str Rmpq_printf
 Rmpq_set Rmpq_set_d Rmpq_set_den Rmpq_set_f Rmpq_set_num Rmpq_set_si Rmpq_set_str
+Rmpq_set_NV
 Rmpq_set_ui Rmpq_set_z Rmpq_sgn
 Rmpq_sprintf Rmpq_snprintf
 Rmpq_sub Rmpq_swap
@@ -112,7 +114,7 @@ sub new {
     # then we'll get a fatal error when we check it for equivalence to
     # the string "Math::GMPq". So we first need to check that it's not
     # an object - which we'll do by using the ref() function:
-    if(!ref($_[0]) && $_[0] eq "Math::GMPq") {
+    if(!ref($_[0]) && Math::GMPq::_SvPOK($_[0]) && $_[0] eq "Math::GMPq") {
       shift;
       if(!@_) {return Rmpq_init()}
       }
@@ -143,11 +145,7 @@ sub new {
 
     if($type == _NOK_T) {
       if(@_ ) {die "Too many arguments supplied to new() - expected only one"}
-      if(Math::GMPq::_has_longdouble()) {
-        _Rmpq_set_ld($ret, $arg1);
-        return $ret;
-      }
-      Rmpq_set_d($ret, $arg1);
+      Rmpq_set_NV($ret, $arg1);
       return $ret;
     }
 
@@ -466,6 +464,13 @@ __END__
    Rmpq_set_si($rop, $si1, $si2);
     Set $rop to 2nd arg / 3rd arg.
 
+   Rmpq_set_d ($rop, $double);
+   Rmpq_set_f ($rop, $f); # $f is a Math::GnumMPf object
+   Rmpq_set_d ($rop, $op);
+   Rmpq_set_NV($rop, $op); # $NV is a perl floating point value
+    Set $rop to the value of the 2nd arg, without rounding.
+    Assigning an Inf or NaN is a fatal error.
+
    Rmpq_set_str($rop, $str, $base);
     Set $rop from $str in the given base $base. The string can be
     an integer like "41" or a fraction like "41/152".  The fraction
@@ -510,10 +515,6 @@ __END__
 
    $double = Rmpq_get_d($op);
     Convert $op to a 'double'.
-
-   Rmpq_set_d($rop, $double);
-   Rmpq_set_f($rop, $f); # $f is a Math::GnumMPf object
-     Set $rop to the value of the 2nd arg, without rounding.
 
    $str = Rmpq_get_str($op, $base);
     Convert $op to a string of digits in base $base. The base may
@@ -577,7 +578,7 @@ __END__
     To determine if two rationals are equal, `Rmpq_equal' is
     faster than `Rmpq_cmp'.
 
-   $si = Rmpq_cmp_ui($op, $ui, $ui);
+   $si  = Rmpq_cmp_ui($op, $ui, $ui);
    $si1 = Rmpq_cmp_si($op, $si2, $ui);
     Compare $op1 and 2nd arg/3rd arg.  Return a positive value if
     $op1 > 2nd arg/3rd arg, zero if $op1 = 2nd arg/3rd arg,
@@ -587,8 +588,12 @@ __END__
     to compare $op with 2/-3, make sure that 2nd arg is
     '-2' and 3rd arg is '3'.
 
+   $si = Rmpq_cmp_NV($op, $NV); # $NV is a perl floating point value
+    The assignment is exact (no rounding or truncating).
+    Assigning an Inf or NaN is a fatal error.
+
    $si = Rmpq_sgn($op);
-    Return +1 if $op>0, 0 if $op=0, and -1 if $op<0.
+    Return 1 if $op>0, 0 if $op=0, and -1 if $op < 0.
 
    $bool = Rmpq_equal($op1, $op2); # faster than Rmpq_cmp()
     Return non-zero if $op1 and $op2 are equal, zero if they
