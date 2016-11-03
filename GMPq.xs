@@ -16,6 +16,10 @@
 #include <gmp.h>
 #include <limits.h>
 
+#if defined(NV_IS_FLOAT128)
+#include <quadmath.h>
+#endif
+
 #ifdef _MSC_VER
 #pragma warning(disable:4700 4715 4716)
 #endif
@@ -37,6 +41,29 @@
 #ifndef Newxz
 #  define Newxz(v,n,t) Newz(0,v,n,t)
 #endif
+
+int _is_infstring(char * s) {
+  int sign = 1;
+
+  if(s[0] == '-') {
+    sign = -1;
+    s++;
+  }
+  else {
+    if(s[0] == '+') s++;
+  }
+
+  if((s[0] == 'i' || s[0] == 'I') && (s[1] == 'n' || s[1] == 'N') && (s[2] == 'f' || s[2] == 'F'))
+    return sign;
+
+#ifdef _WIN32 /* older Win32 perls stringify infinities as(-)1.#INF */
+
+   if(!strcmp(s, "1.#INF")) return sign;
+
+#endif
+
+  return 0;
+}
 
 void Rmpq_canonicalize (mpq_t * p) {
      mpq_canonicalize(*p);
@@ -125,32 +152,192 @@ double Rmpq_get_d(mpq_t * p) {
 }
 
 void Rmpq_set_d(mpq_t * p, double d){
+     if(d != d) croak ("In Rmpq_set_d, cannot coerce a NaN to a Math::GMPq value");
+     if(d != 0 && d / d != 1) croak ("In Rmpq_set_d, cannot coerce an Inf to a Math::GMPq value");
      mpq_set_d(*p, d);
 }
 
-void _Rmpq_set_ld(pTHX_ mpq_t * q, SV * p) {
-#ifdef USE_LONG_DOUBLE
-     char buffer[50];
+void Rmpq_set_NV(pTHX_ mpq_t * copy, SV * original) {
+
+#if defined(NV_IS_FLOAT128)
+
+     char * buffer;
      int exp, exp2 = 0;
-     long double fr;
+     __float128 ld, buffer_size;
+     int returned;
 
-     fr = frexpl((long double)SvNV(p), &exp);
+     ld = (__float128)SvNVX(original);
+     if(ld != ld) croak("In Rmpq_set_NV, cannot coerce a NaN to a Math::GMPq value");
+     if(ld != 0 && (ld / ld != 1))
+       croak("In Rmpq_set_NV, cannot coerce an Inf to a Math::GMPq value");
 
-     while(fr != floorl(fr)) {
-          fr *= 2;
+     ld = frexpq((__float128)SvNVX(original), &exp);
+
+     while(ld != floorl(ld)) {
+          ld *= 2;
           exp2 += 1;
      }
 
-     sprintf(buffer, "%.0Lf", fr);
+     buffer_size = ld < 0.0Q ? ld * -1.0Q : ld;
+     buffer_size = ceill(logq(buffer_size + 1) / 2.30258509299404568401799145468436418Q);
 
-     mpq_set_str(*q, buffer, 10);
+     Newxz(buffer, buffer_size + 5, char);
 
-     if (exp2 > exp) mpq_div_2exp(*q, *q, exp2 - exp);
-     else mpq_mul_2exp(*q, *q, exp - exp2);
+     returned = quadmath_snprintf(buffer, (size_t)buffer_size + 5, "%.0Qf", ld);
+     if(returned < 0) croak("In Rmpq_set_NV, encoding error in quadmath_snprintf function");
+     if(returned >= buffer_size + 5) croak("In Rmpq_set_NV, buffer given to quadmath_snprintf function was too small");
+     mpq_set_str(*copy, buffer, 10);
+     Safefree(buffer);
+
+#elif defined(USE_LONG_DOUBLE)
+
+     char * buffer;
+     int exp, exp2 = 0;
+     long double ld, buffer_size;
+
+     ld = (long double)SvNVX(original);
+     if(ld != ld) croak("In Rmpq_set_NV, cannot coerce a NaN to a Math::GMPq value");
+     if(ld != 0 && (ld / ld != 1))
+       croak("In Rmpq_set_NV, cannot coerce an Inf to a Math::GMPq value");
+
+     ld = frexpl((long double)SvNVX(original), &exp);
+
+     while(ld != floorl(ld)) {
+          ld *= 2;
+          exp2 += 1;
+     }
+
+     buffer_size = ld < 0.0Q ? ld * -1.0Q : ld;
+     buffer_size = ceill(logl(buffer_size + 1) / 2.30258509299404568401799145468436418L);
+
+     Newxz(buffer, buffer_size + 5, char);
+
+     if(sprintf(buffer, "%.0Lf", ld) >= (int)buffer_size + 5) croak("In Rmpq_set_NV, buffer overflow in sprintf function");
+
+     mpq_set_str(*copy, buffer, 10);
+     Safefree(buffer);
+
+     if (exp2 > exp) mpq_div_2exp(*copy, *copy, exp2 - exp);
+     else mpq_mul_2exp(*copy, *copy, exp - exp2);
+
 #else
-     croak("_Rmpq_set_ld not implemented on this build of perl");
+     double d = SvNVX(original);
+     if(d != d) croak("In Rmpq_set_NV, cannot coerce a NaN to a Math::GMPq value");
+     if(d != 0 && (d / d != 1))
+       croak("In Rmpq_set_NV, cannot coerce an Inf to a Math::GMPq value");
+
+     mpq_set_d(*copy, d);
 #endif
 }
+
+int Rmpq_cmp_NV(pTHX_ mpq_t * a, SV * b) {
+
+     mpq_t t;
+     int returned;
+
+#if defined(NV_IS_FLOAT128)
+
+     char * buffer;
+     int exp, exp2 = 0;
+     __float128 ld, buffer_size;
+
+     ld = (__float128)SvNVX(b);
+     if(ld != ld) croak("In Rmpq_set_NV, cannot coerce a NaN to a Math::GMPq value");
+     if(ld != 0 && (ld / ld != 1))
+       croak("In Rmpq_set_NV, cannot coerce an Inf to a Math::GMPq value");
+
+     ld = frexpq((__float128)SvNVX(b), &exp);
+
+     while(ld != floorl(ld)) {
+          ld *= 2;
+          exp2 += 1;
+     }
+
+     buffer_size = ld < 0.0Q ? ld * -1.0Q : ld;
+     buffer_size = ceill(logq(buffer_size + 1) / 2.30258509299404568401799145468436418Q);
+
+     Newxz(buffer, buffer_size + 5, char);
+
+     returned = quadmath_snprintf(buffer, (size_t)buffer_size + 5, "%.0Qf", ld);
+     if(returned < 0) croak("In Rmpq_set_NV, encoding error in quadmath_snprintf function");
+     if(returned >= buffer_size + 5) croak("In Rmpq_set_NV, buffer given to quadmath_snprintf function was too small");
+     mpq_init(t);
+     mpq_set_str(t, buffer, 10);
+     Safefree(buffer);
+
+     if (exp2 > exp) mpq_div_2exp(t, t, exp2 - exp);
+     else mpq_mul_2exp(t, t, exp - exp2);
+
+#elif defined(USE_LONG_DOUBLE)
+
+     char * buffer;
+     int exp, exp2 = 0;
+     long double ld, buffer_size;
+
+     ld = (long double)SvNVX(b);
+     if(ld != ld) croak("In Rmpq_set_NV, cannot coerce a NaN to a Math::GMPq value");
+     if(ld != 0 && (ld / ld != 1))
+       croak("In Rmpq_set_NV, cannot coerce an Inf to a Math::GMPq value");
+
+     ld = frexpl((long double)SvNVX(b), &exp);
+
+     while(ld != floorl(ld)) {
+          ld *= 2;
+          exp2 += 1;
+     }
+
+     buffer_size = ld < 0.0Q ? ld * -1.0Q : ld;
+     buffer_size = ceill(logl(buffer_size + 1) / 2.30258509299404568401799145468436418L);
+
+     Newxz(buffer, buffer_size + 5, char);
+
+     if(sprintf(buffer, "%.0Lf", ld) >= (int)buffer_size + 5) croak("In Rmpq_set_NV, buffer overflow in sprintf function");
+     mpq_init(t);
+     mpq_set_str(t, buffer, 10);
+     Safefree(buffer);
+
+     if (exp2 > exp) mpq_div_2exp(t, t, exp2 - exp);
+     else mpq_mul_2exp(t, t, exp - exp2);
+
+#else
+     double d = SvNVX(b);
+     if(d != d) croak("In Rmpq_set_NV, cannot coerce a NaN to a Math::GMPq value");
+     if(d != 0 && (d / d != 1))
+       croak("In Rmpq_set_NV, cannot coerce an Inf to a Math::GMPq value");
+     mpq_init(t);
+     mpq_set_d(t, d);
+#endif
+
+     returned = mpq_cmp(*a, t);
+     mpq_clear(t);
+     return returned;
+}
+
+/* No longer used *//*
+//void _Rmpq_set_ld(pTHX_ mpq_t * q, SV * p) {
+//#ifdef USE_LONG_DOUBLE
+//     char buffer[50];
+//     int exp, exp2 = 0;
+//     long double fr;
+//
+//     fr = frexpl((long double)SvNV(p), &exp);
+//
+//     while(fr != floorl(fr)) {
+//          fr *= 2;
+//          exp2 += 1;
+//     }
+//
+//     sprintf(buffer, "%.0Lf", fr);
+//
+//     mpq_set_str(*q, buffer, 10);
+//
+//     if (exp2 > exp) mpq_div_2exp(*q, *q, exp2 - exp);
+//     else mpq_mul_2exp(*q, *q, exp - exp2);
+//#else
+//     croak("_Rmpq_set_ld not implemented on this build of perl");
+//#endif
+//}
+*/
 
 void Rmpq_set_f(mpq_t * p, mpf_t * f) {
      mpq_set_f(*p, *f);
@@ -388,11 +575,11 @@ SV * overload_mul(pTHX_ SV * a, SV * b, SV * third) {
      }
 #endif
 
-     if(SvNOK(b)) {
-#ifdef USE_LONG_DOUBLE
-       _Rmpq_set_ld(aTHX_ mpq_t_obj, b);
+     if(SvNOK(b) && !SvPOK(b)) { /* do not use the NV if POK is set */
+#if defined(USE_LONG_DOUBLE) || defined(NV_IS_FLOAT128)
+       Rmpq_set_NV(aTHX_ mpq_t_obj, b);
 #else
-       mpq_set_d(*mpq_t_obj, SvNVX(b));
+       Rmpq_set_d(*mpq_t_obj, SvNVX(b));
 #endif
        mpq_mul(*mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))), *mpq_t_obj);
        return obj_ref;
@@ -475,9 +662,9 @@ SV * overload_add(pTHX_ SV * a, SV * b, SV * third) {
      }
 #endif
 
-     if(SvNOK(b)) {
-#ifdef USE_LONG_DOUBLE
-       _Rmpq_set_ld(aTHX_ mpq_t_obj, b);
+     if(SvNOK(b) && !SvPOK(b)) { /* do not use the NV if POK is set */
+#if defined(USE_LONG_DOUBLE) || defined(NV_IS_FLOAT128)
+       Rmpq_set_NV(aTHX_ mpq_t_obj, b);
 #else
        mpq_set_d(*mpq_t_obj, SvNVX(b));
 #endif
@@ -565,9 +752,9 @@ SV * overload_sub(pTHX_ SV * a, SV * b, SV * third) {
      }
 #endif
 
-     if(SvNOK(b)) {
-#ifdef USE_LONG_DOUBLE
-       _Rmpq_set_ld(aTHX_ mpq_t_obj, b);
+     if(SvNOK(b) && !SvPOK(b)) { /* do not use the NV if POK is set */
+#if defined(USE_LONG_DOUBLE) || defined(NV_IS_FLOAT128)
+       Rmpq_set_NV(aTHX_ mpq_t_obj, b);
 #else
        mpq_set_d(*mpq_t_obj, SvNVX(b));
 #endif
@@ -657,9 +844,9 @@ SV * overload_div(pTHX_ SV * a, SV * b, SV * third) {
      }
 #endif
 
-     if(SvNOK(b)) {
-#ifdef USE_LONG_DOUBLE
-       _Rmpq_set_ld(aTHX_ mpq_t_obj, b);
+     if(SvNOK(b) && !SvPOK(b)) { /* do not use the NV if POK is set */
+#if defined(USE_LONG_DOUBLE) || defined(NV_IS_FLOAT128)
+       Rmpq_set_NV(aTHX_ mpq_t_obj, b);
 #else
        mpq_set_d(*mpq_t_obj, SvNVX(b));
 #endif
@@ -792,10 +979,10 @@ SV * overload_gt(pTHX_ mpq_t * a, SV * b, SV * third) {
      }
 #endif
 
-     if(SvNOK(b)) {
+     if(SvNOK(b) && !SvPOK(b)) { /* do not use the NV if POK is set */
        mpq_init(t);
-#ifdef USE_LONG_DOUBLE
-       _Rmpq_set_ld(aTHX_ &t, b);
+#if defined(USE_LONG_DOUBLE) || defined(NV_IS_FLOAT128)
+       Rmpq_set_NV(aTHX_ &t, b);
 #else
        mpq_set_d(t, SvNVX(b));
 #endif
@@ -871,10 +1058,10 @@ SV * overload_gte(pTHX_ mpq_t * a, SV * b, SV * third) {
      }
 #endif
 
-     if(SvNOK(b)) {
+     if(SvNOK(b) && !SvPOK(b)) { /* do not use the NV if POK is set */
        mpq_init(t);
-#ifdef USE_LONG_DOUBLE
-       _Rmpq_set_ld(aTHX_ &t, b);
+#if defined(USE_LONG_DOUBLE) || defined(NV_IS_FLOAT128)
+       Rmpq_set_NV(aTHX_ &t, b);
 #else
        mpq_set_d(t, SvNVX(b));
 #endif
@@ -950,10 +1137,10 @@ SV * overload_lt(pTHX_ mpq_t * a, SV * b, SV * third) {
      }
 #endif
 
-     if(SvNOK(b)) {
+     if(SvNOK(b) && !SvPOK(b)) { /* do not use the NV if POK is set */
        mpq_init(t);
-#ifdef USE_LONG_DOUBLE
-       _Rmpq_set_ld(aTHX_ &t, b);
+#if defined(USE_LONG_DOUBLE) || defined(NV_IS_FLOAT128)
+       Rmpq_set_NV(aTHX_ &t, b);
 #else
        mpq_set_d(t, SvNVX(b));
 #endif
@@ -1029,10 +1216,10 @@ SV * overload_lte(pTHX_ mpq_t * a, SV * b, SV * third) {
      }
 #endif
 
-     if(SvNOK(b)) {
+     if(SvNOK(b) && !SvPOK(b)) { /* do not use the NV if POK is set */
        mpq_init(t);
-#ifdef USE_LONG_DOUBLE
-       _Rmpq_set_ld(aTHX_ &t, b);
+#if defined(USE_LONG_DOUBLE) || defined(NV_IS_FLOAT128)
+       Rmpq_set_NV(aTHX_ &t, b);
 #else
        mpq_set_d(t, SvNVX(b));
 #endif
@@ -1106,10 +1293,10 @@ SV * overload_spaceship(pTHX_ mpq_t * a, SV * b, SV * third) {
      }
 #endif
 
-     if(SvNOK(b)) {
+     if(SvNOK(b) && !SvPOK(b)) { /* do not use the NV if POK is set */
        mpq_init(t);
-#ifdef USE_LONG_DOUBLE
-       _Rmpq_set_ld(aTHX_ &t, b);
+#if defined(USE_LONG_DOUBLE) || defined(NV_IS_FLOAT128)
+       Rmpq_set_NV(aTHX_ &t, b);
 #else
        mpq_set_d(t, SvNVX(b));
 #endif
@@ -1151,7 +1338,22 @@ SV * overload_spaceship(pTHX_ mpq_t * a, SV * b, SV * third) {
 
 SV * overload_equiv(pTHX_ mpq_t * a, SV * b, SV * third) {
      mpq_t t;
-     int ret;
+     int ret = 0;
+
+#if defined(NV_IS_FLOAT128)
+
+     char * buffer;
+     int returned;
+     __float128 buffer_size;
+     __float128 ld;
+
+#elif defined(USE_LONG_DOUBLE)
+
+     char * buffer;
+     long double buffer_size;
+     long double ld;
+
+#endif
 
 #ifdef MATH_GMPQ_NEED_LONG_LONG_INT
      if(SvIOK(b)) {
@@ -1176,15 +1378,58 @@ SV * overload_equiv(pTHX_ mpq_t * a, SV * b, SV * third) {
      }
 #endif
 
-     if(SvNOK(b)) {
-       mpq_init(t);
-#ifdef USE_LONG_DOUBLE
-       _Rmpq_set_ld(aTHX_ &t, b);
+     if(SvNOK(b) && !SvPOK(b)) { /* do not use the NV if POK is set */
+
+#if defined(NV_IS_FLOAT128)
+
+       ld = (__float128)SvNVX(b) >= 0 ? floorq((__float128)SvNVX(b)) : ceilq((__float128)SvNVX(b));
+       if(ld != ld) croak("In Math::GMPq::overload_equiv, cannot compare a NaN to a Math::GMPq value");
+       if((ld != 0 && (ld / ld != 1)) || (ld != (__float128)SvNVX(b))) ret = -1;
+
+       if(!ret) {
+         buffer_size = ld < 0.0Q ? ld * -1.0Q : ld;
+         buffer_size = ceilq(logq(buffer_size + 1) / 2.30258509299404568401799145468436418Q);
+
+         Newxz(buffer, (int)buffer_size + 5, char);
+
+         returned = quadmath_snprintf(buffer, (size_t)buffer_size + 5, "%.0Qf", ld);
+         if(returned < 0) croak("In Math::GMPq::overload_equiv, encoding error in quadmath_snprintf function");
+         if(returned >= buffer_size + 5) croak("In Math::GMPq::overload_equiv, buffer given to quadmath_snprintf function was too small");
+         mpq_init(t);
+         mpq_set_str(t, buffer, 10);
+         Safefree(buffer);
+         ret = mpq_equal(*a, t);
+         mpq_clear(t);
+       }
+
+#elif defined(USE_LONG_DOUBLE)
+
+       ld = (long double)SvNVX(b) >= 0 ? floorl((long double)SvNVX(b)) : ceill((long double)SvNVX(b));
+       if(ld != ld) croak("In Math::GMPq::overload_equiv, cannot compare a NaN to a Math::GMPq value");
+       if((ld != 0 && (ld / ld != 1)) || (ld != (long double)SvNVX(b))) ret = -1;
+
+       if(!ret) {
+         buffer_size = ld < 0.0L ? ld * -1.0L : ld;
+         buffer_size = ceill(logl(buffer_size + 1) / 2.30258509299404568401799145468436418L);
+
+         Newxz(buffer, (int)buffer_size + 5, char);
+
+         if(sprintf(buffer, "%.0Lf", ld) >= (int)buffer_size + 5) croak("In Math::GMPq::overload_equiv, buffer overflow in sprintf function");
+         mpq_init(t);
+         mpq_set_str(t, buffer, 10);
+         Safefree(buffer);
+         ret = mpq_equal(*a, t);
+         mpq_clear(t);
+       }
 #else
+       double d = SvNVX(b);
+       if(d != d) croak("In Math::GMPq::overload_not_equiv, cannot compare a NaN to a Math::GMPq value");
+       if(d != 0 && d / d != 1) return newSViv(1);
+       mpq_init(t);
        mpq_set_d(t, SvNVX(b));
-#endif
        ret = mpq_equal(*a, t);
        mpq_clear(t);
+#endif
        return newSViv(ret);
      }
 
@@ -1219,7 +1464,22 @@ SV * overload_equiv(pTHX_ mpq_t * a, SV * b, SV * third) {
 
 SV * overload_not_equiv(pTHX_ mpq_t * a, SV * b, SV * third) {
      mpq_t t;
-     int ret;
+     int ret = 0;
+
+#if defined(NV_IS_FLOAT128)
+
+     char * buffer;
+     int returned;
+     __float128 buffer_size;
+     __float128 ld;
+
+#elif defined(USE_LONG_DOUBLE)
+
+     char * buffer;
+     long double buffer_size;
+     long double ld;
+
+#endif
 
 #ifdef MATH_GMPQ_NEED_LONG_LONG_INT
      if(SvIOK(b)) {
@@ -1245,15 +1505,59 @@ SV * overload_not_equiv(pTHX_ mpq_t * a, SV * b, SV * third) {
      }
 #endif
 
-     if(SvNOK(b)) {
-       mpq_init(t);
-#ifdef USE_LONG_DOUBLE
-       _Rmpq_set_ld(aTHX_ &t, b);
+     if(SvNOK(b) && !SvPOK(b)) { /* do not use the NV if POK is set */
+
+#if defined(NV_IS_FLOAT128)
+
+       ld = (__float128)SvNVX(b) >= 0 ? floorq((__float128)SvNVX(b)) : ceilq((__float128)SvNVX(b));
+       if(ld != ld) croak("In Math::GMPq::overload_equiv, cannot compare a NaN to a Math::GMPq value");
+       if((ld != 0 && (ld / ld != 1)) || (ld != (__float128)SvNVX(b))) ret = -1;
+
+       if(!ret) {
+         buffer_size = ld < 0.0Q ? ld * -1.0Q : ld;
+         buffer_size = ceilq(logq(buffer_size + 1) / 2.30258509299404568401799145468436418Q);
+
+         Newxz(buffer, (int)buffer_size + 5, char);
+
+         returned = quadmath_snprintf(buffer, (size_t)buffer_size + 5, "%.0Qf", ld);
+         if(returned < 0) croak("In Math::GMPq::overload_equiv, encoding error in quadmath_snprintf function");
+         if(returned >= buffer_size + 5) croak("In Math::GMPq::overload_equiv, buffer given to quadmath_snprintf function was too small");
+         mpq_init(t);
+         mpq_set_str(t, buffer, 10);
+         Safefree(buffer);
+         ret = mpq_equal(*a, t);
+         mpq_clear(t);
+       }
+
+#elif defined(USE_LONG_DOUBLE)
+
+       ld = (long double)SvNVX(b) >= 0 ? floorl((long double)SvNVX(b)) : ceill((long double)SvNVX(b));
+       if(ld != ld) croak("In Math::GMPq::overload_equiv, cannot compare a NaN to a Math::GMPq value");
+       if((ld != 0 && (ld / ld != 1)) || (ld != (long double)SvNVX(b))) ret = -1;
+
+       if(!ret) {
+         buffer_size = ld < 0.0L ? ld * -1.0L : ld;
+         buffer_size = ceill(logl(buffer_size + 1) / 2.30258509299404568401799145468436418L);
+
+         Newxz(buffer, (int)buffer_size + 5, char);
+
+         if(sprintf(buffer, "%.0Lf", ld) >= (int)buffer_size + 5) croak("In Math::GMPq::overload_equiv, buffer overflow in sprintf function");
+         mpq_init(t);
+         mpq_set_str(t, buffer, 10);
+         Safefree(buffer);
+         ret = mpq_equal(*a, t);
+         mpq_clear(t);
+       }
 #else
+       double d = SvNVX(b);
+       if(d != d) croak("In Math::GMPq::overload_not_equiv, cannot compare a NaN to a Math::GMPq value");
+       if(d != 0 && d / d != 1) return newSViv(1);
+       mpq_init(t);
        mpq_set_d(t, SvNVX(b));
-#endif
        ret = mpq_equal(*a, t);
        mpq_clear(t);
+#endif
+
        if(ret) return newSViv(0);
        return newSViv(1);
      }
@@ -1348,10 +1652,10 @@ SV * overload_mul_eq(pTHX_ SV * a, SV * b, SV * third) {
        }
 #endif
 
-     if(SvNOK(b)) {
+     if(SvNOK(b) && !SvPOK(b)) { /* do not use the NV if POK is set */
        mpq_init(t);
-#ifdef USE_LONG_DOUBLE
-       _Rmpq_set_ld(aTHX_ &t, b);
+#if defined(USE_LONG_DOUBLE) || defined(NV_IS_FLOAT128)
+       Rmpq_set_NV(aTHX_ &t, b);
 #else
        mpq_set_d(t, SvNVX(b));
 #endif
@@ -1411,10 +1715,10 @@ SV * overload_add_eq(pTHX_ SV * a, SV * b, SV * third) {
        }
 #endif
 
-     if(SvNOK(b)) {
+     if(SvNOK(b) && !SvPOK(b)) { /* do not use the NV if POK is set */
        mpq_init(t);
-#ifdef USE_LONG_DOUBLE
-       _Rmpq_set_ld(aTHX_ &t, b);
+#if defined(USE_LONG_DOUBLE) || defined(NV_IS_FLOAT128)
+       Rmpq_set_NV(aTHX_ &t, b);
 #else
        mpq_set_d(t, SvNVX(b));
 #endif
@@ -1473,10 +1777,10 @@ SV * overload_sub_eq(pTHX_ SV * a, SV * b, SV * third) {
        }
 #endif
 
-     if(SvNOK(b)) {
+     if(SvNOK(b) && !SvPOK(b)) { /* do not use the NV if POK is set */
        mpq_init(t);
-#ifdef USE_LONG_DOUBLE
-       _Rmpq_set_ld(aTHX_ &t, b);
+#if defined(USE_LONG_DOUBLE) || defined(NV_IS_FLOAT128)
+       Rmpq_set_NV(aTHX_ &t, b);
 #else
        mpq_set_d(t, SvNVX(b));
 #endif
@@ -1536,10 +1840,10 @@ SV * overload_div_eq(pTHX_ SV * a, SV * b, SV * third) {
        }
 #endif
 
-     if(SvNOK(b)) {
+     if(SvNOK(b) && !SvPOK(b)) { /* do not use the NV if POK is set */
        mpq_init(t);
-#ifdef USE_LONG_DOUBLE
-       _Rmpq_set_ld(aTHX_ &t, b);
+#if defined(USE_LONG_DOUBLE) || defined(NV_IS_FLOAT128)
+       Rmpq_set_NV(aTHX_ &t, b);
 #else
        mpq_set_d(t, SvNVX(b));
 #endif
@@ -1619,7 +1923,7 @@ SV * wrap_gmp_printf(pTHX_ SV * a, SV * b) {
        fflush(stdout);
        return newSViv(ret);
      }
-     if(SvNOK(b)) {
+     if(SvNOK(b) && !SvPOK(b)) { /* do not use the NV if POK is set */
        ret = gmp_printf(SvPV_nolen(a), SvNVX(b));
        fflush(stdout);
        return newSViv(ret);
@@ -1670,7 +1974,7 @@ SV * wrap_gmp_fprintf(pTHX_ FILE * stream, SV * a, SV * b) {
        fflush(stream);
        return newSViv(ret);
      }
-     if(SvNOK(b)) {
+     if(SvNOK(b) && !SvPOK(b)) { /* do not use the NV if POK is set */
        ret = gmp_fprintf(stream, SvPV_nolen(a), SvNVX(b));
        fflush(stream);
        return newSViv(ret);
@@ -1734,7 +2038,7 @@ SV * wrap_gmp_sprintf(pTHX_ SV * s, SV * a, SV * b, int buflen) {
        return newSViv(ret);
      }
 
-     if(SvNOK(b)) {
+     if(SvNOK(b) && !SvPOK(b)) { /* do not use the NV if POK is set */
        ret = gmp_sprintf(stream, SvPV_nolen(a), SvNVX(b));
        sv_setpv(s, stream);
        Safefree(stream);
@@ -1801,7 +2105,7 @@ SV * wrap_gmp_snprintf(pTHX_ SV * s, SV * bytes, SV * a, SV * b, int buflen) {
        return newSViv(ret);
      }
 
-     if(SvNOK(b)) {
+     if(SvNOK(b) && !SvPOK(b)) { /* do not use the NV if POK is set */
        ret = gmp_snprintf(stream, (size_t)SvUV(bytes), SvPV_nolen(a), SvNV(b));
        sv_setpv(s, stream);
        Safefree(stream);
@@ -1821,7 +2125,7 @@ SV * wrap_gmp_snprintf(pTHX_ SV * s, SV * bytes, SV * a, SV * b, int buflen) {
 int _itsa(pTHX_ SV * a) {
      if(SvUOK(a)) return 1;
      if(SvIOK(a)) return 2;
-     if(SvNOK(a)) return 3;
+     if(SvNOK(a) && !SvPOK(a)) return 3;
      if(SvPOK(a)) return 4;
      if(sv_isobject(a)) {
        const char *h = HvNAME(SvSTASH(SvRV(a)));
@@ -2009,12 +2313,21 @@ unsigned int _uint_max(void) {
    return (unsigned int)UINT_MAX;
 }
 
+int _SvPOK(pTHX_ SV * in) {
+   if(SvPOK(in)) return 1;
+   return 0;
+}
+
 
 
 MODULE = Math::GMPq  PACKAGE = Math::GMPq
 
 PROTOTYPES: DISABLE
 
+
+int
+_is_infstring (s)
+	char *	s
 
 void
 Rmpq_canonicalize (p)
@@ -2237,14 +2550,14 @@ Rmpq_set_d (p, d)
         return; /* assume stack size is correct */
 
 void
-_Rmpq_set_ld (q, p)
-	mpq_t *	q
-	SV *	p
+Rmpq_set_NV (copy, original)
+	mpq_t *	copy
+	SV *	original
         PREINIT:
         I32* temp;
         PPCODE:
         temp = PL_markstack_ptr++;
-        _Rmpq_set_ld(aTHX_ q, p);
+        Rmpq_set_NV(aTHX_ copy, original);
         if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
           PL_markstack_ptr = temp;
@@ -2252,6 +2565,14 @@ _Rmpq_set_ld (q, p)
         }
         /* must have used dXSARGS; list context implied */
         return; /* assume stack size is correct */
+
+int
+Rmpq_cmp_NV (a, b)
+	mpq_t *	a
+	SV *	b
+CODE:
+  RETVAL = Rmpq_cmp_NV (aTHX_ a, b);
+OUTPUT:  RETVAL
 
 void
 Rmpq_set_f (p, f)
@@ -3038,4 +3359,11 @@ _int_max ()
 unsigned int
 _uint_max ()
 
+
+int
+_SvPOK (in)
+	SV *	in
+CODE:
+  RETVAL = _SvPOK (aTHX_ in);
+OUTPUT:  RETVAL
 
