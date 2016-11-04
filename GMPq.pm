@@ -54,7 +54,7 @@ Rmpq_get_d
 Rmpq_get_den Rmpq_get_num Rmpq_get_str Rmpq_init Rmpq_init_nobless Rmpq_inp_str
 Rmpq_inv Rmpq_mul Rmpq_mul_2exp Rmpq_neg Rmpq_numref Rmpq_out_str Rmpq_printf
 Rmpq_set Rmpq_set_d Rmpq_set_den Rmpq_set_f Rmpq_set_num Rmpq_set_si Rmpq_set_str
-Rmpq_set_NV
+Rmpq_set_NV Rmpq_cmp_NV
 Rmpq_set_ui Rmpq_set_z Rmpq_sgn
 Rmpq_sprintf Rmpq_snprintf
 Rmpq_sub Rmpq_swap
@@ -80,7 +80,7 @@ Rmpq_get_d
 Rmpq_get_den Rmpq_get_num Rmpq_get_str Rmpq_init Rmpq_init_nobless Rmpq_inp_str
 Rmpq_inv Rmpq_mul Rmpq_mul_2exp Rmpq_neg Rmpq_numref Rmpq_out_str Rmpq_printf
 Rmpq_set Rmpq_set_d Rmpq_set_den Rmpq_set_f Rmpq_set_num Rmpq_set_si Rmpq_set_str
-Rmpq_set_NV
+Rmpq_set_NV Rmpq_cmp_NV
 Rmpq_set_ui Rmpq_set_z Rmpq_sgn
 Rmpq_sprintf Rmpq_snprintf
 Rmpq_sub Rmpq_swap
@@ -589,8 +589,10 @@ __END__
     '-2' and 3rd arg is '3'.
 
    $si = Rmpq_cmp_NV($op, $NV); # $NV is a perl floating point value
-    The assignment is exact (no rounding or truncating).
-    Assigning an Inf or NaN is a fatal error.
+    Return 0  if $op == $NV.
+    Return 1  if $op >  $NV.
+    Return -1 if $op <  $NV
+    It's a fatal error if $NV is a NaN.
 
    $si = Rmpq_sgn($op);
     Return 1 if $op>0, 0 if $op=0, and -1 if $op < 0.
