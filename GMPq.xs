@@ -210,7 +210,7 @@ void Rmpq_set_NV(pTHX_ mpq_t * copy, SV * original) {
           exp2 += 1;
      }
 
-     buffer_size = ld < 0.0Q ? ld * -1.0Q : ld;
+     buffer_size = ld < 0.0L ? ld * -1.0L : ld;
      buffer_size = ceill(logl(buffer_size + 1) / 2.30258509299404568401799145468436418L);
 
      Newxz(buffer, buffer_size + 5, char);
@@ -293,7 +293,7 @@ int Rmpq_cmp_NV(pTHX_ mpq_t * a, SV * b) {
           exp2 += 1;
      }
 
-     buffer_size = ld < 0.0Q ? ld * -1.0Q : ld;
+     buffer_size = ld < 0.0L ? ld * -1.0L : ld;
      buffer_size = ceill(logl(buffer_size + 1) / 2.30258509299404568401799145468436418L);
 
      Newxz(buffer, buffer_size + 5, char);
