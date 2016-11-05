@@ -1,3 +1,5 @@
+0.43
+
 0.42
  - Replace the condition "if(SvNOK(x))" with "if(SvNOK(x) && !SvPOK(x))".
    See https://github.com/sisyphus/math-gmpz/issues/1 (Thanks trizen.)
