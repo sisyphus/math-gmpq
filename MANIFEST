@@ -2,6 +2,7 @@ MANIFEST
 CHANGES
 Makefile.PL
 GMPq.pm
+GMPq.pod
 GMPq.xs
 V/V.xs
 V/V.pm
@@ -28,4 +29,5 @@ t/printf.t
 t/TRmpq_out_str.t
 t/pod.t
 t/Rmpq_integer_p.t
+t/z_arith.t
 typemap
