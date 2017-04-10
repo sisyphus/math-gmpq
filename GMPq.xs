@@ -382,7 +382,15 @@ int Rmpq_cmp_z(mpq_t * p, mpz_t * z) {
 #if __GNU_MP_RELEASE >= 60099
      return mpq_cmp_z(*p, *z);
 #else
-     croak("Rmpq_cmp_z not implemented in this version (%s) of gmp - need at least 6.1.0", gmp_version);
+     int ret;
+     mpz_t temp;
+
+     mpz_init_set(temp, *z);
+     mpz_mul(temp, temp, mpq_denref(*p));
+     ret = mpz_cmp(mpq_numref(*p), temp);
+     mpz_clear(temp);
+     return ret;
+
 #endif
 }
 
@@ -548,6 +556,47 @@ void Rmpq_set_den(mpq_t * r, mpz_t * z) {
 
 SV * get_refcnt(pTHX_ SV * s) {
      return newSVuv(SvREFCNT(s));
+}
+
+void Rmpq_add_z(mpq_t * rop, mpq_t * op, mpz_t * z) {
+     mpz_mul(mpq_numref(*rop), mpq_denref(*op), *z);
+     mpz_add(mpq_numref(*rop), mpq_numref(*op), mpq_numref(*rop));
+     mpz_set(mpq_denref(*rop), mpq_denref(*op));
+}
+
+void Rmpq_sub_z(mpq_t * rop, mpq_t * op, mpz_t * z) {
+     mpz_mul(mpq_numref(*rop), mpq_denref(*op), *z);
+     mpz_sub(mpq_numref(*rop), mpq_numref(*op), mpq_numref(*rop));
+     mpz_set(mpq_denref(*rop), mpq_denref(*op));
+}
+
+void Rmpq_z_sub(mpq_t * rop, mpz_t * z, mpq_t * op) {
+     mpz_mul(mpq_numref(*rop), mpq_denref(*op), *z);
+     mpz_sub(mpq_numref(*rop), mpq_numref(*rop), mpq_numref(*op));
+     mpz_set(mpq_denref(*rop), mpq_denref(*op));
+}
+
+void Rmpq_mul_z(mpq_t * rop, mpq_t * op, mpz_t * z) {
+     mpz_mul(mpq_numref(*rop), mpq_numref(*op), *z);
+     mpz_set(mpq_denref(*rop), mpq_denref(*op));
+     mpq_canonicalize(*rop);
+}
+
+void Rmpq_div_z(mpq_t * rop, mpq_t * op, mpz_t * z) {
+     mpz_mul(mpq_denref(*rop), mpq_denref(*op), *z);
+     mpz_set(mpq_numref(*rop), mpq_numref(*op));
+     mpq_canonicalize(*rop);
+}
+
+void Rmpq_z_div(mpq_t * rop, mpz_t * z, mpq_t * op) {
+     mpz_mul(mpq_numref(*rop), mpq_denref(*op), *z);
+     mpz_set(mpq_denref(*rop), mpq_numref(*op));
+     mpq_canonicalize(*rop);
+}
+
+void Rmpq_pow_ui(mpq_t * rop, mpq_t * op, unsigned long ui) {
+     mpz_pow_ui(mpq_numref(*rop), mpq_numref(*op), ui);
+     mpz_pow_ui(mpq_denref(*rop), mpq_denref(*op), ui);
 }
 
 /* Finish typemapping - typemap 1st arg only */
@@ -1014,7 +1063,9 @@ SV * overload_gt(pTHX_ mpq_t * a, SV * b, SV * third) {
 
        if(strEQ(h, "Math::GMPz")) {
 #if __GNU_MP_RELEASE < 60099
-         croak("overloading \">\": Rmpq_cmp_z not implemented in this version (%s) of gmp - need at least 6.1.0", gmp_version);
+         ret = Rmpq_cmp_z(a, INT2PTR(mpz_t *, SvIVX(SvRV(b))));
+         if(ret > 0) return newSViv(1);
+         return newSViv(0);
 #else
          ret = mpq_cmp_z(*a, *(INT2PTR(mpz_t *, SvIVX(SvRV(b)))));
          if(ret > 0) return newSViv(1);
@@ -1091,7 +1142,9 @@ SV * overload_gte(pTHX_ mpq_t * a, SV * b, SV * third) {
 
        if(strEQ(h, "Math::GMPz")) {
 #if __GNU_MP_RELEASE < 60099
-         croak("overloading \">=\": Rmpq_cmp_z not implemented in this version (%s) of gmp - need at least 6.1.0", gmp_version);
+         ret = Rmpq_cmp_z(a, INT2PTR(mpz_t *, SvIVX(SvRV(b))));
+         if(ret >= 0) return newSViv(1);
+         return newSViv(0);
 #else
          ret = mpq_cmp_z(*a, *(INT2PTR(mpz_t *, SvIVX(SvRV(b)))));
          if(ret >= 0) return newSViv(1);
@@ -1168,7 +1221,9 @@ SV * overload_lt(pTHX_ mpq_t * a, SV * b, SV * third) {
 
        if(strEQ(h, "Math::GMPz")) {
 #if __GNU_MP_RELEASE < 60099
-         croak("overloading \"<\": Rmpq_cmp_z not implemented in this version (%s) of gmp - need at least 6.1.0", gmp_version);
+         ret = Rmpq_cmp_z(a, INT2PTR(mpz_t *, SvIVX(SvRV(b))));
+         if(ret < 0) return newSViv(1);
+         return newSViv(0);
 #else
          ret = mpq_cmp_z(*a, *(INT2PTR(mpz_t *, SvIVX(SvRV(b)))));
          if(ret < 0) return newSViv(1);
@@ -1245,7 +1300,9 @@ SV * overload_lte(pTHX_ mpq_t * a, SV * b, SV * third) {
 
        if(strEQ(h, "Math::GMPz")) {
 #if __GNU_MP_RELEASE < 60099
-         croak("overloading \"<=\": Rmpq_cmp_z not implemented in this version (%s) of gmp - need at least 6.1.0", gmp_version);
+         ret = Rmpq_cmp_z(a, INT2PTR(mpz_t *, SvIVX(SvRV(b))));
+         if(ret <= 0) return newSViv(1);
+         return newSViv(0);
 #else
          ret = mpq_cmp_z(*a, *(INT2PTR(mpz_t *, SvIVX(SvRV(b)))));
          if(ret <= 0) return newSViv(1);
@@ -1316,7 +1373,8 @@ SV * overload_spaceship(pTHX_ mpq_t * a, SV * b, SV * third) {
        }
        if(strEQ(h, "Math::GMPz")) {
 #if __GNU_MP_RELEASE < 60099
-         croak("overloading \"<=>\": Rmpq_cmp_z not implemented in this version (%s) of gmp - need at least 6.1.0", gmp_version);
+         ret = Rmpq_cmp_z(a, INT2PTR(mpz_t *, SvIVX(SvRV(b))));
+         return newSViv(ret);
 #else
          ret = mpq_cmp_z(*a, *(INT2PTR(mpz_t *, SvIVX(SvRV(b)))));
          return newSViv(ret);
@@ -1459,7 +1517,8 @@ SV * overload_equiv(pTHX_ mpq_t * a, SV * b, SV * third) {
 
        if(strEQ(h, "Math::GMPz")) {
 #if __GNU_MP_RELEASE < 60099
-         croak("overloading \"==\": Rmpq_cmp_z not implemented in this version (%s) of gmp - need at least 6.1.0", gmp_version);
+         if(Rmpq_cmp_z(a, INT2PTR(mpz_t *, SvIVX(SvRV(b))))) return newSViv(0);
+         return newSViv(1);
 #else
          if(mpq_cmp_z(*a, *(INT2PTR(mpz_t *, SvIVX(SvRV(b)))))) return newSViv(0);
          return newSViv(1);
@@ -1608,7 +1667,8 @@ SV * overload_not_equiv(pTHX_ mpq_t * a, SV * b, SV * third) {
 
        if(strEQ(h, "Math::GMPz")) {
 #if __GNU_MP_RELEASE < 60099
-         croak("overloading \"!=\": Rmpq_cmp_z not implemented in this version (%s) of gmp - need at least 6.1.0", gmp_version);
+         if(Rmpq_cmp_z(a, INT2PTR(mpz_t *, SvIVX(SvRV(b))))) return newSViv(1);
+         return newSViv(0);
 #else
          if(mpq_cmp_z(*a, *(INT2PTR(mpz_t *, SvIVX(SvRV(b)))))) return newSViv(1);
          return newSViv(0);
@@ -3003,6 +3063,132 @@ get_refcnt (s)
 CODE:
   RETVAL = get_refcnt (aTHX_ s);
 OUTPUT:  RETVAL
+
+void
+Rmpq_add_z (rop, op, z)
+	mpq_t *	rop
+	mpq_t *	op
+	mpz_t *	z
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_add_z(rop, op, z);
+        if (PL_markstack_ptr != temp) {
+          /* truly void, because dXSARGS not invoked */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
+        }
+        /* must have used dXSARGS; list context implied */
+        return; /* assume stack size is correct */
+
+void
+Rmpq_sub_z (rop, op, z)
+	mpq_t *	rop
+	mpq_t *	op
+	mpz_t *	z
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_sub_z(rop, op, z);
+        if (PL_markstack_ptr != temp) {
+          /* truly void, because dXSARGS not invoked */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
+        }
+        /* must have used dXSARGS; list context implied */
+        return; /* assume stack size is correct */
+
+void
+Rmpq_z_sub (rop, z, op)
+	mpq_t *	rop
+	mpz_t *	z
+	mpq_t *	op
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_z_sub(rop, z, op);
+        if (PL_markstack_ptr != temp) {
+          /* truly void, because dXSARGS not invoked */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
+        }
+        /* must have used dXSARGS; list context implied */
+        return; /* assume stack size is correct */
+
+void
+Rmpq_mul_z (rop, op, z)
+	mpq_t *	rop
+	mpq_t *	op
+	mpz_t *	z
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_mul_z(rop, op, z);
+        if (PL_markstack_ptr != temp) {
+          /* truly void, because dXSARGS not invoked */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
+        }
+        /* must have used dXSARGS; list context implied */
+        return; /* assume stack size is correct */
+
+void
+Rmpq_div_z (rop, op, z)
+	mpq_t *	rop
+	mpq_t *	op
+	mpz_t *	z
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_div_z(rop, op, z);
+        if (PL_markstack_ptr != temp) {
+          /* truly void, because dXSARGS not invoked */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
+        }
+        /* must have used dXSARGS; list context implied */
+        return; /* assume stack size is correct */
+
+void
+Rmpq_z_div (rop, z, op)
+	mpq_t *	rop
+	mpz_t *	z
+	mpq_t *	op
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_z_div(rop, z, op);
+        if (PL_markstack_ptr != temp) {
+          /* truly void, because dXSARGS not invoked */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
+        }
+        /* must have used dXSARGS; list context implied */
+        return; /* assume stack size is correct */
+
+void
+Rmpq_pow_ui (rop, op, ui)
+	mpq_t *	rop
+	mpq_t *	op
+	unsigned long	ui
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_pow_ui(rop, op, ui);
+        if (PL_markstack_ptr != temp) {
+          /* truly void, because dXSARGS not invoked */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
+        }
+        /* must have used dXSARGS; list context implied */
+        return; /* assume stack size is correct */
 
 SV *
 overload_mul (a, b, third)
