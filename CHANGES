@@ -1,4 +1,8 @@
 0.43
+ - Add Rmpq_add_z, Rmpq_sub_z, Rmpq_z_sub, Rmpq_mul_z, Rmpq_div_z, Rmpq_z_div
+   and Rmpq_pow_ui.
+ - Extend Rmpq_cmp_z to work with Math::GMPq built against earlier (pre 6.1.0)
+   versions of the gmp library.
 
 0.42
  - Replace the condition "if(SvNOK(x))" with "if(SvNOK(x) && !SvPOK(x))".
