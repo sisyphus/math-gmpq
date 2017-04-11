@@ -559,21 +559,36 @@ SV * get_refcnt(pTHX_ SV * s) {
 }
 
 void Rmpq_add_z(mpq_t * rop, mpq_t * op, mpz_t * z) {
-     mpz_mul(mpq_numref(*rop), mpq_denref(*op), *z);
-     mpz_add(mpq_numref(*rop), mpq_numref(*op), mpq_numref(*rop));
-     mpz_set(mpq_denref(*rop), mpq_denref(*op));
+     if(*rop == *op) {
+        mpz_addmul(mpq_numref(*op), mpq_denref(*op), *z);
+     } else {
+        mpq_set(*rop, *op);
+        mpz_addmul(mpq_numref(*rop), mpq_denref(*rop), *z);
+    }
 }
 
 void Rmpq_sub_z(mpq_t * rop, mpq_t * op, mpz_t * z) {
-     mpz_mul(mpq_numref(*rop), mpq_denref(*op), *z);
-     mpz_sub(mpq_numref(*rop), mpq_numref(*op), mpq_numref(*rop));
-     mpz_set(mpq_denref(*rop), mpq_denref(*op));
+     if (*rop == *op) {
+        mpz_submul(mpq_numref(*op), mpq_denref(*op), *z);
+     } else {
+        mpq_set(*rop, *op);
+        mpz_submul(mpq_numref(*rop), mpq_denref(*rop), *z);
+     }
 }
 
 void Rmpq_z_sub(mpq_t * rop, mpz_t * z, mpq_t * op) {
-     mpz_mul(mpq_numref(*rop), mpq_denref(*op), *z);
-     mpz_sub(mpq_numref(*rop), mpq_numref(*rop), mpq_numref(*op));
-     mpz_set(mpq_denref(*rop), mpq_denref(*op));
+     if (*rop == *op) {
+        mpz_t temp;
+        mpz_init(temp);
+        mpz_mul(temp, *z, mpq_denref(*op));
+        mpz_sub(temp, temp, mpq_numref(*op));
+        mpz_set(mpq_numref(*op), temp);
+        mpz_clear(temp);
+     } else {
+        mpq_set(*rop, *op);
+        mpz_mul(mpq_numref(*rop), mpq_denref(*op), *z);
+        mpz_sub(mpq_numref(*rop), mpq_numref(*rop), mpq_numref(*op));
+     }
 }
 
 void Rmpq_mul_z(mpq_t * rop, mpq_t * op, mpz_t * z) {
