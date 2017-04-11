@@ -559,7 +559,7 @@ SV * get_refcnt(pTHX_ SV * s) {
 }
 
 void Rmpq_add_z(mpq_t * rop, mpq_t * op, mpz_t * z) {
-     if(*rop == *op) {
+     if (*rop == *op) {
         mpz_addmul(mpq_numref(*op), mpq_denref(*op), *z);
      } else {
         mpq_set(*rop, *op);
@@ -604,9 +604,18 @@ void Rmpq_div_z(mpq_t * rop, mpq_t * op, mpz_t * z) {
 }
 
 void Rmpq_z_div(mpq_t * rop, mpz_t * z, mpq_t * op) {
-     mpz_mul(mpq_numref(*rop), mpq_denref(*op), *z);
-     mpz_set(mpq_denref(*rop), mpq_numref(*op));
-     mpq_canonicalize(*rop);
+     if (*rop == *op) {
+        mpz_t temp;
+        mpz_init(temp);
+        mpq_get_num(temp, *op);
+        mpz_mul(mpq_numref(*rop), mpq_denref(*op), *z);
+        mpz_set(mpq_denref(*rop), temp);
+        mpz_clear(temp);
+     } else {
+        mpz_mul(mpq_numref(*rop), mpq_denref(*op), *z);
+        mpz_set(mpq_denref(*rop), mpq_numref(*op));
+    }
+    mpq_canonicalize(*rop);
 }
 
 void Rmpq_pow_ui(mpq_t * rop, mpq_t * op, unsigned long ui) {
