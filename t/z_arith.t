@@ -1,3 +1,8 @@
+
+###############################################
+# When $rop and $op are NOT the same variable #
+###############################################
+
 use strict;
 use warnings;
 use Math::GMPq qw(:mpq);
