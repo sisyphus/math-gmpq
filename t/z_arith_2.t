@@ -12,7 +12,7 @@ use Math::GMPq;
 use Math::GMPz;
 use Test::More;
 
-plan tests => 32;
+plan tests => 33;
 
 {
     my $q = Math::GMPq->new('42');
@@ -182,4 +182,11 @@ plan tests => 32;
 
     Math::GMPq::Rmpq_z_div($q, $z, $q);
     is("$q", '24000', 'Rmpq_z_div($q, $z, $q)');
+}
+
+{
+    my $q = Math::GMPq->new('5/12');
+    my $z = Math::GMPz->new('100');
+    Math::GMPq::Rmpq_mul_z($q, $q, $z);
+    is("$q", '125/3', 'Rmpq_mul_z($q, $q, $z)');
 }
