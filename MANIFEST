@@ -30,4 +30,6 @@ t/TRmpq_out_str.t
 t/pod.t
 t/Rmpq_integer_p.t
 t/z_arith.t
+t/z_arith_2.t
+t/z_arith_overload.t
 typemap
