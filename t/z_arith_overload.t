@@ -93,6 +93,6 @@ eval {my $xception = 2 ** Math::GMPq->new('5/1');};
 
 if($@ =~ /^Raising a value to an mpq_t power is not allowed/) {print "ok 11\n"}
 else {
-  warn "\n\$\@: $@;
+  warn "\n\$\@: $@";
   print "not ok 11\n";
 }
