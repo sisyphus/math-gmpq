@@ -235,15 +235,19 @@
    Rmpq_add  ($rop, $op1, $op2);
    Rmpq_add_z($rop, $op1, $z); # $z is a Math::GMPz object
     1st arg = 2nd arg + 3rd arg.
+    (The gmp library doesn't provide an mpq_add_z function.)
 
    Rmpq_sub  ($rop, $op1, $op2);
    Rmpq_sub_z($rop, $op1, $z); # $z is a Math::GMPz object
    Rmpq_z_sub($rop, $z, $op1); # $z is a Math::GMPz object
     1st arg = 2nd arg - 3rd arg.
+    (The gmp library doesn't provide an mpq_sub_z function or
+     an mpq_z_sub function.)
 
    Rmpq_mul  ($rop, $op1, $op2);
    Rmpq_mul_z($rop, $op1, $z); # $z is a Math::GMPz object
     1st arg = 2nd arg * 3rd arg.
+    (The gmp library doesn't provide an mpq_mul_z function.)
 
    Rmpq_mul_2exp($rop, $op, $ui);
     $rop = $op * (2 ** $ui).
@@ -252,6 +256,8 @@
    Rmpq_div_z($rop, $op1, $z); # $z is a Math::GMPz object
    Rmpq_z_div($rop, $z, $op1); # $z is a Math::GMPz object
     1st arg  = 2nd arg / 3rd arg.
+    (The gmp library doesn't provide an mpq_div_z function or
+     an mpq_z_div function.)
 
    Rmpq_div_2exp($rop, $op, $ui);
     $rop = $op / (2 ** $ui).
@@ -292,6 +298,9 @@
     negative value if 1st arg < 2nd arg.
     To determine if two rationals are equal, `Rmpq_equal' is
     faster than `Rmpq_cmp'.
+    (The gmp library provides mpq_cmp_z only for gmp-6.1.0 and
+     later but Rmpq_cmp_z is available for all builds of Math::GMPz,
+     irrespective of the underlying version of gmp.)
 
    $si  = Rmpq_cmp_ui($op, $ui, $ui);
    $si1 = Rmpq_cmp_si($op, $si2, $ui);
