@@ -2356,7 +2356,7 @@ SV * overload_pow(pTHX_ SV * p, SV * second, SV * third) {
      SV * obj_ref, * obj;
      const char *h;
 
-     if(third == &PL_sv_yes) croak("Raising an unsigned long to an mpq_t power is not allowed in overloaded '**' operation");
+     if(third == &PL_sv_yes) croak("Raising a value to an mpq_t power is not allowed in '**' operation in Math::GMPq::overload_pow");
 
      if(SvUOK(second) || (SvIOK(second) && SvIVX(second) >= 0)) {
        New(1, mpq_t_obj, 1, mpq_t);
