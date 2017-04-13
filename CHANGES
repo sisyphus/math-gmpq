@@ -1,3 +1,5 @@
+0.44
+
 0.43
  - Add Rmpq_add_z, Rmpq_sub_z, Rmpq_z_sub, Rmpq_mul_z, Rmpq_div_z, Rmpq_z_div
    and Rmpq_pow_ui. (With assistance from Trizen.)
