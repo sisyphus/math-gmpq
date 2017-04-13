@@ -18,8 +18,8 @@ warn "# LONG_MIN : ", Math::GMPq::_long_min(),  "\n";
 warn "# LONG_MAX : ", Math::GMPq::_long_max(),  "\n";
 warn "# ULONG_MAX: ", Math::GMPq::_ulong_max(), "\n";
 
-if($Math::GMPq::VERSION eq '0.43' && $Math::GMPq::Random::VERSION eq '0.43' &&
-   $Math::GMPq::V::VERSION eq '0.43' &&
+if($Math::GMPq::VERSION eq '0.44' && $Math::GMPq::Random::VERSION eq '0.44' &&
+   $Math::GMPq::V::VERSION eq '0.44' &&
    Math::GMPq::_get_xs_version() eq $Math::GMPq::VERSION) {print "ok 1\n"}
 else {print "not ok 1 $Math::GMPq::VERSION $Math::GMPq::Random::VERSION ", Math::GMPq::_get_xs_version(), "\n"}
 
