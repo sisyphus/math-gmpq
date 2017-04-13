@@ -4,7 +4,7 @@ use warnings;
 use Math::GMPq;
 use Math::GMPz;
 
-print "1..10\n";
+print "1..11\n";
 
 my $q = Math::GMPq->new('-1/5');
 my $z = Math::GMPq->new(8);
@@ -87,4 +87,12 @@ if($rop == '1/15625') {print "ok 10\n"}
 else {
   warn "\n Expected 1/15625, got $rop\n";
   print "not ok 10\n";
+}
+
+eval {my $xception = 2 ** Math::GMPq->new('5/1');};
+
+if($@ =~ /^Raising a value to an mpq_t power is not allowed/) {print "ok 11\n"}
+else {
+  warn "\n\$\@: $@;
+  print "not ok 11\n";
 }
