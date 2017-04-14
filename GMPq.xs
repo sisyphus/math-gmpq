@@ -181,7 +181,7 @@ void Rmpq_set_NV(pTHX_ mpq_t * copy, SV * original) {
      buffer_size = ld < 0.0Q ? ld * -1.0Q : ld;
      buffer_size = ceill(logq(buffer_size + 1) / 2.30258509299404568401799145468436418Q);
 
-     Newxz(buffer, buffer_size + 5, char);
+     Newxz(buffer, (int)buffer_size + 5, char);
 
      returned = quadmath_snprintf(buffer, (size_t)buffer_size + 5, "%.0Qf", ld);
      if(returned < 0) croak("In Rmpq_set_NV, encoding error in quadmath_snprintf function");
@@ -213,7 +213,7 @@ void Rmpq_set_NV(pTHX_ mpq_t * copy, SV * original) {
      buffer_size = ld < 0.0L ? ld * -1.0L : ld;
      buffer_size = ceill(logl(buffer_size + 1) / 2.30258509299404568401799145468436418L);
 
-     Newxz(buffer, buffer_size + 5, char);
+     Newxz(buffer, (int)buffer_size + 5, char);
 
      if(sprintf(buffer, "%.0Lf", ld) >= (int)buffer_size + 5) croak("In Rmpq_set_NV, buffer overflow in sprintf function");
 
@@ -259,9 +259,9 @@ int Rmpq_cmp_NV(pTHX_ mpq_t * a, SV * b) {
      }
 
      buffer_size = ld < 0.0Q ? ld * -1.0Q : ld;
-     buffer_size = ceill(logq(buffer_size + 1) / 2.30258509299404568401799145468436418Q);
+     buffer_size = ceilq(logq(buffer_size + 1) / 2.30258509299404568401799145468436418Q);
 
-     Newxz(buffer, buffer_size + 5, char);
+     Newxz(buffer, (int)buffer_size + 5, char);
 
      returned = quadmath_snprintf(buffer, (size_t)buffer_size + 5, "%.0Qf", ld);
      if(returned < 0) croak("In Rmpq_cmp_NV, encoding error in quadmath_snprintf function");
@@ -296,7 +296,7 @@ int Rmpq_cmp_NV(pTHX_ mpq_t * a, SV * b) {
      buffer_size = ld < 0.0L ? ld * -1.0L : ld;
      buffer_size = ceill(logl(buffer_size + 1) / 2.30258509299404568401799145468436418L);
 
-     Newxz(buffer, buffer_size + 5, char);
+     Newxz(buffer, (int)buffer_size + 5, char);
 
      if(sprintf(buffer, "%.0Lf", ld) >= (int)buffer_size + 5) croak("In Rmpq_cmp_NV, buffer overflow in sprintf function");
      mpq_init(t);
