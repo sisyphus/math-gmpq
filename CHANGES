@@ -1,3 +1,5 @@
+0.45
+
 0.44
  - Fix bugs in t/z_arith_2.t and t/z_arith_overload.t. (Hadn't checked for
    Math::GMPz availability.)
