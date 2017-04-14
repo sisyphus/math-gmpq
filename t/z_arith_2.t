@@ -9,8 +9,15 @@ use strict;
 use warnings;
 
 use Math::GMPq;
-use Math::GMPz;
 use Test::More;
+
+eval{require Math::GMPz};
+
+if ($@) {
+    warn "\$\@: $@\n";
+    plan(skip_all => "Math::GMPz could not be loaded");
+}
+
 
 plan tests => 33;
 
