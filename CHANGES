@@ -1,4 +1,7 @@
 0.44
+ - Fix bugs in t/z_arith_2.t and t/z_arith_overload.t. (Hadn't checked for
+   Math::GMPz availability.)
+ - In a couple of Newxz() calls, cast "buffer_size + 5" to int. (Previously missed.)
 
 0.43
  - Add Rmpq_add_z, Rmpq_sub_z, Rmpq_z_sub, Rmpq_mul_z, Rmpq_div_z, Rmpq_z_div
