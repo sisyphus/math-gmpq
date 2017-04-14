@@ -2,7 +2,16 @@
 use strict;
 use warnings;
 use Math::GMPq;
-use Math::GMPz;
+
+eval {require Math::GMPz;};
+
+if($@) {
+  print "1..1\n";
+  warn "\$\@: $@";
+  print "ok 1\n";
+  warn "Skipping tests - Couldn't load Math::GMPz\n";
+  exit 0;
+}
 
 print "1..11\n";
 
