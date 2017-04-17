@@ -1,4 +1,6 @@
 0.45
+ - Fix and test for division by 0. (Now croaks on divby0 instead of crashing.)
+   Fix (and test) Rmpq_z_div for the case when z == 0.
 
 0.44
  - Fix bugs in t/z_arith_2.t and t/z_arith_overload.t. (Hadn't checked for
