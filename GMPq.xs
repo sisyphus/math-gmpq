@@ -415,6 +415,8 @@ void Rmpq_mul(mpq_t * p1, mpq_t * p2, mpq_t * p3) {
 }
 
 void Rmpq_div(mpq_t * p1, mpq_t * p2, mpq_t * p3) {
+     if(!mpq_cmp_ui(*p3, 0, 1))
+       croak("Division by 0 not allowed in Math::GMPq::Rmpq_div");
      mpq_div(*p1, *p2, *p3);
 }
 
@@ -581,16 +583,20 @@ void Rmpq_mul_z(mpq_t * rop, mpq_t * op, mpz_t * z) {
 }
 
 void Rmpq_div_z(mpq_t * rop, mpq_t * op, mpz_t * z) {
+     if(!mpz_cmp_ui(*z, 0))
+       croak("Division by 0 not allowed in Math::GMPq::Rmpq_div_z");
      if(rop != op) mpq_set(*rop, *op);
      mpz_mul(mpq_denref(*rop), mpq_denref(*rop), *z);
      mpq_canonicalize(*rop);
 }
 
 void Rmpq_z_div(mpq_t * rop, mpz_t * z, mpq_t * op) {
+     if(!mpq_cmp_ui(*op, 0, 1))
+       croak("Division by 0 not allowed in Math::GMPq::Rmpq_z_div");
      if(rop != op) mpq_set(*rop, *op);
-     mpz_mul(mpq_denref(*rop), mpq_denref(*rop), *z);
-     mpq_canonicalize(*rop);
      mpq_inv(*rop, *rop);
+     mpz_mul(mpq_numref(*rop), mpq_numref(*rop), *z);
+     mpq_canonicalize(*rop);
 }
 
 void Rmpq_pow_ui(mpq_t * rop, mpq_t * op, unsigned long ui) {
@@ -897,6 +903,8 @@ SV * overload_div(pTHX_ SV * a, SV * b, SV * third) {
 
 #ifndef MATH_GMPQ_NEED_LONG_LONG_INT
      if(SvIOK(b)) {
+       if(SvIV(b) == 0)
+         croak("Division by 0 not allowed in Math::GMPq::overload_div");
        mpq_set_d(*mpq_t_obj, SvNV(b));
        if(third == &PL_sv_yes) mpq_div(*mpq_t_obj, *mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))));
        else mpq_div(*mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))), *mpq_t_obj);
@@ -904,8 +912,13 @@ SV * overload_div(pTHX_ SV * a, SV * b, SV * third) {
      }
 #else
      if(SvIOK(b)) {
+       if(SvIV(b) == 0)
+         croak("Division by 0 not allowed in Math::GMPq::overload_div");
+       /*
+       pointless test - should not happen with an IOK
        if(mpq_set_str(*mpq_t_obj, SvPV_nolen(b), 0))
          croak("Invalid string supplied to Math::GMPq::overload_div");
+       */
        if(third == &PL_sv_yes) mpq_div(*mpq_t_obj, *mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))));
        else mpq_div(*mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))), *mpq_t_obj);
        return obj_ref;
@@ -913,6 +926,11 @@ SV * overload_div(pTHX_ SV * a, SV * b, SV * third) {
 #endif
 
      if(SvNOK(b) && !SvPOK(b)) { /* do not use the NV if POK is set */
+
+       if(SvNV(b) == 0)
+         croak("Division by 0 not allowed in Math::GMPq::overload_div");
+
+       /* If SvNV(b) is Inf or Nan, this will be caught by Rmpq_set_NV */
 
        Rmpq_set_NV(aTHX_ mpq_t_obj, b);
 
@@ -926,6 +944,8 @@ SV * overload_div(pTHX_ SV * a, SV * b, SV * third) {
        if(mpq_set_str(*mpq_t_obj, SvPV_nolen(b), 0))
          croak("Invalid string supplied to Math::GMPq::overload_div");
        mpq_canonicalize(*mpq_t_obj);
+       if(!mpq_cmp_ui(*mpq_t_obj, 0, 1))
+         croak("Division by 0 not allowed in Math::GMPq::overload_div");
        if(third == &PL_sv_yes) mpq_div(*mpq_t_obj, *mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))));
        else mpq_div(*mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))), *mpq_t_obj);
        return obj_ref;
@@ -933,19 +953,24 @@ SV * overload_div(pTHX_ SV * a, SV * b, SV * third) {
 
      if(sv_isobject(b)) {
        if(strEQ(h, "Math::GMPq")) {
+         if(!mpq_cmp_ui(*(INT2PTR(mpq_t *, SvIVX(SvRV(b)))), 0, 1))
+           croak("Division by 0 not allowed in Math::GMPq::overload_div");
          mpq_div(*mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))), *(INT2PTR(mpq_t *, SvIVX(SvRV(b)))));
          return obj_ref;
        }
        if(strEQ(h, "Math::GMPz") || strEQ(h, "Math::GMP")) {
          if(third == &PL_sv_yes) {
+           /* Rmpq_z_div will catch divby0 */
            Rmpq_z_div(mpq_t_obj, INT2PTR(mpz_t *, SvIVX(SvRV(b))), INT2PTR(mpq_t *, SvIVX(SvRV(a))));
          }
          else {
+           /* Rmpq_z_div will catch divby0 */
            Rmpq_div_z(mpq_t_obj, INT2PTR(mpq_t *, SvIVX(SvRV(a))), INT2PTR(mpz_t *, SvIVX(SvRV(b))));
          }
          return obj_ref;
        }
        if(strEQ(h, "Math::MPFR")) {
+         /* divby0 is allowed here */
          dSP;
          SV * ret;
          int count;
@@ -1933,6 +1958,10 @@ SV * overload_div_eq(pTHX_ SV * a, SV * b, SV * third) {
 
 #ifndef MATH_GMPQ_NEED_LONG_LONG_INT
      if(SvIOK(b)) {
+
+       if(SvIV(b) == 0)
+         croak("Division by 0 not allowed in Math::GMPq::overload_div_eq");
+
        mpq_init(t);
        mpq_set_d(t, SvNV(b));
        mpq_div(*(INT2PTR(mpq_t *, SvIVX(SvRV(a)))), *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))), t);
@@ -1941,6 +1970,10 @@ SV * overload_div_eq(pTHX_ SV * a, SV * b, SV * third) {
      }
 #else
      if(SvIOK(b)) {
+
+       if(SvIV(b) == 0)
+         croak("Division by 0 not allowed in Math::GMPq::overload_div_eq");
+
        mpq_init(t);
        if(mpq_set_str(t, SvPV_nolen(b), 0)) {
          SvREFCNT_dec(a);
@@ -1953,6 +1986,11 @@ SV * overload_div_eq(pTHX_ SV * a, SV * b, SV * third) {
 #endif
 
      if(SvNOK(b) && !SvPOK(b)) { /* do not use the NV if POK is set */
+
+       if(SvNV(b) == 0)
+         croak("Division by 0 not allowed in Math::GMPq::overload_div_eq");
+
+       /* If SvNV(b) is Inf or Nan, this will be caught by Rmpq_set_NV */
 
        mpq_init(t);
        Rmpq_set_NV(aTHX_ &t, b);
@@ -1968,6 +2006,8 @@ SV * overload_div_eq(pTHX_ SV * a, SV * b, SV * third) {
          croak("Invalid string supplied to Math::GMPq::overload_div_eq");
        }
        mpq_canonicalize(t);
+       if(!mpq_cmp_ui(t, 0, 1))
+         croak("Division by 0 not allowed in Math::GMPq::overload_div_eq");
        mpq_div(*(INT2PTR(mpq_t *, SvIVX(SvRV(a)))), *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))), t);
        mpq_clear(t);
        return a;
@@ -1976,10 +2016,13 @@ SV * overload_div_eq(pTHX_ SV * a, SV * b, SV * third) {
      if(sv_isobject(b)) {
        const char *h = HvNAME(SvSTASH(SvRV(b)));
        if(strEQ(h, "Math::GMPq")) {
+         if(!mpq_cmp_ui(*(INT2PTR(mpq_t *, SvIVX(SvRV(b)))), 0, 1))
+           croak("Division by 0 not allowed in Math::GMPq::overload_div_eq");
          mpq_div(*(INT2PTR(mpq_t *, SvIVX(SvRV(a)))), *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))), *(INT2PTR(mpq_t *, SvIVX(SvRV(b)))));
          return a;
        }
        if(strEQ(h, "Math::GMPz") || strEQ(h, "Math::GMP")) {
+         /* Rmpq_div_z will catch divby0 */
          Rmpq_div_z(INT2PTR(mpq_t *, SvIVX(SvRV(a))), INT2PTR(mpq_t *, SvIVX(SvRV(a))), INT2PTR(mpz_t *, SvIVX(SvRV(b))));
          return a;
        }
