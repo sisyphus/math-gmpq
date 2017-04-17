@@ -19,7 +19,7 @@ if ($@) {
 }
 
 
-plan tests => 33;
+plan tests => 35;
 
 {
     my $q = Math::GMPq->new('42');
@@ -196,4 +196,18 @@ plan tests => 33;
     my $z = Math::GMPz->new('100');
     Math::GMPq::Rmpq_mul_z($q, $q, $z);
     is("$q", '125/3', 'Rmpq_mul_z($q, $q, $z)');
+}
+
+{
+    my $q = Math::GMPq->new('5/12');
+    my $z0 = Math::GMPz->new('0');
+    Math::GMPq::Rmpq_z_div($q, $z0, $q);
+    is("$q", '0', 'Rmpq_z_div($q, $z0, $q)');
+}
+
+{
+    my $q0 = Math::GMPq->new('0/1');
+    my $z = Math::GMPz->new('10');
+    Math::GMPq::Rmpq_div_z($q0, $q0, $z);
+    is("$q0", '0', 'Rmpq_div_z($q0, $q0, $z)');
 }
