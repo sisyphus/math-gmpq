@@ -17,7 +17,7 @@ if($@) {
   exit 0;
 }
 
-print "1..13\n";
+print "1..15\n";
 
 print "# Using gmp version ", Math::GMPq::gmp_v(), "\n";
 
@@ -119,6 +119,22 @@ if($rop == Math::GMPq->new("-27/64")) {print "ok 13\n"}
 else {
   warn "\n Expected -27/64, got $rop\n";
   print "not ok 13\n";
+}
+
+Rmpq_z_div($rop, Math::GMPz->new(0), Math::GMPq->new('1/3'));
+
+if($rop == 0) {print "ok 14\n"}
+else {
+  warn "\n Expected 0, got $rop\n";
+  print "not ok 14\n";
+}
+
+Rmpq_div_z($rop, Math::GMPq->new(0), Math::GMPz->new(-11));
+
+if($rop == 0) {print "ok 15\n"}
+else {
+  warn "\n Expected 0, got $rop\n";
+  print "not ok 15\n";
 }
 
 
