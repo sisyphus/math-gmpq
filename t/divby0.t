@@ -270,7 +270,19 @@ else {
 
 eval{require Math::MPFR;};
 
-if(!$@) {
+if($@) {
+  warn "\n\$\@: $@\n";
+  warn "Skipping tests 21 to 24 - could not load Math::MPFR\n";
+  for(21..24) {print "ok $_\n"}
+}
+
+elsif($Math::MPFR::VERSION < 3.36) {
+  warn "Skipping tests 21 to 24 - need Math-MPFR-3.36 or later\n";
+  warn "We have only version $Math::MPFR::VERSION\n";
+  for(21..24) {print "ok $_\n"}
+}
+
+else {
 
   #################################
   # overloaded division by mpfr_t #
@@ -280,8 +292,8 @@ if(!$@) {
   my $pq = Math::GMPq->new('1/10031256');
   my $nq = $pq * -1;
   my $zq = Math::GMPq->new(0);
-
   my $pinf = $pq / $fr0;
+
   if(Math::MPFR::Rmpfr_inf_p($pinf) && $pinf > 0) {print "ok 21\n"}
   else {
     warn "\nExpected +Inf, got $pinf\n";
@@ -308,8 +320,4 @@ if(!$@) {
     print "not ok 24\n";
   }
 }
-else {
-  warn "\n\$\@: $@\n";
-  warn "Skipping tests 21 to 24 - could not load Math::MPFR\n";
-  for(21..24) {print "ok $_\n"}
-}
+
