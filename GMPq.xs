@@ -914,11 +914,10 @@ SV * overload_div(pTHX_ SV * a, SV * b, SV * third) {
      if(SvIOK(b)) {
        if(SvIV(b) == 0)
          croak("Division by 0 not allowed in Math::GMPq::overload_div");
-       /*
-       pointless test - should not happen with an IOK
+
        if(mpq_set_str(*mpq_t_obj, SvPV_nolen(b), 0))
          croak("Invalid string supplied to Math::GMPq::overload_div");
-       */
+
        if(third == &PL_sv_yes) mpq_div(*mpq_t_obj, *mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))));
        else mpq_div(*mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))), *mpq_t_obj);
        return obj_ref;
