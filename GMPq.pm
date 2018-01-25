@@ -268,14 +268,14 @@ sub Rmpq_snprintf {
     return $len;
 }
 
-sub __GNU_MP_VERSION {return ___GNU_MP_VERSION()}
-sub __GNU_MP_VERSION_MINOR {return ___GNU_MP_VERSION_MINOR()}
-sub __GNU_MP_VERSION_PATCHLEVEL {return ___GNU_MP_VERSION_PATCHLEVEL()}
-sub __GNU_MP_RELEASE {return ___GNU_MP_RELEASE()}
-sub __GMP_CC {return ___GMP_CC()}
-sub __GMP_CFLAGS {return ___GMP_CFLAGS()}
-sub GMP_LIMB_BITS {return _GMP_LIMB_BITS()}
-sub GMP_NAIL_BITS {return _GMP_NAIL_BITS()}
+sub __GNU_MP_VERSION            () {return ___GNU_MP_VERSION()}
+sub __GNU_MP_VERSION_MINOR      () {return ___GNU_MP_VERSION_MINOR()}
+sub __GNU_MP_VERSION_PATCHLEVEL () {return ___GNU_MP_VERSION_PATCHLEVEL()}
+sub __GNU_MP_RELEASE            () {return ___GNU_MP_RELEASE()}
+sub __GMP_CC                    () {return ___GMP_CC()}
+sub __GMP_CFLAGS                () {return ___GMP_CFLAGS()}
+sub GMP_LIMB_BITS               () {return _GMP_LIMB_BITS()}
+sub GMP_NAIL_BITS               () {return _GMP_NAIL_BITS()}
 
 *qgmp_randseed =                      \&Math::GMPq::Random::Rgmp_randseed;
 *qgmp_randseed_ui =                   \&Math::GMPq::Random::Rgmp_randseed_ui;
