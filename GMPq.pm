@@ -72,7 +72,7 @@ qgmp_urandomb_ui qgmp_urandomm_ui
     our $VERSION = '0.46';
     #$VERSION = eval $VERSION;
 
-    DynaLoader::bootstrap Math::GMPq $VERSION;
+    Math::GMPq->DynaLoader::bootstrap($VERSION);
 
     %Math::GMPq::EXPORT_TAGS =(mpq => [qw(
 Rmpq_abs Rmpq_add Rmpq_canonicalize Rmpq_clear Rmpq_cmp Rmpq_cmp_si Rmpq_cmp_ui
