@@ -1,3 +1,4 @@
+use strict;
 use warnings;
 use Math::GMPq qw(:mpq);
 
