@@ -8,7 +8,7 @@ print "# Using gmp version ", Math::GMPq::gmp_v(), "\n";
 
 my($WR1, $WR2, $WR3, $WR4, $WR5, $WR6, $WR7, $WR8);
 my($RD1, $RD2, $RD3, $RD4, $RD5, $RD6, $RD7, $RD8);
-my($ret, $ok, $count, $prefix, $suffix);
+my($ret, $ok, $count, $mpq, $prefix, $suffix);
 
 $mpq = Math::GMPq->new(17);
 open($WR1, '>', 'out1.txt') or die "Can't open WR1: $!";
