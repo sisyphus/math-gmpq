@@ -486,7 +486,13 @@
     += -= *= /= ++ --
     == != !
     < <= > >= <=>
-    = "" abs
+    "" abs
+    =
+
+    NOTE: Making use of the '=' overloading is not recommended unless
+          you understand its caveats. See 'perldoc overload' and
+          read it thoroughly, including the documentation regarding
+          'copy constructors'.
 
     Atempting to use the overloaded operators with objects that
     have been blessed into some package other than 'Math::GMPq'
