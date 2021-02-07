@@ -1,3 +1,5 @@
+0.47
+
 0.46
  - Fix bug in t/divby0.t
  - Create header file math_gmpq_include.h
