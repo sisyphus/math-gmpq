@@ -1,5 +1,6 @@
     package Math::GMPq;
     use strict;
+    use warnings;
     use Math::GMPq::Random;
     require Exporter;
     *import = \&Exporter::import;
