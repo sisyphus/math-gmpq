@@ -11,36 +11,8 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <gmp.h>
-#include <limits.h>
 
-#if defined(NV_IS_FLOAT128)
-#include <quadmath.h>
-#endif
-
-#ifdef _MSC_VER
-#pragma warning(disable:4700 4715 4716)
-#endif
-
-#if defined MATH_GMPQ_NEED_LONG_LONG_INT
-#ifndef _MSC_VER
-#include <inttypes.h>
-#endif
-#endif
-
-#ifdef OLDPERL
-#define SvUOK SvIsUV
-#endif
-
-#ifndef Newx
-#  define Newx(v,n,t) New(0,v,n,t)
-#endif
-
-#ifndef Newxz
-#  define Newxz(v,n,t) Newz(0,v,n,t)
-#endif
+#include "math_gmpq_include.h"
 
 int _is_infstring(char * s) {
   int sign = 1;
@@ -664,31 +636,7 @@ SV * overload_mul(pTHX_ SV * a, SV * b, SV * third) {
          return obj_ref;
        }
        if(strEQ(h, "Math::MPFR")) {
-         dSP;
-         SV * ret;
-         int count;
-
-         ENTER;
-
-         PUSHMARK(SP);
-         XPUSHs(b);
-         XPUSHs(a);
-         XPUSHs(sv_2mortal(newSViv(1)));
-         PUTBACK;
-
-         count = call_pv("Math::MPFR::overload_mul", G_SCALAR);
-
-         SPAGAIN;
-
-         if (count != 1)
-           croak("Error in Math::GMPq::overload_mul callback to Math::MPFR::overload_mul\n");
-
-         ret = POPs;
-
-         /* Avoid "Attempt to free unreferenced scalar" warning */
-         SvREFCNT_inc(ret);
-         LEAVE;
-         return ret;
+         _overload_callback("Math::MPFR::overload_mul", "Math::GMPq::overload_mul", newSViv(0));
        }
      }
 
@@ -754,31 +702,7 @@ SV * overload_add(pTHX_ SV * a, SV * b, SV * third) {
          return obj_ref;
        }
        if(strEQ(h, "Math::MPFR")) {
-         dSP;
-         SV * ret;
-         int count;
-
-         ENTER;
-
-         PUSHMARK(SP);
-         XPUSHs(b);
-         XPUSHs(a);
-         XPUSHs(sv_2mortal(newSViv(1)));
-         PUTBACK;
-
-         count = call_pv("Math::MPFR::overload_add", G_SCALAR);
-
-         SPAGAIN;
-
-         if (count != 1)
-           croak("Error in Math::GMPq::overload_add callback to Math::MPFR::overload_add\n");
-
-         ret = POPs;
-
-         /* Avoid "Attempt to free unreferenced scalar" warning */
-         SvREFCNT_inc(ret);
-         LEAVE;
-         return ret;
+         _overload_callback("Math::MPFR::overload_add", "Math::GMPq::overload_add", newSViv(0));
        }
      }
 
@@ -852,31 +776,7 @@ SV * overload_sub(pTHX_ SV * a, SV * b, SV * third) {
          return obj_ref;
        }
        if(strEQ(h, "Math::MPFR")) {
-         dSP;
-         SV * ret;
-         int count;
-
-         ENTER;
-
-         PUSHMARK(SP);
-         XPUSHs(b);
-         XPUSHs(a);
-         XPUSHs(sv_2mortal(&PL_sv_yes));
-         PUTBACK;
-
-         count = call_pv("Math::MPFR::overload_sub", G_SCALAR);
-
-         SPAGAIN;
-
-         if (count != 1)
-           croak("Error in Math::GMPq::overload_sub callback to Math::MPFR::overload_sub\n");
-
-         ret = POPs;
-
-         /* Avoid "Attempt to free unreferenced scalar" warning */
-         SvREFCNT_inc(ret);
-         LEAVE;
-         return ret;
+         _overload_callback("Math::MPFR::overload_sub", "Math::GMPq::overload_sub", &PL_sv_yes);
        }
      }
 
@@ -970,31 +870,7 @@ SV * overload_div(pTHX_ SV * a, SV * b, SV * third) {
        }
        if(strEQ(h, "Math::MPFR")) {
          /* divby0 is allowed here */
-         dSP;
-         SV * ret;
-         int count;
-
-         ENTER;
-
-         PUSHMARK(SP);
-         XPUSHs(b);
-         XPUSHs(a);
-         XPUSHs(sv_2mortal(&PL_sv_yes));
-         PUTBACK;
-
-         count = call_pv("Math::MPFR::overload_div", G_SCALAR);
-
-         SPAGAIN;
-
-         if (count != 1)
-           croak("Error in Math::GMPq::overload_div callback to Math::MPFR::overload_div\n");
-
-         ret = POPs;
-
-         /* Avoid "Attempt to free unreferenced scalar" warning */
-         SvREFCNT_inc(ret);
-         LEAVE;
-         return ret;
+         _overload_callback("Math::MPFR::overload_div", "Math::GMPq::overload_div", &PL_sv_yes);
        }
      }
 
@@ -2287,10 +2163,12 @@ SV * wrap_gmp_snprintf(pTHX_ SV * s, SV * bytes, SV * a, SV * b, int buflen) {
 }
 
 int _itsa(pTHX_ SV * a) {
-     if(SvUOK(a)) return 1;
-     if(SvIOK(a)) return 2;
-     if(SvNOK(a) && !SvPOK(a)) return 3;
+     if(SvIOK(a)) {
+       if(SvUOK(a)) return 1;
+       return 2;
+     }
      if(SvPOK(a)) return 4;
+     if(SvNOK(a)) return 3;
      if(sv_isobject(a)) {
        const char *h = HvNAME(SvSTASH(SvRV(a)));
        if(strEQ(h, "Math::GMPq")) return 7;
@@ -2393,14 +2271,14 @@ SV * _wrap_count(pTHX) {
      return newSVuv(PL_sv_count);
 }
 
-SV * overload_pow(pTHX_ SV * p, SV * second, SV * third) {
+SV * overload_pow(pTHX_ SV * a, SV * b, SV * third) {
      mpq_t * mpq_t_obj;
      SV * obj_ref, * obj;
      const char *h;
 
      if(third == &PL_sv_yes) croak("Raising a value to an mpq_t power is not allowed in '**' operation in Math::GMPq::overload_pow");
 
-     if(SvUOK(second) || (SvIOK(second) && SvIVX(second) >= 0)) {
+     if(SvUOK(b) || (SvIOK(b) && SvIVX(b) >= 0)) {
        New(1, mpq_t_obj, 1, mpq_t);
        if(mpq_t_obj == NULL) croak("Failed to allocate memory in overload_pow function");
        obj_ref = newSV(0);
@@ -2408,37 +2286,13 @@ SV * overload_pow(pTHX_ SV * p, SV * second, SV * third) {
        mpq_init(*mpq_t_obj);
        sv_setiv(obj, INT2PTR(IV, mpq_t_obj));
        SvREADONLY_on(obj);
-       Rmpq_pow_ui(mpq_t_obj, INT2PTR(mpq_t *, SvIVX(SvRV(p))), SvUVX(second));
+       Rmpq_pow_ui(mpq_t_obj, INT2PTR(mpq_t *, SvIVX(SvRV(a))), SvUVX(b));
        return obj_ref;
      }
-     if(sv_isobject(second)) {
-       h = HvNAME(SvSTASH(SvRV(second)));
+     if(sv_isobject(b)) {
+       h = HvNAME(SvSTASH(SvRV(b)));
        if(strEQ(h, "Math::MPFR")) {
-         dSP;
-         SV * ret;
-         int count;
-
-         ENTER;
-
-         PUSHMARK(SP);
-         XPUSHs(second);
-         XPUSHs(p);
-         XPUSHs(sv_2mortal(&PL_sv_yes));
-         PUTBACK;
-
-         count = call_pv("Math::MPFR::overload_pow", G_SCALAR);
-
-         SPAGAIN;
-
-         if (count != 1)
-           croak("Error in Math::GMPq:overload_pow callback to Math::MPFR::overload_pow\n");
-
-         ret = POPs;
-
-         /* Avoid "Attempt to free unreferenced scalar" warning */
-         SvREFCNT_inc(ret);
-         LEAVE;
-         return ret;
+         _overload_callback("Math::MPFR::overload_pow", "Math::GMPq:overload_pow", &PL_sv_yes);
        }
      }
 
@@ -3619,12 +3473,12 @@ OUTPUT:  RETVAL
 
 
 SV *
-overload_pow (p, second, third)
-	SV *	p
-	SV *	second
+overload_pow (a, b, third)
+	SV *	a
+	SV *	b
 	SV *	third
 CODE:
-  RETVAL = overload_pow (aTHX_ p, second, third);
+  RETVAL = overload_pow (aTHX_ a, b, third);
 OUTPUT:  RETVAL
 
 SV *
