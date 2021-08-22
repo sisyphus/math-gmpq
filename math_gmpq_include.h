@@ -29,6 +29,15 @@
 #  define Newxz(v,n,t) Newz(0,v,n,t)
 #endif
 
+#define SV_IS_IOK(x) \
+     SvIOK(x)
+
+#define SV_IS_POK(x) \
+     SvPOK(x)
+
+#define SV_IS_NOK(x) \
+     SvNOK(x)
+
 #define _overload_callback(_1st_arg,_2nd_arg,_3rd_arg)					\
   dSP;											\
   SV * ret;										\
