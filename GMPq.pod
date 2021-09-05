@@ -36,7 +36,7 @@
    my $bn1 = Rmpq_init(); # Value set to 0/1
 
    # Assign a value.
-   Rmpq_set_str($str, $base);
+   Rmpq_set_str($bn1, $str, $base);
 
    # Remove any factors common to both numerator and
    # denominator so that gcd(numerator, denominator) == 1.
@@ -88,7 +88,7 @@
 
    These next 3 functions are demonstrated above:
    $rop   = Rmpq_init();
-   $rop   = Rmpq_set_strl($str, $base); # 1 < $base < 63
+   Rmpq_set_strl($rop, $str, $base); # 1 < $base < 63
    $str = Rmpq_get_str($op, $base); # 1 < $base < 37
 
    The following functions are simply wrappers around a GMP
