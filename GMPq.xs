@@ -983,6 +983,97 @@ NV _mpf_get_float128(mpf_t * x) {
 
 }
 
+int _rndaz(char *a, IV exponent, UV prec, int display) {
+  size_t len;
+  int i, ulp_pos = ULP_INDEX;
+
+  if(exponent < LOW_SUBNORMAL_EXP) return 0;
+
+  if(exponent < HIGH_SUBNORMAL_EXP) ulp_pos -= HIGH_SUBNORMAL_EXP - exponent;
+
+  len = strlen(a);
+
+  if(a[0] == '-' || a[0] == '+') ++ulp_pos;
+
+  if(len <= ulp_pos + 1) return 0;          /* no rounding required */
+
+  if(display) printf("len: %u ULP index: %d\n", (unsigned int)len, ulp_pos);
+
+  if(a[ulp_pos + 1] == '0') return 0;       /* no rounding required */
+
+  /* will get to here only if a[ulp_pos + 1] == '1' */
+
+  if(a[ulp_pos] == '1') return 1; /* rnda */
+
+  if(len > ulp_pos + 2) {
+
+    for(i = ulp_pos + 2; i < len; ++i) {
+      if(a[i] == '1') return 1;         /* rnda */
+    }
+  }
+
+  return 0;                             /* no rounding required */
+}
+
+double _mpf_get_d_rndn(mpf_t * p) {
+  char * buf;
+  mp_exp_t exponent;
+  size_t n_digits;
+  mpf_t temp, dbl_min;
+  double d;
+
+  n_digits = (size_t)mpf_get_prec(*p);
+
+  Newxz(buf, n_digits + 2, char);
+
+  mpf_get_str(buf, &exponent, 2, n_digits, *p);
+
+  /* printf("exponent: %d\n", exponent); */
+
+  if(_rndaz(buf, (IV)exponent, (UV)n_digits, 0)) {
+    /* printf("ROUNDING AWAY FROM ZERO\n"); */
+    Safefree(buf);
+    mpf_init2(temp, n_digits);
+    mpf_set_ui(temp, 1);
+    if(exponent <= 53) mpf_div_2exp(temp, temp, 53 - exponent);
+    else mpf_mul_2exp(temp, temp, exponent - 53);
+
+    /***********************************************
+
+    For the (subnormal) exponent range -1074 ..-1021, rounding away
+    from zero will be achieved by simply adding the smallest
+    representable (subnormal) value (0.1e-1073)
+
+    ***********************************************/
+
+    if(exponent < -1021 && exponent > -1075) { /* handle subnormal doubles */
+      mpf_init2(dbl_min, 64);
+      mpf_set_ui(dbl_min, 1);
+
+      mpf_div_2exp(dbl_min, dbl_min, 1074); /*********************************
+                                             dbl_min set to smallest non-zero
+                                             positive (subnormal) value
+                                             ********************************/
+
+      if(mpf_sgn(*p) > 0) mpf_add(temp, *p, dbl_min);
+      else mpf_sub(temp, *p, dbl_min);
+      mpf_clear(dbl_min);
+    }
+    else { /* handle normal doubles */
+      if(mpf_sgn(*p) > 0) mpf_add(temp, *p, temp);
+      else mpf_sub(temp, *p, temp);
+    }
+
+    d = mpf_get_d(temp);
+    mpf_clear(temp);
+    return d;
+  }
+
+  Safefree(buf);
+  return mpf_get_d(*p);
+
+}
+
 NV _mpf_get_ld(mpf_t * x) {
 
 /* we replicate rounding towards zero because this is what mpf_get_d does */
@@ -994,10 +1085,10 @@ NV _mpf_get_ld(mpf_t * x) {
      long double ret;
      mpf_t t, d;
 
-     msd = _mpf_get_d(x); /* should replace this with _mpf_get_d_rndn from Math/GMPf.xs */
+     msd = _mpf_get_d_rndn(x);
 
      if(msd == 0.0 || msd != msd || msd / msd != 1)
-       return (long double)msd);
+       return (long double)msd;
 
      if(mpf_get_prec(*x) > 2112) mpf_init2(t, mpf_get_prec(*x));
      else mpf_init2(t, 2112);
@@ -1119,7 +1210,11 @@ SV * Rmpq_get_NV(pTHX_ mpq_t * x) {
      mpf_t t;
      NV ret;
 
+#if defined(USE_LONG_DOUBLE) && REQUIRED_LDBL_MANT_DIG == 2098
+     mpf_init2(t, 2098);
+#else
      mpf_init2(t, 128);
+#endif
      mpf_set_q(t, *x) ;
 
 #if defined(USE_QUADMATH)
@@ -2606,6 +2701,9 @@ int _SvPOK(pTHX_ SV * in) {
    return 0;
 }
 
+int _required_ldbl_mant_dig(void) {
+    return REQUIRED_LDBL_MANT_DIG;
+}
 
 
 MODULE = Math::GMPq  PACKAGE = Math::GMPq
@@ -3454,6 +3552,17 @@ NV
 _mpf_get_float128 (x)
 	mpf_t *	x
 
+int
+_rndaz (a, exponent, prec, display)
+	char *	a
+	IV	exponent
+	UV	prec
+	int	display
+
+double
+_mpf_get_d_rndn (p)
+	mpf_t *	p
+
 NV
 _mpf_get_ld (x)
 	mpf_t *	x
@@ -3813,4 +3922,8 @@ _SvPOK (in)
 CODE:
   RETVAL = _SvPOK (aTHX_ in);
 OUTPUT:  RETVAL
+
+int
+_required_ldbl_mant_dig ()
+
 
