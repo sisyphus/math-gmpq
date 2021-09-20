@@ -34,6 +34,7 @@ use overload
     '/='   => \&overload_div_eq,
     '**='  => \&overload_pow_eq,
     '""'   => \&overload_string,
+    '0+'   => \&overload_num,
     '>'    => \&overload_gt,
     '>='   => \&overload_gte,
     '<'    => \&overload_lt,
@@ -58,7 +59,7 @@ Rmpq_get_d
 Rmpq_get_den Rmpq_get_num Rmpq_get_str Rmpq_init Rmpq_init_nobless Rmpq_inp_str
 Rmpq_inv Rmpq_mul Rmpq_mul_2exp Rmpq_neg Rmpq_numref Rmpq_out_str Rmpq_printf
 Rmpq_set Rmpq_set_d Rmpq_set_den Rmpq_set_f Rmpq_set_num Rmpq_set_si Rmpq_set_str
-Rmpq_set_NV Rmpq_cmp_NV
+Rmpq_set_NV Rmpq_get_NV Rmpq_cmp_NV
 Rmpq_set_ui Rmpq_set_z Rmpq_sgn
 Rmpq_sprintf Rmpq_snprintf
 Rmpq_sub Rmpq_swap
@@ -85,7 +86,7 @@ Rmpq_get_d
 Rmpq_get_den Rmpq_get_num Rmpq_get_str Rmpq_init Rmpq_init_nobless Rmpq_inp_str
 Rmpq_inv Rmpq_mul Rmpq_mul_2exp Rmpq_neg Rmpq_numref Rmpq_out_str Rmpq_printf
 Rmpq_set Rmpq_set_d Rmpq_set_den Rmpq_set_f Rmpq_set_num Rmpq_set_si Rmpq_set_str
-Rmpq_set_NV Rmpq_cmp_NV
+Rmpq_set_NV Rmpq_get_NV Rmpq_cmp_NV
 Rmpq_set_ui Rmpq_set_z Rmpq_sgn
 Rmpq_sprintf Rmpq_snprintf
 Rmpq_sub Rmpq_swap
