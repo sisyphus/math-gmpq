@@ -3,7 +3,27 @@
 #include <gmp.h>
 #include <limits.h>
 
-#if defined(NV_IS_FLOAT128)
+#if LDBL_MANT_DIG == 106
+#define REQUIRED_LDBL_MANT_DIG 2098
+#else
+#define REQUIRED_LDBL_MANT_DIG LDBL_MANT_DIG
+#endif
+
+#if NVSIZE == 8 || (defined(USE_LONG_DOUBLE) && REQUIRED_LDBL_MANT_DIG == 2098)
+#define ULP_INDEX			52
+#define LOW_SUBNORMAL_EXP		-1074
+#define HIGH_SUBNORMAL_EXP		-1021
+#elif defined(USE_LONG_DOUBLE) && REQUIRED_LDBL_MANT_DIG == 64
+#define ULP_INDEX			63
+#define LOW_SUBNORMAL_EXP		-16445
+#define HIGH_SUBNORMAL_EXP		-16381
+#else
+#define ULP_INDEX			112
+#define LOW_SUBNORMAL_EXP		-16494
+#define HIGH_SUBNORMAL_EXP		-16381
+#endif
+
+#if defined(USE_QUADMATH)
 #include <quadmath.h>
 #endif
 
