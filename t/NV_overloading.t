@@ -7,7 +7,7 @@ use strict;
 use warnings;
 use Math::GMPq;
 
-print "1..120\n";
+print "1..121\n";
 
 my $inf  = 999 ** (999 ** 999);
 my $ninf = $inf * -1;
@@ -945,4 +945,12 @@ if(Math::GMPq->new(0.1) == 0.1) {print "ok 120\n" }
 else {
   warn "\n ", Math::GMPq->new(0.1), "!= 0.1\n";
   print "not ok 120\n";
+}
+
+my $s1 = sprintf "%.5g", Math::GMPq->new(0.625);
+
+if($s1 == 0.625) {print "ok 121\n"}
+else {
+  warn "\n $s1 != 0.625\n";
+  print "not ok 121\n";
 }
