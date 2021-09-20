@@ -126,6 +126,8 @@
    "$double" means any number (not necessarily integer) that will fit
    into a C 'double'.
 
+   "$NV" is perl's floating point type (run "perl -V:nvtype")
+
    "$bool" means a value (usually a 'signed long int') in which
    the only interest is whether it evaluates as true or false.
 
@@ -174,7 +176,7 @@
    Rmpq_set_d ($rop, $double);
    Rmpq_set_f ($rop, $f); # $f is a Math::GnumMPf object
    Rmpq_set_d ($rop, $op);
-   Rmpq_set_NV($rop, $op); # $NV is a perl floating point value
+   Rmpq_set_NV($rop, $NV);
     Set $rop to the value of the 2nd arg, without rounding.
     Assigning an Inf or NaN is a fatal error.
 
@@ -220,8 +222,12 @@
 
    RATIONAL CONVERSIONS
 
-   $double = Rmpq_get_d($op);
-    Convert $op to a 'double'.
+   $NV = Rmpq_get_d($op);
+    Convert $op to a its double-precision value.
+
+   $NV = Rmpq_get_NV($op);
+    Convert $op to an NV using the full precision available to the NV.
+    If nvtype is 'double', then this is the same as Rmpq_get_d($op).
 
    $str = Rmpq_get_str($op, $base);
     Convert $op to a string of digits in base $base. The base may
@@ -312,7 +318,7 @@
     to compare $op with 2/-3, make sure that 2nd arg is
     '-2' and 3rd arg is '3'.
 
-   $si = Rmpq_cmp_NV($op, $NV); # $NV is a perl floating point value
+   $si = Rmpq_cmp_NV($op, $NV);
     Return 0  if $op == $NV.
     Return 1  if $op >  $NV.
     Return -1 if $op <  $NV
@@ -486,7 +492,7 @@
     += -= *= /= ++ --
     == != !
     < <= > >= <=>
-    "" abs
+    "" abs 0+
     =
 
     NOTE: Making use of the '=' overloading is not recommended unless
