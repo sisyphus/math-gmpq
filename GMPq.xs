@@ -129,6 +129,39 @@ void Rmpq_set_d(mpq_t * p, double d){
      mpq_set_d(*p, d);
 }
 
+void _mpf_set_doubledouble(mpf_t * q, SV * p) {
+#if defined(USE_LONG_DOUBLE) && REQUIRED_LDBL_MANT_DIG == 2098
+     double msd;                     /* Most Significant Double */
+     mpf_t t, d;
+     long double lsd;                /* Will be assigned the Least Siginficant Double */
+
+     msd = (double)SvNVX(p);
+     if(msd != 0.0) {
+       if(msd != msd) croak("In _Rmpf_set_ld (called from Rmpf_set_NV), cannot coerce a NaN to a Math::GMPf object");
+       if(msd / msd != 1.0) croak("In _Rmpf_set_ld (called from Rmpf_set_NV), cannot coerce an Inf to a Math::GMPf object");
+     }
+
+     lsd = SvNVX(p) - (long double)msd;
+
+     mpf_init2(t, 2098);
+     mpf_init2(d, 53);
+     mpf_set_d(t, msd);
+     mpf_set_d(d, (double)lsd);
+     mpf_add(t, t, d);
+
+     mpf_clear(d);
+
+     mpf_set(*q, t);
+
+     mpf_clear(t);
+
+#else
+
+     croak("_mpf_set_doubledouble not implemented because NV is not a doubledouble");
+
+#endif
+}
+
 void Rmpq_set_NV(pTHX_ mpq_t * copy, SV * original) {
 
 #if defined(USE_QUADMATH)
@@ -166,6 +199,15 @@ void Rmpq_set_NV(pTHX_ mpq_t * copy, SV * original) {
 
 #elif defined(USE_LONG_DOUBLE)
 
+#  if REQUIRED_LDBL_MANT_DIG == 2098
+     mpf_t t;
+
+     mpf_init2(t, 2098);
+     _mpf_set_doubledouble(&t, original);
+     mpq_set_f(*copy, t);
+     mpf_clear(t);
+
+#  else
      char * buffer;
      int exp, exp2 = 0;
      long double ld, buffer_size;
@@ -194,6 +236,7 @@ void Rmpq_set_NV(pTHX_ mpq_t * copy, SV * original) {
 
      if (exp2 > exp) mpq_div_2exp(*copy, *copy, exp2 - exp);
      else mpq_mul_2exp(*copy, *copy, exp - exp2);
+#  endif
 
 #else
      double d = SvNVX(original);
@@ -1664,11 +1707,16 @@ SV * overload_equiv(pTHX_ mpq_t * a, SV * b, SV * third) {
      __float128 ld;
 
 #elif defined(USE_LONG_DOUBLE)
+#  if REQUIRED_LDBL_MANT_DIG == 2098
+     mpf_t temp;
+     long double ld;
 
+#  else
      char * buffer;
      long double buffer_size;
      long double ld;
 
+#  endif
 #endif
 
 #ifdef MATH_GMPQ_NEED_LONG_LONG_INT
@@ -1738,6 +1786,20 @@ SV * overload_equiv(pTHX_ mpq_t * a, SV * b, SV * third) {
        mpq_clear(t);
 
 #elif defined(USE_LONG_DOUBLE)
+
+# if REQUIRED_LDBL_MANT_DIG == 2098
+       ld = (long double)SvNVX(b);
+       if(ld != ld) croak("In Math::GMPq::overload_equiv, cannot compare a NaN to a Math::GMPq value");
+       if(ld != 0 && ld / ld != 1) return newSViv(0);
+       mpq_init(t);
+       mpf_init2(temp, 2098);
+       _mpf_set_doubledouble(&temp, b);
+       mpq_set_f(t, temp);
+       ret = mpq_equal(*a, t);
+       mpf_clear(temp);
+       mpq_clear(t);
+
+# else
        int exp, exp2 = 0;
 
        ld = (long double)SvNVX(b);
@@ -1764,6 +1826,8 @@ SV * overload_equiv(pTHX_ mpq_t * a, SV * b, SV * third) {
        else mpq_mul_2exp(t, t, exp - exp2);
        ret = mpq_equal(*a, t);
        mpq_clear(t);
+
+#  endif
 #else
        double d = SvNVX(b);
        if(d != d) croak("In Math::GMPq::overload_equiv, cannot compare a NaN to a Math::GMPq value");
@@ -2927,6 +2991,23 @@ Rmpq_set_d (p, d)
         PPCODE:
         temp = PL_markstack_ptr++;
         Rmpq_set_d(p, d);
+        if (PL_markstack_ptr != temp) {
+          /* truly void, because dXSARGS not invoked */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
+        }
+        /* must have used dXSARGS; list context implied */
+        return; /* assume stack size is correct */
+
+void
+_mpf_set_doubledouble (q, p)
+	mpf_t *	q
+	SV *	p
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        _mpf_set_doubledouble(q, p);
         if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
           PL_markstack_ptr = temp;
