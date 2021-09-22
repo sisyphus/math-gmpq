@@ -4,6 +4,7 @@
  - Fix bug in overload_equiv. (A cast to 'long double' needed to become a
    cast to '__float128'.
  - Add Rmpq_get_NV function.
+ - Fix Rmpq_set_NV for doubledouble NVs.
  - Add '0+' overloading.
 
 0.46
