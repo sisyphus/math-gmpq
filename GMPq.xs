@@ -289,7 +289,21 @@ int Rmpq_cmp_NV(pTHX_ mpq_t * a, SV * b) {
      else mpq_mul_2exp(t, t, exp - exp2);
 
 #elif defined(USE_LONG_DOUBLE)
+# if REQUIRED_LDBL_MANT_DIG == 2098
+     mpf_t temp;
+     long double ld = (long double)SvNVX(b);
+     if(ld != ld) croak("In Rmpq_cmp_NV, cannot compare a NaN to a Math::GMPq value");
+     if(ld != 0 && ld / ld != 1) {
+       if(ld > 0) return -1;
+       return 1;
+     }
+     mpq_init(t);
+     mpf_init2(temp, 2098);
+     _mpf_set_doubledouble(&temp, b);
+     mpq_set_f(t, temp);
+     mpf_clear(temp);
 
+#  else
      char * buffer;
      int exp, exp2 = 0;
      long double ld, buffer_size;
@@ -321,6 +335,7 @@ int Rmpq_cmp_NV(pTHX_ mpq_t * a, SV * b) {
      if (exp2 > exp) mpq_div_2exp(t, t, exp2 - exp);
      else mpq_mul_2exp(t, t, exp - exp2);
 
+#  endif
 #else
      double d = SvNVX(b);
      if(d != d) croak("In Rmpq_cmp_NV, cannot coerce a NaN to a Math::GMPq value");
@@ -1699,26 +1714,6 @@ SV * overload_equiv(pTHX_ mpq_t * a, SV * b, SV * third) {
      mpq_t t;
      int ret = 0;
 
-#if defined(USE_QUADMATH)
-
-     char * buffer;
-     int returned;
-     __float128 buffer_size;
-     __float128 ld;
-
-#elif defined(USE_LONG_DOUBLE)
-#  if REQUIRED_LDBL_MANT_DIG == 2098
-     mpf_t temp;
-     long double ld;
-
-#  else
-     char * buffer;
-     long double buffer_size;
-     long double ld;
-
-#  endif
-#endif
-
 #ifdef MATH_GMPQ_NEED_LONG_LONG_INT
      if(SV_IS_IOK(b)) {
        mpq_init(t);
@@ -1754,90 +1749,8 @@ SV * overload_equiv(pTHX_ mpq_t * a, SV * b, SV * third) {
      }
 
      if(SV_IS_NOK(b)) {
-
-#if defined(USE_QUADMATH)
-       int exp, exp2 = 0;
-
-       ld = (__float128)SvNVX(b);
-       if(ld != ld) croak("In Math::GMPq::overload_equiv, cannot compare a NaN to a Math::GMPq value");
-       if(ld != 0 && ld / ld != 1) return newSViv(0);
-
-       ld = frexpq((__float128)SvNVX(b), &exp);
-
-       while(ld != floorq(ld)) {
-            ld *= 2;
-            exp2 += 1;
-       }
-
-       buffer_size = ld < 0.0Q ? ld * -1.0Q : ld;
-       buffer_size = ceilq(logq(buffer_size + 1) / 2.30258509299404568401799145468436418Q);
-
-       Newxz(buffer, (int)buffer_size + 5, char);
-
-       returned = quadmath_snprintf(buffer, (size_t)buffer_size + 5, "%.0Qf", ld);
-       if(returned < 0) croak("In Math::GMPq::overload_equiv, encoding error in quadmath_snprintf function");
-       if(returned >= buffer_size + 5) croak("In Math::GMPq::overload_equiv, buffer given to quadmath_snprintf function was too small");
-       mpq_init(t);
-       mpq_set_str(t, buffer, 10);
-       Safefree(buffer);
-       if (exp2 > exp) mpq_div_2exp(t, t, exp2 - exp);
-       else mpq_mul_2exp(t, t, exp - exp2);
-       ret = mpq_equal(*a, t);
-       mpq_clear(t);
-
-#elif defined(USE_LONG_DOUBLE)
-
-# if REQUIRED_LDBL_MANT_DIG == 2098
-       ld = (long double)SvNVX(b);
-       if(ld != ld) croak("In Math::GMPq::overload_equiv, cannot compare a NaN to a Math::GMPq value");
-       if(ld != 0 && ld / ld != 1) return newSViv(0);
-       mpq_init(t);
-       mpf_init2(temp, 2098);
-       _mpf_set_doubledouble(&temp, b);
-       mpq_set_f(t, temp);
-       ret = mpq_equal(*a, t);
-       mpf_clear(temp);
-       mpq_clear(t);
-
-# else
-       int exp, exp2 = 0;
-
-       ld = (long double)SvNVX(b);
-       if(ld != ld) croak("In Math::GMPq::overload_equiv, cannot compare a NaN to a Math::GMPq value");
-       if(ld != 0 && ld / ld != 1) return newSViv(0);
-
-       ld = frexpl((long double)SvNVX(b), &exp);
-
-       while(ld != floorl(ld)) {
-            ld *= 2;
-            exp2 += 1;
-       }
-
-       buffer_size = ld < 0.0L ? ld * -1.0L : ld;
-       buffer_size = ceill(logl(buffer_size + 1) / 2.30258509299404568401799145468436418L);
-
-       Newxz(buffer, (int)buffer_size + 5, char);
-
-       if(sprintf(buffer, "%.0Lf", ld) >= (int)buffer_size + 5) croak("In Math::GMPq::overload_equiv, buffer overflow in sprintf function");
-       mpq_init(t);
-       mpq_set_str(t, buffer, 10);
-       Safefree(buffer);
-       if (exp2 > exp) mpq_div_2exp(t, t, exp2 - exp);
-       else mpq_mul_2exp(t, t, exp - exp2);
-       ret = mpq_equal(*a, t);
-       mpq_clear(t);
-
-#  endif
-#else
-       double d = SvNVX(b);
-       if(d != d) croak("In Math::GMPq::overload_equiv, cannot compare a NaN to a Math::GMPq value");
-       if(d != 0 && d / d != 1) return newSViv(0);
-       mpq_init(t);
-       mpq_set_d(t, SvNVX(b));
-       ret = mpq_equal(*a, t);
-       mpq_clear(t);
-#endif
-       return newSViv(ret);
+       if(Rmpq_cmp_NV(aTHX_ a, b)) return newSViv(0);
+       return newSViv(1);
      }
 
      if(sv_isobject(b)) {
@@ -1863,21 +1776,6 @@ SV * overload_equiv(pTHX_ mpq_t * a, SV * b, SV * third) {
 SV * overload_not_equiv(pTHX_ mpq_t * a, SV * b, SV * third) {
      mpq_t t;
      int ret = 0;
-
-#if defined(USE_QUADMATH)
-
-     char * buffer;
-     int returned;
-     __float128 buffer_size;
-     __float128 ld;
-
-#elif defined(USE_LONG_DOUBLE)
-
-     char * buffer;
-     long double buffer_size;
-     long double ld;
-
-#endif
 
 #ifdef MATH_GMPQ_NEED_LONG_LONG_INT
      if(SV_IS_IOK(b)) {
@@ -1916,77 +1814,10 @@ SV * overload_not_equiv(pTHX_ mpq_t * a, SV * b, SV * third) {
      }
 
      if(SV_IS_NOK(b)) {
-
-#if defined(USE_QUADMATH)
-       int exp, exp2 = 0;
-
-       ld = (__float128)SvNVX(b);
-       if(ld != ld) croak("In Math::GMPq::overload_not_equiv, cannot compare a NaN to a Math::GMPq value");
-       if(ld != 0 && ld / ld != 1) return newSViv(1);
-
-       ld = frexpq((__float128)SvNVX(b), &exp);
-
-       while(ld != floorq(ld)) {
-            ld *= 2;
-            exp2 += 1;
-       }
-
-       buffer_size = ld < 0.0Q ? ld * -1.0Q : ld;
-       buffer_size = ceilq(logq(buffer_size + 1) / 2.30258509299404568401799145468436418Q);
-
-       Newxz(buffer, (int)buffer_size + 5, char);
-
-       returned = quadmath_snprintf(buffer, (size_t)buffer_size + 5, "%.0Qf", ld);
-       if(returned < 0) croak("In Math::GMPq::overload_not_equiv, encoding error in quadmath_snprintf function");
-       if(returned >= buffer_size + 5) croak("In Math::GMPq::overload_equiv, buffer given to quadmath_snprintf function was too small");
-       mpq_init(t);
-       mpq_set_str(t, buffer, 10);
-       Safefree(buffer);
-       if (exp2 > exp) mpq_div_2exp(t, t, exp2 - exp);
-       else mpq_mul_2exp(t, t, exp - exp2);
-       ret = mpq_equal(*a, t);
-       mpq_clear(t);
-
-#elif defined(USE_LONG_DOUBLE)
-       int exp, exp2 = 0;
-
-       ld = (long double)SvNVX(b);
-       if(ld != ld) croak("In Math::GMPq::overload_not_equiv, cannot compare a NaN to a Math::GMPq value");
-       if(ld != 0 && ld / ld != 1) return newSViv(1);
-
-       ld = frexpl((long double)SvNVX(b), &exp);
-
-       while(ld != floorl(ld)) {
-            ld *= 2;
-            exp2 += 1;
-       }
-
-       buffer_size = ld < 0.0L ? ld * -1.0L : ld;
-       buffer_size = ceill(logl(buffer_size + 1) / 2.30258509299404568401799145468436418L);
-
-       Newxz(buffer, (int)buffer_size + 5, char);
-
-       if(sprintf(buffer, "%.0Lf", ld) >= (int)buffer_size + 5) croak("In Math::GMPq::overload_not_equiv, buffer overflow in sprintf function");
-       mpq_init(t);
-       mpq_set_str(t, buffer, 10);
-       Safefree(buffer);
-       if (exp2 > exp) mpq_div_2exp(t, t, exp2 - exp);
-       else mpq_mul_2exp(t, t, exp - exp2);
-       ret = mpq_equal(*a, t);
-       mpq_clear(t);
-#else
-       double d = SvNVX(b);
-       if(d != d) croak("In Math::GMPq::overload_not_equiv, cannot compare a NaN to a Math::GMPq value");
-       if(d != 0 && d / d != 1) return newSViv(1);
-       mpq_init(t);
-       mpq_set_d(t, SvNVX(b));
-       ret = mpq_equal(*a, t);
-       mpq_clear(t);
-#endif
-
-       if(ret) return newSViv(0);
-       return newSViv(1);
+       if(Rmpq_cmp_NV(aTHX_ a, b)) return newSViv(1);
+       return newSViv(0);
      }
+
 
      if(sv_isobject(b)) {
        const char *h = HvNAME(SvSTASH(SvRV(b)));
