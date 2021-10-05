@@ -1,6 +1,7 @@
 0.48
  - Fix Rmpq_cmp_NV for doubledouble NVs.
  - Fix overloading of comparison operators for doubledouble NVs
+ - Add Rmpq_set_IV and Rmpq_cmp_IV functions
 
 0.47
  - Add "use warnings;" to GMPq.pm.
