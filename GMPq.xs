@@ -135,13 +135,13 @@ void _mpf_set_doubledouble(mpf_t * q, SV * p) {
      mpf_t t, d;
      long double lsd;                /* Will be assigned the Least Siginficant Double */
 
-     msd = (double)SvNVX(p);
+     msd = (double)SvNV(p);
      if(msd != 0.0) {
        if(msd != msd) croak("In _Rmpf_set_ld (called from Rmpf_set_NV), cannot coerce a NaN to a Math::GMPf object");
        if(msd / msd != 1.0) croak("In _Rmpf_set_ld (called from Rmpf_set_NV), cannot coerce an Inf to a Math::GMPf object");
      }
 
-     lsd = SvNVX(p) - (long double)msd;
+     lsd = SvNV(p) - (long double)msd;
 
      mpf_init2(t, 2098);
      mpf_init2(d, 53);
@@ -171,12 +171,12 @@ void Rmpq_set_NV(pTHX_ mpq_t * copy, SV * original) {
      __float128 ld, buffer_size;
      int returned;
 
-     ld = (__float128)SvNVX(original);
+     ld = (__float128)SvNV(original);
      if(ld != ld) croak("In Rmpq_set_NV, cannot coerce a NaN to a Math::GMPq value");
      if(ld != 0 && (ld / ld != 1))
        croak("In Rmpq_set_NV, cannot coerce an Inf to a Math::GMPq value");
 
-     ld = frexpq((__float128)SvNVX(original), &exp);
+     ld = frexpq((__float128)SvNV(original), &exp);
 
      while(ld != floorq(ld)) {
           ld *= 2;
@@ -212,12 +212,12 @@ void Rmpq_set_NV(pTHX_ mpq_t * copy, SV * original) {
      int exp, exp2 = 0;
      long double ld, buffer_size;
 
-     ld = (long double)SvNVX(original);
+     ld = (long double)SvNV(original);
      if(ld != ld) croak("In Rmpq_set_NV, cannot coerce a NaN to a Math::GMPq value");
      if(ld != 0 && (ld / ld != 1))
        croak("In Rmpq_set_NV, cannot coerce an Inf to a Math::GMPq value");
 
-     ld = frexpl((long double)SvNVX(original), &exp);
+     ld = frexpl((long double)SvNV(original), &exp);
 
      while(ld != floorl(ld)) {
           ld *= 2;
@@ -239,7 +239,7 @@ void Rmpq_set_NV(pTHX_ mpq_t * copy, SV * original) {
 #  endif
 
 #else
-     double d = SvNVX(original);
+     double d = SvNV(original);
      if(d != d) croak("In Rmpq_set_NV, cannot coerce a NaN to a Math::GMPq value");
      if(d != 0 && (d / d != 1))
        croak("In Rmpq_set_NV, cannot coerce an Inf to a Math::GMPq value");
@@ -259,14 +259,14 @@ int Rmpq_cmp_NV(pTHX_ mpq_t * a, SV * b) {
      int exp, exp2 = 0;
      __float128 ld, buffer_size;
 
-     ld = (__float128)SvNVX(b);
+     ld = (__float128)SvNV(b);
      if(ld != ld) croak("In Rmpq_cmp_NV, cannot coerce a NaN to a Math::GMPq value");
      if(ld != 0 && (ld / ld != 1)) {
        if(ld > 0) return -1;
        return 1;
      }
 
-     ld = frexpq((__float128)SvNVX(b), &exp);
+     ld = frexpq((__float128)SvNV(b), &exp);
 
      while(ld != floorq(ld)) {
           ld *= 2;
@@ -291,7 +291,7 @@ int Rmpq_cmp_NV(pTHX_ mpq_t * a, SV * b) {
 #elif defined(USE_LONG_DOUBLE)
 # if REQUIRED_LDBL_MANT_DIG == 2098
      mpf_t temp;
-     long double ld = (long double)SvNVX(b);
+     long double ld = (long double)SvNV(b);
      if(ld != ld) croak("In Rmpq_cmp_NV, cannot compare a NaN to a Math::GMPq value");
      if(ld != 0 && ld / ld != 1) {
        if(ld > 0) return -1;
@@ -308,14 +308,14 @@ int Rmpq_cmp_NV(pTHX_ mpq_t * a, SV * b) {
      int exp, exp2 = 0;
      long double ld, buffer_size;
 
-     ld = (long double)SvNVX(b);
+     ld = (long double)SvNV(b);
      if(ld != ld) croak("In Rmpq_cmp_NV, cannot coerce a NaN to a Math::GMPq value");
      if(ld != 0 && (ld / ld != 1)) {
        if(ld > 0) return -1;
        return 1;
      }
 
-     ld = frexpl((long double)SvNVX(b), &exp);
+     ld = frexpl((long double)SvNV(b), &exp);
 
      while(ld != floorl(ld)) {
           ld *= 2;
@@ -337,7 +337,7 @@ int Rmpq_cmp_NV(pTHX_ mpq_t * a, SV * b) {
 
 #  endif
 #else
-     double d = SvNVX(b);
+     double d = SvNV(b);
      if(d != d) croak("In Rmpq_cmp_NV, cannot coerce a NaN to a Math::GMPq value");
      if(d != 0 && (d / d != 1)) {
        if(d > 0) return -1;
@@ -351,32 +351,6 @@ int Rmpq_cmp_NV(pTHX_ mpq_t * a, SV * b) {
      mpq_clear(t);
      return returned;
 }
-
-/* No longer used *//*
-//void _Rmpq_set_ld(pTHX_ mpq_t * q, SV * p) {
-//#ifdef USE_LONG_DOUBLE
-//     char buffer[50];
-//     int exp, exp2 = 0;
-//     long double fr;
-//
-//     fr = frexpl((long double)SvNV(p), &exp);
-//
-//     while(fr != floorl(fr)) {
-//          fr *= 2;
-//          exp2 += 1;
-//     }
-//
-//     sprintf(buffer, "%.0Lf", fr);
-//
-//     mpq_set_str(*q, buffer, 10);
-//
-//     if (exp2 > exp) mpq_div_2exp(*q, *q, exp2 - exp);
-//     else mpq_mul_2exp(*q, *q, exp - exp2);
-//#else
-//     croak("_Rmpq_set_ld not implemented on this build of perl");
-//#endif
-//}
-*/
 
 void Rmpq_set_f(mpq_t * p, mpf_t * f) {
      mpq_set_f(*p, *f);
