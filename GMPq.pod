@@ -169,10 +169,13 @@
    Rmpq_set_z($rop, $z); # $z is a Math::GMPz object
     Set $rop to value contained in 2nd arg.
 
-   Rmpq_set_ui($rop, $ui1, $ui2);
-   Rmpq_set_si($rop, $si1, $si2);
-   Rmpq_set_IV($rop, $IV1, $IV2);
+   Rmpq_set_ui($rop, $ui1 , $ui2);
+   Rmpq_set_si($rop, $si ,  $ui );
+   Rmpq_set_IV($rop, $IV1 , $IV2);
     Set $rop to 2nd arg / 3rd arg.
+    The 3rd arg should be an unsigned value. That is, the value -2/3
+    should be assigned as 2nd arg is -2, 3rd arg is 3 ... not 2nd
+    arg is 2, third arg is -3.
 
    Rmpq_set_d ($rop, $double);
    Rmpq_set_f ($rop, $f); # $f is a Math::GnumMPf object
@@ -309,9 +312,9 @@
      later but Rmpq_cmp_z is available for all builds of Math::GMPz,
      irrespective of the underlying version of gmp.)
 
-   $si = Rmpq_cmp_ui($op, $ui,  $ui );
-   $si = Rmpq_cmp_si($op, $si2, $ui );
-   $si = Rmpq_cmp_IV($op, $IV1, $IV2);
+   $si = Rmpq_cmp_ui($op, $ui1 , $ui2);
+   $si = Rmpq_cmp_si($op, $si2 , $ui );
+   $si = Rmpq_cmp_IV($op, $IV1 , $IV2);
     Compare $op1 and 2nd arg/3rd arg.  Return a positive value if
     $op1 > 2nd arg/3rd arg, zero if $op1 = 2nd arg/3rd arg,
     and a negative value if $op1 < 2nd arg/3rd arg.
