@@ -52,10 +52,19 @@ if($Config{nvsize} == 8
 elsif($Config{nvtype} eq '__float128')           { $nv = 1.18973149535723176508575932662800702e4932 }
 else                                             { $nv = 1.18973149535723176502e4932                }
 
-Rmpq_set_NV($q, $nv);
-my $nv_check = Rmpq_get_NV($q);
+# $nv is NV_MAX and a buggy perls could assign that value
+# as 'INf', so we avoid the next test if we hit such a bug.
+eval {Rmpq_set_NV($q, $nv);};
 
-cmp_ok($nv_check, '==', $nv, "NV_MAX survives \"set and get\" round trip");
+my $nv_check;
+
+if($@ && $@ =~ /cannot coerce an Inf to a Math::GMP/) {
+  warn "\nThis perl incorrectly assigns NV_MAX as Inf\n";
+}
+else {
+  $nv_check = Rmpq_get_NV($q);
+  cmp_ok($nv_check, '==', $nv, "NV_MAX survives \"set and get\" round trip");
+}
 
 Rmpq_set_NV($q, $set);
 $nv_check = Rmpq_get_NV($q);
