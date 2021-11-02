@@ -137,8 +137,8 @@ void _mpf_set_doubledouble(mpf_t * q, SV * p) {
 
      msd = (double)SvNV(p);
      if(msd != 0.0) {
-       if(msd != msd) croak("In _Rmpf_set_ld (called from Rmpf_set_NV), cannot coerce a NaN to a Math::GMPf object");
-       if(msd / msd != 1.0) croak("In _Rmpf_set_ld (called from Rmpf_set_NV), cannot coerce an Inf to a Math::GMPf object");
+       if(msd != msd) croak("In _mpf_set_doubledouble (called from Rmpq_set_NV), cannot coerce a NaN to a Math::GMPf object");
+       if(msd / msd != 1.0) croak("In _mpf_set_doubledouble (called from Rmpq_set_NV), cannot coerce an Inf to a Math::GMPf object");
      }
 
      lsd = SvNV(p) - (long double)msd;
@@ -171,6 +171,9 @@ void Rmpq_set_NV(pTHX_ mpq_t * copy, SV * original) {
      __float128 ld, buffer_size;
      int returned;
 
+     if(!SV_IS_NOK(original))
+       croak("In Rmpq_set_NV, 2nd argument is not an NV");
+
      ld = (__float128)SvNV(original);
      if(ld != ld) croak("In Rmpq_set_NV, cannot coerce a NaN to a Math::GMPq value");
      if(ld != 0 && (ld / ld != 1))
@@ -202,6 +205,9 @@ void Rmpq_set_NV(pTHX_ mpq_t * copy, SV * original) {
 #  if REQUIRED_LDBL_MANT_DIG == 2098
      mpf_t t;
 
+     if(!SV_IS_NOK(original))
+       croak("In Rmpq_set_NV, 2nd argument is not an NV");
+
      mpf_init2(t, 2098);
      _mpf_set_doubledouble(&t, original);
      mpq_set_f(*copy, t);
@@ -211,6 +217,9 @@ void Rmpq_set_NV(pTHX_ mpq_t * copy, SV * original) {
      char * buffer;
      int exp, exp2 = 0;
      long double ld, buffer_size;
+
+     if(!SV_IS_NOK(original))
+       croak("In Rmpq_set_NV, 2nd argument is not an NV");
 
      ld = (long double)SvNV(original);
      if(ld != ld) croak("In Rmpq_set_NV, cannot coerce a NaN to a Math::GMPq value");
@@ -239,7 +248,12 @@ void Rmpq_set_NV(pTHX_ mpq_t * copy, SV * original) {
 #  endif
 
 #else
-     double d = SvNV(original);
+     double d;
+
+     if(!SV_IS_NOK(original))
+       croak("In Rmpq_set_NV, 2nd argument is not an NV");
+
+     d = SvNV(original);
      if(d != d) croak("In Rmpq_set_NV, cannot coerce a NaN to a Math::GMPq value");
      if(d != 0 && (d / d != 1))
        croak("In Rmpq_set_NV, cannot coerce an Inf to a Math::GMPq value");
@@ -252,6 +266,9 @@ int Rmpq_cmp_NV(pTHX_ mpq_t * a, SV * b) {
 
      mpq_t t;
      int returned;
+
+     if(!SvNOK(b))
+       croak("In Rmpq_cmp_NV, 2nd argument is not an NV");
 
 #if defined(USE_QUADMATH)
 
@@ -628,12 +645,15 @@ void Rmpq_set_IV(pTHX_ mpq_t * a, SV * my_iv1, SV * my_iv2) {
        mpq_clear(temp);
      }
 
-     else croak("2nd and/or 3rd arg provided to Rmpq_set_IV not an IV");
+     else croak("Arg provided to Rmpq_set_IV not an IV");
 }
 
 int Rmpq_cmp_IV(pTHX_ mpq_t * q, SV * iv1, SV * iv2) {
     mpq_t temp;
     int ret;
+
+    if(!SvIOK(iv1) || !SvIOK(iv2))
+      croak("Arg provided to Rmpq_cmp_IV is not an IV");
 
     mpq_init(temp);
 
@@ -2376,6 +2396,23 @@ int _required_ldbl_mant_dig(void) {
     return REQUIRED_LDBL_MANT_DIG;
 }
 
+int IOK_flag(SV * sv) {
+  if(SvUOK(sv)) return 2;
+  if(SvIOK(sv)) return 1;
+  return 0;
+}
+
+int POK_flag(SV * sv) {
+  if(SvPOK(sv)) return 1;
+  return 0;
+}
+
+int NOK_flag(SV * sv) {
+  if(SvNOK(sv)) return 1;
+  return 0;
+}
+
+
 
 MODULE = Math::GMPq  PACKAGE = Math::GMPq
 
@@ -3641,4 +3678,16 @@ OUTPUT:  RETVAL
 int
 _required_ldbl_mant_dig ()
 
+
+int
+IOK_flag (sv)
+	SV *	sv
+
+int
+POK_flag (sv)
+	SV *	sv
+
+int
+NOK_flag (sv)
+	SV *	sv
 
