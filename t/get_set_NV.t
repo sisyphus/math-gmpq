@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Math::GMPq qw(:mpq);
+use Math::GMPq qw(:mpq IOK_flag NOK_flag POK_flag);
 use Config;
 
 use Test::More;
@@ -24,7 +24,13 @@ for(1 .. 10) {
 for (-1022, -1040, -16382, -16400 -1074, -16445, -16494) {
   my $nv = 2 ** $_;
 
-  Rmpq_set_NV($q, $nv);
+  if(NOK_flag($nv)) {
+     Rmpq_set_NV($q, $nv);
+  }
+  else {
+     Rmpq_set_IV($q, $nv, 1);
+  }
+
   my $nv_check = Rmpq_get_NV($q);
 
   cmp_ok($nv_check, '==', $nv, "2 ** $_ survives \"set and get\" round trip");
@@ -35,7 +41,13 @@ for (-1022, -1040, -16382, -16400, -1074, -16445, -16494) {
   my $nv = (2 ** $_);
   $nv += (2 ** $pow);
 
-  Rmpq_set_NV($q, $nv);
+  if(NOK_flag($nv)) {
+     Rmpq_set_NV($q, $nv);
+  }
+  else {
+     Rmpq_set_IV($q, $nv, 1);
+  }
+
   my $nv_check = Rmpq_get_NV($q);
 
   cmp_ok($nv_check, '==', $nv, "(2 ** $_) + (2 ** $pow) survives \"set and get\" round trip");
@@ -70,5 +82,8 @@ Rmpq_set_NV($q, $set);
 $nv_check = Rmpq_get_NV($q);
 
 cmp_ok($nv_check, '==', $set, "$set survives \"set and get\" round trip");
+
+cmp_ok(POK_flag("$nv_check"), '==', 1, "POK_flag set as expected"  );
+cmp_ok(POK_flag(2.5)        , '==', 0, "POK_flag unset as expected");
 
 done_testing();
