@@ -1,7 +1,10 @@
 0.48
  - Fix Rmpq_cmp_NV for doubledouble NVs.
  - Fix overloading of comparison operators for doubledouble NVs
- - Add Rmpq_set_IV and Rmpq_cmp_IV functions
+ - Add Rmpq_set_IV and Rmpq_cmp_IV functions.
+ - Add POK_flag(), IOK_flag(), NOK_flag (@EXPORT_OK only)
+ - 2nd and 3rd args to Rmpq_cmp_IV and Rmpq_set_IV must have its IOK flag set.
+ - 2nd arg to Rmpq_cmp_NV and Rmpq_set_NV must have its NOK flag set.
 
 0.47
  - Add "use warnings;" to GMPq.pm.
