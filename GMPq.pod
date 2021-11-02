@@ -171,18 +171,24 @@
 
    Rmpq_set_ui($rop, $ui1 , $ui2);
    Rmpq_set_si($rop, $si ,  $ui );
-   Rmpq_set_IV($rop, $IV1 , $IV2);
+   Rmpq_set_IV($rop, $iv1 , $iv2);
     Set $rop to 2nd arg / 3rd arg.
     The 3rd arg should be an unsigned value. That is, the value -2/3
     should be assigned as 2nd arg is -2, 3rd arg is 3 ... not 2nd
     arg is 2, third arg is -3.
+    With Rmpq_set_IV, $iv1 and $iv2 must both have their IOK flag set,
+    or the function will croak. Best to first check IOK_flag($iv), which
+    will return a non-zero value if and only if the IOK flag is set.
 
    Rmpq_set_d ($rop, $double);
    Rmpq_set_f ($rop, $f); # $f is a Math::GnumMPf object
    Rmpq_set_d ($rop, $op);
-   Rmpq_set_NV($rop, $NV);
+   Rmpq_set_NV($rop, $nv);
     Set $rop to the value of the 2nd arg, without rounding.
     Assigning an Inf or NaN is a fatal error.
+    With Rmpq_set_NV, $nv must have its NOK flag set, or the function
+    will croak. Best to first check NOK_flag($nv), which will return a
+    non-zero value if and only if the NOK flag is set.
 
    Rmpq_set_str($rop, $str, $base);
     Set $rop from $str in the given base $base. The string can be
@@ -314,7 +320,7 @@
 
    $si = Rmpq_cmp_ui($op, $ui1 , $ui2);
    $si = Rmpq_cmp_si($op, $si2 , $ui );
-   $si = Rmpq_cmp_IV($op, $IV1 , $IV2);
+   $si = Rmpq_cmp_IV($op, $iv1 , $iv2); # $iv1, $iv2, are IVs.
     Compare $op1 and 2nd arg/3rd arg.  Return a positive value if
     $op1 > 2nd arg/3rd arg, zero if $op1 = 2nd arg/3rd arg,
     and a negative value if $op1 < 2nd arg/3rd arg.
@@ -323,11 +329,25 @@
     to compare $op with 2/-3, make sure that 2nd arg is
     '-2' and 3rd arg is '3'.
 
-   $si = Rmpq_cmp_NV($op, $NV);
-    Return 0  if $op == $NV.
-    Return 1  if $op >  $NV.
-    Return -1 if $op <  $NV
-    It's a fatal error if $NV is a NaN.
+    NOTE:
+         Rmpq_cmp_IV() requires that the 2nd and 3rd arguments both
+         have their IOK flag set - otherwise it croaks.
+         Suggestion: first check the status of the flag of both of
+         those arguments using IOK_flag($iv),which returns a non-zero
+         value if and only if the flag in question is set.
+
+   $si = Rmpq_cmp_NV($op, $nv);
+    Return 0  if $op == $nv.
+    Return 1  if $op >  $nv.
+    Return -1 if $op <  $nv
+    It's a fatal error if $nv is a NaN.
+
+    NOTE:
+         Rmpq_cmp_NV() requires that the 2nd argument
+         has its NOK flag set - otherwise it croaks.
+         Suggestion: first check the status of the flag of the
+         second argument using NOK_flag($nv),which returns a
+         non-zero value if and only if the flag in question is set.
 
    $si = Rmpq_sgn($op);
     Return 1 if $op>0, 0 if $op=0, and -1 if $op < 0.
@@ -559,6 +579,16 @@
     Returns true if $op is an integer (ie denominator of $op is 1).
     Else returns false. The mpq_integer_p function is not
     implemented in gmp.
+
+   $si = IOK_flag($sv); # $sv is a perl scalar variable.
+   $si = NOK_flag($sv);
+   $si = POK_flag($sv);
+
+   Return 0 if $sv's IOK/NOK/POK flag is unset.
+   Else return 1.
+   If the IsUV flag is set, then IOK_flag() returns 2, thereby indicating
+   that both the IOK and IsUV flags are set (and that the integer value
+   held by $sv should therefore be treated as unsigned).
 
    #####
 
