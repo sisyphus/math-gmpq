@@ -50,6 +50,7 @@ use overload
     @Math::GMPq::EXPORT_OK = qw(
 __GNU_MP_VERSION __GNU_MP_VERSION_MINOR __GNU_MP_VERSION_PATCHLEVEL
 __GNU_MP_RELEASE __GMP_CC __GMP_CFLAGS
+IOK_flag NOK_flag POK_flag
 Rmpq_abs Rmpq_add Rmpq_canonicalize Rmpq_clear Rmpq_cmp Rmpq_cmp_si Rmpq_cmp_ui
 Rmpq_cmp_z Rmpq_add_z Rmpq_sub_z Rmpq_z_sub Rmpq_mul_z Rmpq_div_z Rmpq_z_div
 Rmpq_pow_ui
