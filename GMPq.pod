@@ -383,8 +383,8 @@
     is different (to match the order of the mpq_out_str args).
     To print to STDERR:
        TRmpq_out_str(*stderr, $base, $digits, $op);
-    To print to an open filehandle (let's call it FH):
-       TRmpq_out_str(\*FH, $base, $digits, $op);
+    To print to an open filehandle (let's call it $fh):
+       TRmpq_out_str(\*$fh, $base, $digits, $op);
 
    $bytes_read = Rmpq_inp_str($rop, $base);
     BEST TO USE TRmpq_inp_str INSTEAD.
@@ -408,8 +408,8 @@
     from somewhere other than STDIN.
     To read from STDIN:
        TRmpq_inp_str($rop, *stdin, $base);
-    To read from an open filehandle (let's call it FH):
-       TRmpq_inp_str($rop, \*FH, $base);
+    To read from an open filehandle (let's call it $fh):
+       TRmpq_inp_str($rop, \*$fh, $base);
 
    #######################
 
