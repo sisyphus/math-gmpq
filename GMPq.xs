@@ -277,7 +277,7 @@ int Rmpq_cmp_NV(pTHX_ mpq_t * a, SV * b) {
      __float128 ld, buffer_size;
 
      ld = (__float128)SvNV(b);
-     if(ld != ld) croak("In Rmpq_cmp_NV, cannot coerce a NaN to a Math::GMPq value");
+     if(ld != ld) croak("In Rmpq_cmp_NV, cannot compare a NaN to a Math::GMPq value");
      if(ld != 0 && (ld / ld != 1)) {
        if(ld > 0) return -1;
        return 1;
@@ -326,7 +326,7 @@ int Rmpq_cmp_NV(pTHX_ mpq_t * a, SV * b) {
      long double ld, buffer_size;
 
      ld = (long double)SvNV(b);
-     if(ld != ld) croak("In Rmpq_cmp_NV, cannot coerce a NaN to a Math::GMPq value");
+     if(ld != ld) croak("In Rmpq_cmp_NV, cannot compare a NaN to a Math::GMPq value");
      if(ld != 0 && (ld / ld != 1)) {
        if(ld > 0) return -1;
        return 1;
@@ -355,7 +355,7 @@ int Rmpq_cmp_NV(pTHX_ mpq_t * a, SV * b) {
 #  endif
 #else
      double d = SvNV(b);
-     if(d != d) croak("In Rmpq_cmp_NV, cannot coerce a NaN to a Math::GMPq value");
+     if(d != d) croak("In Rmpq_cmp_NV, cannot compare a NaN to a Math::GMPq value");
      if(d != 0 && (d / d != 1)) {
        if(d > 0) return -1;
        return 1;
