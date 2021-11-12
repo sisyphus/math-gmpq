@@ -183,7 +183,7 @@ cmp_ok(Rmpq_cmp_NV($q, $pinf), '<', 0, "Rmpq_cmp_NV(+inf) handled correctly");
 cmp_ok(Rmpq_cmp_NV($q, $ninf), '>', 0, "Rmpq_cmp_NV(-inf) handled correctly");
 
 eval { Rmpq_cmp_NV($q, $nan); };
-like($@, qr/cannot coerce/, "Rmpq_cmp_NV(nan) handled correctly");
+like($@, qr/cannot compare/, "Rmpq_cmp_NV(nan) handled correctly");
 
 eval { Rmpq_cmp_NV($q, 5); };
 like($@, qr/2nd argument is not an NV/, "Rmpq_cmp_NV(nan) handled correctly");
