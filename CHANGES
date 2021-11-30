@@ -1,4 +1,5 @@
 0.49
+ - Remove all references to _MSC_VER
 
 0.48
  - Fix Rmpq_cmp_NV for doubledouble NVs.
