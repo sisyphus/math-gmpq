@@ -71,9 +71,7 @@ HIGH_SUBNORMAL_EXP       : Highest subnormal exponent value for perl's NV type.
 #endif
 
 #if defined MATH_GMPQ_NEED_LONG_LONG_INT
-#ifndef _MSC_VER
 #include <inttypes.h>
-#endif
 #endif
 
 #ifdef OLDPERL
