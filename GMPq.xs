@@ -112,9 +112,9 @@ void Rmpq_set_si(mpq_t * p1, long p2, long p3) {
 }
 
 void Rmpq_set_str(pTHX_ mpq_t * p1, SV * p2, SV * base) {
-     unsigned long b = SvUV(base);
+     unsigned long b = (unsigned long)SvUV(base);
      if(b == 1 || b > 62) croak ("%u is not a valid base in Rmpq_set_str", b);
-     if(mpq_set_str(*p1, SvPV_nolen(p2), SvUV(base)))
+     if(mpq_set_str(*p1, SvPV_nolen(p2), (int)SvIV(base)))
        croak("String supplied to Rmpq_set_str function is not a valid base %u number", SvUV(base));
 }
 
@@ -376,7 +376,7 @@ void Rmpq_set_f(mpq_t * p, mpf_t * f) {
 SV * Rmpq_get_str(pTHX_ mpq_t * p, SV * base){
      char * out;
      SV * outsv;
-     unsigned long b = SvUV(base);
+     unsigned long b = (unsigned long)SvUV(base);
 
      New(123, out, mpz_sizeinbase(mpq_numref(*p), b) + mpz_sizeinbase(mpq_denref(*p), b) + 3, char);
      if(out == NULL) croak ("Failed to allocate memory in Rmpq_get_str function");
@@ -442,11 +442,11 @@ void Rmpq_div(mpq_t * p1, mpq_t * p2, mpq_t * p3) {
 }
 
 void Rmpq_mul_2exp(pTHX_ mpq_t * p1, mpq_t * p2, SV * p3) {
-     mpq_mul_2exp(*p1, *p2, SvUV(p3));
+     mpq_mul_2exp(*p1, *p2, (mp_bitcnt_t)SvUV(p3));
 }
 
 void Rmpq_div_2exp(pTHX_ mpq_t * p1, mpq_t * p2, SV * p3) {
-     mpq_div_2exp(*p1, *p2, SvUV(p3));
+     mpq_div_2exp(*p1, *p2, (mp_bitcnt_t)SvUV(p3));
 }
 
 void Rmpq_neg(mpq_t * p1, mpq_t * p2) {
@@ -1031,7 +1031,7 @@ NV _mpf_get_float128(mpf_t * x) {
 
 int _rndaz(char *a, IV exponent, UV prec, int display) {
   size_t len;
-  int i, ulp_pos = ULP_INDEX;
+  IV i, ulp_pos = ULP_INDEX;
 
   if(exponent < LOW_SUBNORMAL_EXP) return 0;
 
@@ -1043,7 +1043,7 @@ int _rndaz(char *a, IV exponent, UV prec, int display) {
 
   if(len <= ulp_pos + 1) return 0;          /* no rounding required */
 
-  if(display) printf("len: %u ULP index: %d\n", (unsigned int)len, ulp_pos);
+  if(display) printf("len: %u ULP index: %d\n", (unsigned int)len, (int)ulp_pos);
 
   if(a[ulp_pos + 1] == '0') return 0;       /* no rounding required */
 
@@ -1079,7 +1079,7 @@ double _mpf_get_d_rndn(mpf_t * p) {
   if(_rndaz(buf, (IV)exponent, (UV)n_digits, 0)) {
     /* printf("ROUNDING AWAY FROM ZERO\n"); */
     Safefree(buf);
-    mpf_init2(temp, n_digits);
+    mpf_init2(temp, (mp_bitcnt_t)n_digits);
     mpf_set_ui(temp, 1);
     if(exponent <= 53) mpf_div_2exp(temp, temp, 53 - exponent);
     else mpf_mul_2exp(temp, temp, exponent - 53);
@@ -1944,7 +1944,7 @@ SV * overload_div_eq(pTHX_ SV * a, SV * b, SV * third) {
 SV * overload_pow_eq(pTHX_ SV * a, SV * b, SV * third) {
      if(SvUOK(b) || (SV_IS_IOK(b) && SvIVX(b) >= 0)) {
        SvREFCNT_inc(a);
-       Rmpq_pow_ui(INT2PTR(mpq_t *, SvIVX(SvRV(a))), INT2PTR(mpq_t *, SvIVX(SvRV(a))), SvUVX(b));
+       Rmpq_pow_ui(INT2PTR(mpq_t *, SvIVX(SvRV(a))), INT2PTR(mpq_t *, SvIVX(SvRV(a))), (unsigned long)SvUVX(b));
        return a;
      }
      croak("Invalid argument supplied to Math::GMPq::overload_pow_eq function");
@@ -2322,7 +2322,7 @@ SV * overload_pow(pTHX_ SV * a, SV * b, SV * third) {
        mpq_init(*mpq_t_obj);
        sv_setiv(obj, INT2PTR(IV, mpq_t_obj));
        SvREADONLY_on(obj);
-       Rmpq_pow_ui(mpq_t_obj, INT2PTR(mpq_t *, SvIVX(SvRV(a))), SvUVX(b));
+       Rmpq_pow_ui(mpq_t_obj, INT2PTR(mpq_t *, SvIVX(SvRV(a))), (unsigned long)SvUVX(b));
        return obj_ref;
      }
      if(sv_isobject(b)) {
