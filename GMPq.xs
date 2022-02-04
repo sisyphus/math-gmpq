@@ -797,7 +797,7 @@ SV * overload_sub(pTHX_ SV * a, SV * b, SV * third) {
 
      if(SV_IS_IOK(b)) {
        Rmpq_set_IV(aTHX_ mpq_t_obj, b, newSViv(1));
-       if(third == &PL_sv_yes) mpq_sub(*mpq_t_obj, *mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))));
+       if(SWITCH_ARGS) mpq_sub(*mpq_t_obj, *mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))));
        else mpq_sub(*mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))), *mpq_t_obj);
        return obj_ref;
      }
@@ -806,7 +806,7 @@ SV * overload_sub(pTHX_ SV * a, SV * b, SV * third) {
        if(mpq_set_str(*mpq_t_obj, SvPV_nolen(b), 0))
          croak("Invalid string supplied to Math::GMPq::overload_sub");
        mpq_canonicalize(*mpq_t_obj);
-       if(third == &PL_sv_yes) mpq_sub(*mpq_t_obj, *mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))));
+       if(SWITCH_ARGS) mpq_sub(*mpq_t_obj, *mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))));
        else mpq_sub(*mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))), *mpq_t_obj);
        return obj_ref;
      }
@@ -815,7 +815,7 @@ SV * overload_sub(pTHX_ SV * a, SV * b, SV * third) {
 
        Rmpq_set_NV(aTHX_ mpq_t_obj, b);
 
-       if(third == &PL_sv_yes) mpq_sub(*mpq_t_obj, *mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))));
+       if(SWITCH_ARGS) mpq_sub(*mpq_t_obj, *mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))));
        else mpq_sub(*mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))), *mpq_t_obj);
        return obj_ref;
      }
@@ -826,7 +826,7 @@ SV * overload_sub(pTHX_ SV * a, SV * b, SV * third) {
          return obj_ref;
        }
        if(strEQ(h, "Math::GMPz") || strEQ(h, "Math::GMP")) {
-         if(third == &PL_sv_yes) {
+         if(SWITCH_ARGS) {
            Rmpq_z_sub(mpq_t_obj, INT2PTR(mpz_t *, SvIVX(SvRV(b))), INT2PTR(mpq_t *, SvIVX(SvRV(a))));
          }
          else {
@@ -864,7 +864,7 @@ SV * overload_div(pTHX_ SV * a, SV * b, SV * third) {
        if(SvIV(b) == 0)
          croak("Division by 0 not allowed in Math::GMPq::overload_div");
        Rmpq_set_IV(aTHX_ mpq_t_obj, b, newSViv(1));
-       if(third == &PL_sv_yes) mpq_div(*mpq_t_obj, *mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))));
+       if(SWITCH_ARGS) mpq_div(*mpq_t_obj, *mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))));
        else mpq_div(*mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))), *mpq_t_obj);
        return obj_ref;
      }
@@ -875,7 +875,7 @@ SV * overload_div(pTHX_ SV * a, SV * b, SV * third) {
        mpq_canonicalize(*mpq_t_obj);
        if(!mpq_cmp_ui(*mpq_t_obj, 0, 1))
          croak("Division by 0 not allowed in Math::GMPq::overload_div");
-       if(third == &PL_sv_yes) mpq_div(*mpq_t_obj, *mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))));
+       if(SWITCH_ARGS) mpq_div(*mpq_t_obj, *mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))));
        else mpq_div(*mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))), *mpq_t_obj);
        return obj_ref;
      }
@@ -889,7 +889,7 @@ SV * overload_div(pTHX_ SV * a, SV * b, SV * third) {
 
        Rmpq_set_NV(aTHX_ mpq_t_obj, b);
 
-       if(third == &PL_sv_yes) mpq_div(*mpq_t_obj, *mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))));
+       if(SWITCH_ARGS) mpq_div(*mpq_t_obj, *mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))));
        else mpq_div(*mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))), *mpq_t_obj);
        return obj_ref;
      }
@@ -902,7 +902,7 @@ SV * overload_div(pTHX_ SV * a, SV * b, SV * third) {
          return obj_ref;
        }
        if(strEQ(h, "Math::GMPz") || strEQ(h, "Math::GMP")) {
-         if(third == &PL_sv_yes) {
+         if(SWITCH_ARGS) {
            /* Rmpq_z_div will catch divby0 */
            Rmpq_z_div(mpq_t_obj, INT2PTR(mpz_t *, SvIVX(SvRV(b))), INT2PTR(mpq_t *, SvIVX(SvRV(a))));
          }
@@ -1317,7 +1317,7 @@ SV * overload_gt(pTHX_ mpq_t * a, SV * b, SV * third) {
 
      if(SV_IS_IOK(b)) {
        ret = Rmpq_cmp_IV(aTHX_ a, b, newSViv(1));
-       if(third == &PL_sv_yes) ret *= -1;
+       if(SWITCH_ARGS) ret *= -1;
        if(ret > 0) return newSViv(1);
        return newSViv(0);
      }
@@ -1334,14 +1334,14 @@ SV * overload_gt(pTHX_ mpq_t * a, SV * b, SV * third) {
        mpq_canonicalize(t);
        ret = mpq_cmp(*a, t);
        mpq_clear(t);
-       if(third == &PL_sv_yes) ret *= -1;
+       if(SWITCH_ARGS) ret *= -1;
        if(ret > 0) return newSViv(1);
        return newSViv(0);
      }
 
      if(SV_IS_NOK(b)) {
        ret = Rmpq_cmp_NV(aTHX_ a, b);
-       if(third == &PL_sv_yes) ret *= -1;
+       if(SWITCH_ARGS) ret *= -1;
        if(ret > 0) return newSViv(1);
        return newSViv(0);
      }
@@ -1376,7 +1376,7 @@ SV * overload_gte(pTHX_ mpq_t * a, SV * b, SV * third) {
 
      if(SV_IS_IOK(b)) {
        ret = Rmpq_cmp_IV(aTHX_ a, b, newSViv(1));
-       if(third == &PL_sv_yes) ret *= -1;
+       if(SWITCH_ARGS) ret *= -1;
        if(ret >= 0) return newSViv(1);
        return newSViv(0);
      }
@@ -1393,14 +1393,14 @@ SV * overload_gte(pTHX_ mpq_t * a, SV * b, SV * third) {
        mpq_canonicalize(t);
        ret = mpq_cmp(*a, t);
        mpq_clear(t);
-       if(third == &PL_sv_yes) ret *= -1;
+       if(SWITCH_ARGS) ret *= -1;
        if(ret >= 0) return newSViv(1);
        return newSViv(0);
      }
 
      if(SV_IS_NOK(b)) {
        ret = Rmpq_cmp_NV(aTHX_ a, b);
-       if(third == &PL_sv_yes) ret *= -1;
+       if(SWITCH_ARGS) ret *= -1;
        if(ret >= 0) return newSViv(1);
        return newSViv(0);
      }
@@ -1435,7 +1435,7 @@ SV * overload_lt(pTHX_ mpq_t * a, SV * b, SV * third) {
 
      if(SV_IS_IOK(b)) {
        ret = Rmpq_cmp_IV(aTHX_ a, b, newSViv(1));
-       if(third == &PL_sv_yes) ret *= -1;
+       if(SWITCH_ARGS) ret *= -1;
        if(ret < 0) return newSViv(1);
        return newSViv(0);
      }
@@ -1452,14 +1452,14 @@ SV * overload_lt(pTHX_ mpq_t * a, SV * b, SV * third) {
        mpq_canonicalize(t);
        ret = mpq_cmp(*a, t);
        mpq_clear(t);
-       if(third == &PL_sv_yes) ret *= -1;
+       if(SWITCH_ARGS) ret *= -1;
        if(ret < 0) return newSViv(1);
        return newSViv(0);
      }
 
      if(SV_IS_NOK(b)) {
        ret = Rmpq_cmp_NV(aTHX_ a, b);
-       if(third == &PL_sv_yes) ret *= -1;
+       if(SWITCH_ARGS) ret *= -1;
        if(ret < 0) return newSViv(1);
        return newSViv(0);
      }
@@ -1494,7 +1494,7 @@ SV * overload_lte(pTHX_ mpq_t * a, SV * b, SV * third) {
 
      if(SV_IS_IOK(b)) {
        ret = Rmpq_cmp_IV(aTHX_ a, b, newSViv(1));
-       if(third == &PL_sv_yes) ret *= -1;
+       if(SWITCH_ARGS) ret *= -1;
        if(ret <= 0) return newSViv(1);
        return newSViv(0);
      }
@@ -1511,14 +1511,14 @@ SV * overload_lte(pTHX_ mpq_t * a, SV * b, SV * third) {
        mpq_canonicalize(t);
        ret = mpq_cmp(*a, t);
        mpq_clear(t);
-       if(third == &PL_sv_yes) ret *= -1;
+       if(SWITCH_ARGS) ret *= -1;
        if(ret <= 0) return newSViv(1);
        return newSViv(0);
      }
 
      if(SV_IS_NOK(b)) {
        ret = Rmpq_cmp_NV(aTHX_ a, b);
-       if(third == &PL_sv_yes) ret *= -1;
+       if(SWITCH_ARGS) ret *= -1;
        if(ret <= 0) return newSViv(1);
        return newSViv(0);
      }
@@ -1554,7 +1554,7 @@ SV * overload_spaceship(pTHX_ mpq_t * a, SV * b, SV * third) {
 
      if(SV_IS_IOK(b)) {
        ret = Rmpq_cmp_IV(aTHX_ a, b, newSViv(1));
-       if(third == &PL_sv_yes) ret *= -1;
+       if(SWITCH_ARGS) ret *= -1;
        return newSViv(ret);
      }
 
@@ -1570,13 +1570,13 @@ SV * overload_spaceship(pTHX_ mpq_t * a, SV * b, SV * third) {
        mpq_canonicalize(t);
        ret = mpq_cmp(*a, t);
        mpq_clear(t);
-       if(third == &PL_sv_yes) ret *= -1;
+       if(SWITCH_ARGS) ret *= -1;
        return newSViv(ret);
      }
 
      if(SV_IS_NOK(b)) {
        ret = Rmpq_cmp_NV(aTHX_ a, b);
-       if(third == &PL_sv_yes) ret *= -1;
+       if(SWITCH_ARGS) ret *= -1;
        return newSViv(ret);
      }
 
@@ -2312,7 +2312,7 @@ SV * overload_pow(pTHX_ SV * a, SV * b, SV * third) {
      SV * obj_ref, * obj;
      const char *h;
 
-     if(third == &PL_sv_yes) croak("Raising a value to an mpq_t power is not allowed in '**' operation in Math::GMPq::overload_pow");
+     if(SWITCH_ARGS) croak("Raising a value to an mpq_t power is not allowed in '**' operation in Math::GMPq::overload_pow");
 
      if(SvUOK(b) || (SV_IS_IOK(b) && SvIVX(b) >= 0)) {
        New(1, mpq_t_obj, 1, mpq_t);
