@@ -79,3 +79,10 @@ else {
   warn "\nSkipping tests - no Math::MPFR\n";
   print "ok 1\n";
 }
+
+# Check that the &PL_sv_yes bug
+# does not rear its ugly head here
+# See https://github.com/sisyphus/math-decimal64/pull/1
+
+sub hmmmm () {!0}
+sub aaarh () {!1}
