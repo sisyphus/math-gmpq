@@ -113,9 +113,9 @@ void Rmpq_set_si(mpq_t * p1, long p2, long p3) {
 
 void Rmpq_set_str(pTHX_ mpq_t * p1, SV * p2, SV * base) {
      unsigned long b = (unsigned long)SvUV(base);
-     if(b == 1 || b > 62) croak ("%u is not a valid base in Rmpq_set_str", b);
+     if(b == 1 || b > 62) croak ("%u is not a valid base in Rmpq_set_str", (int)b);
      if(mpq_set_str(*p1, SvPV_nolen(p2), (int)SvIV(base)))
-       croak("String supplied to Rmpq_set_str function is not a valid base %u number", SvUV(base));
+       croak("String supplied to Rmpq_set_str function is not a valid base %u number", (int)SvUV(base));
 }
 
 
