@@ -238,7 +238,17 @@ SV * _wrap_count(pTHX) {
      return newSVuv(PL_sv_count);
 }
 
+/* Provide a duplicate of Math::GMPq::_has_pv_nv_bug. *
+ * This allows GMPq.pm to determine the value of      *
+ * the constant GMPQ_PV_NV_BUG at compile time.       */
 
+int _has_pv_nv_bug(void) {
+#if defined(GMPQ_PV_NV_BUG)
+     return 1;
+#else
+     return 0;
+#endif
+}
 MODULE = Math::GMPq::Random  PACKAGE = Math::GMPq::Random
 
 PROTOTYPES: DISABLE
@@ -437,5 +447,9 @@ _wrap_count ()
 CODE:
   RETVAL = _wrap_count (aTHX);
 OUTPUT:  RETVAL
+
+
+int
+_has_pv_nv_bug ()
 
 
