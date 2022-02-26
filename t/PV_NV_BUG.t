@@ -18,15 +18,15 @@ warn " The string 'nan' apparently numifies to zero\n"
 cmp_ok(GMPQ_PV_NV_BUG, '==', Math::GMPq::_has_pv_nv_bug(),
        "Perl environment and XS environment agree");       # Test 1
 
-my $nv_1 = 1.3;
+my $nv_1 = 1.5;
 my $s    = "$nv_1";
 
 cmp_ok(_ITSA($nv_1), '==', 3, "NV slot will be used");     # Test 2
 
-cmp_ok(Math::GMPq->new($nv_1), '==', '5854679515581645/4503599627370496',
+cmp_ok(Math::GMPq->new($nv_1), '==', '3/2',
        "NV slot was used by new()");                       # Test 3
 
-cmp_ok(Math::GMPq->new(1) * $nv_1, '==', '5854679515581645/4503599627370496',
+cmp_ok(Math::GMPq->new(1) * $nv_1, '==', '3/2',
        "NV slot was used by overload_mul()");              # Test 4
 
 my $nv_2 = '1.7';
