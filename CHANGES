@@ -1,5 +1,6 @@
 0.52
- - Limit test in Makefile.PL for GMPQ_PV_NV_BUG to perl-5.35.9 and earlier
+ - Limit test in Makefile.PL for GMPQ_PV_NV_BUG to perl-5.35.9 and earlier.
+ - Enable building on Cywin quadmath builds. (Add '-lquadmath' to LIBS.)
 
 0.51
  - Fix bug re inconsistent settings of POK and NOK flag, which manifests itself as (eg):
