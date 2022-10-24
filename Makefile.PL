@@ -101,13 +101,17 @@ else { print "Not defining GMPQ_PV_NV_BUG as perl version >= 5.035010\n\n" }
 
 ####################################
 
+my $libopts = '-lgmp';
+$libopts    = '-lquadmath -lgmp'
+  if ($^O eq 'cygwin' && $use_quadmath);
+
 my %options = (
   NAME => 'Math::GMPq',
   AUTHOR => 'Sisyphus (sisyphus at (@) cpan dot (.) org)',
   ABSTRACT => 'Perl interface to the GMP rational functions',
   DEFINE   => $defines,
   LIBS => [
-    '-lgmp'
+    $libopts
   ],
   LICENSE  => 'perl',
   VERSION_FROM => 'GMPq.pm',
