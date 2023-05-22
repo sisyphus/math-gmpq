@@ -1843,6 +1843,9 @@ SV * overload_mul_eq(pTHX_ SV * a, SV * b, SV * third) {
          Rmpq_mul_z(INT2PTR(mpq_t *, SvIVX(SvRV(a))), INT2PTR(mpq_t *, SvIVX(SvRV(a))), INT2PTR(mpz_t *, SvIVX(SvRV(b))));
          return a;
        }
+       if(SvIV(get_sv("Math::GMPq::RETYPE", 0)) && strEQ(h, "Math::MPFR")) {
+           _overload_callback("Math::MPFR::overload_mul", "Math::GMPq::overload_mul", newSViv(0));
+       }
      }
 
      SvREFCNT_dec(a);
@@ -1899,6 +1902,9 @@ SV * overload_add_eq(pTHX_ SV * a, SV * b, SV * third) {
          Rmpq_add_z(INT2PTR(mpq_t *, SvIVX(SvRV(a))), INT2PTR(mpq_t *, SvIVX(SvRV(a))), INT2PTR(mpz_t *, SvIVX(SvRV(b))));
          return a;
        }
+       if(SvIV(get_sv("Math::GMPq::RETYPE", 0)) && strEQ(h, "Math::MPFR")) {
+           _overload_callback("Math::MPFR::overload_add", "Math::GMPq::overload_add", newSViv(0));
+       }
      }
 
      SvREFCNT_dec(a);
@@ -1954,6 +1960,9 @@ SV * overload_sub_eq(pTHX_ SV * a, SV * b, SV * third) {
        if(strEQ(h, "Math::GMPz") || strEQ(h, "Math::GMP")) {
          Rmpq_sub_z(INT2PTR(mpq_t *, SvIVX(SvRV(a))), INT2PTR(mpq_t *, SvIVX(SvRV(a))), INT2PTR(mpz_t *, SvIVX(SvRV(b))));
          return a;
+       }
+       if(SvIV(get_sv("Math::GMPq::RETYPE", 0)) && strEQ(h, "Math::MPFR")) {
+           _overload_callback("Math::MPFR::overload_sub", "Math::GMPq::overload_sub", &PL_sv_yes);
        }
      }
 
@@ -2024,6 +2033,9 @@ SV * overload_div_eq(pTHX_ SV * a, SV * b, SV * third) {
          Rmpq_div_z(INT2PTR(mpq_t *, SvIVX(SvRV(a))), INT2PTR(mpq_t *, SvIVX(SvRV(a))), INT2PTR(mpz_t *, SvIVX(SvRV(b))));
          return a;
        }
+       if(SvIV(get_sv("Math::GMPq::RETYPE", 0)) && strEQ(h, "Math::MPFR")) {
+           _overload_callback("Math::MPFR::overload_div", "Math::GMPq::overload_div", &PL_sv_yes);
+       }
      }
 
      SvREFCNT_dec(a);
@@ -2032,11 +2044,20 @@ SV * overload_div_eq(pTHX_ SV * a, SV * b, SV * third) {
 }
 
 SV * overload_pow_eq(pTHX_ SV * a, SV * b, SV * third) {
+     SvREFCNT_inc(a);
      if(SvUOK(b) || (SV_IS_IOK(b) && SvIVX(b) >= 0)) {
-       SvREFCNT_inc(a);
        Rmpq_pow_ui(INT2PTR(mpq_t *, SvIVX(SvRV(a))), INT2PTR(mpq_t *, SvIVX(SvRV(a))), (unsigned long)SvUVX(b));
        return a;
      }
+
+     if(sv_isobject(b) && SvIV(get_sv("Math::GMPq::RETYPE", 0))) {
+       const char *h = HvNAME(SvSTASH(SvRV(b)));
+       if(strEQ(h, "Math::MPFR")) {
+           _overload_callback("Math::MPFR::overload_pow", "Math::GMPq::overload_pow", &PL_sv_yes);
+       }
+     }
+
+     SvREFCNT_dec(a);
      croak("Invalid argument supplied to Math::GMPq::overload_pow_eq function");
 }
 
