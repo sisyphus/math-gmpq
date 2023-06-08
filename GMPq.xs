@@ -2396,28 +2396,24 @@ SV * ___GMP_CFLAGS(pTHX) {
 #endif
 }
 
-SV * overload_inc(pTHX_ SV * p, SV * second, SV * third) {
+void overload_inc(pTHX_ SV * p, SV * second, SV * third) {
      mpq_t one;
 
      mpq_init(one);
      mpq_set_ui(one, 1, 1);
 
-     SvREFCNT_inc(p);
      mpq_add(*(INT2PTR(mpq_t *, SvIVX(SvRV(p)))), *(INT2PTR(mpq_t *, SvIVX(SvRV(p)))), one);
      mpq_clear(one);
-     return p;
 }
 
-SV * overload_dec(pTHX_ SV * p, SV * second, SV * third) {
+void overload_dec(pTHX_ SV * p, SV * second, SV * third) {
      mpq_t one;
 
      mpq_init(one);
      mpq_set_ui(one, 1, 1);
 
-     SvREFCNT_inc(p);
      mpq_sub(*(INT2PTR(mpq_t *, SvIVX(SvRV(p)))), *(INT2PTR(mpq_t *, SvIVX(SvRV(p)))), one);
      mpq_clear(one);
-     return p;
 }
 
 SV * _wrap_count(pTHX) {
@@ -3705,23 +3701,41 @@ CODE:
 OUTPUT:  RETVAL
 
 
-SV *
+void
 overload_inc (p, second, third)
 	SV *	p
 	SV *	second
 	SV *	third
-CODE:
-  RETVAL = overload_inc (aTHX_ p, second, third);
-OUTPUT:  RETVAL
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        overload_inc(aTHX_ p, second, third);
+        if (PL_markstack_ptr != temp) {
+          /* truly void, because dXSARGS not invoked */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
+        }
+        /* must have used dXSARGS; list context implied */
+        return; /* assume stack size is correct */
 
-SV *
+void
 overload_dec (p, second, third)
 	SV *	p
 	SV *	second
 	SV *	third
-CODE:
-  RETVAL = overload_dec (aTHX_ p, second, third);
-OUTPUT:  RETVAL
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        overload_dec(aTHX_ p, second, third);
+        if (PL_markstack_ptr != temp) {
+          /* truly void, because dXSARGS not invoked */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
+        }
+        /* must have used dXSARGS; list context implied */
+        return; /* assume stack size is correct */
 
 SV *
 _wrap_count ()
