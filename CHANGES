@@ -1,5 +1,7 @@
 Revision history for Perl module Math::GMPq
 
+0.55
+
 0.54
  - Expand cross-class overloading to include +=, -=, *=, /=, and **= operations,
    conditionally available only when $Math::GMPq::RETYPE has been set to 1.
