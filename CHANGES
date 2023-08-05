@@ -1,5 +1,7 @@
 Revision history for Perl module Math::GMPq
 
+0.56
+
 0.55
  - Fix bugs in t/overload_op_eq.t
 
