@@ -22,28 +22,55 @@ my $q  = Math::GMPq->new('1/11');
 my $fr = 0;
 $fr = Math::MPFR->new(17.1) if $have_mpfr;
 
-# $Math::GMPz::RETYPE 0 (the default).
+cmp_ok($Math::GMPq::RETYPE, '==', 0, "retyping not allowed");
 
 eval {$q *= $fr;};
-like($@, qr/^Invalid argument supplied to Math::GMPq::overload_mul_eq/, '$q *= $q is illegal');
+if(ref($fr)) {
+  like($@, qr/^Invalid argument supplied to Math::GMPq::overload_mul_eq/, '$q *= $fr is illegal');
+}
+else {
+  cmp_ok($q, '==', 0, "multiplication by scalar ok");
+}
 
 eval {$q += $fr;};
-like($@, qr/^Invalid argument supplied to Math::GMPq::overload_add_eq/, '$q += $fr is illegal');
+if(ref($fr)) {
+  like($@, qr/^Invalid argument supplied to Math::GMPq::overload_add_eq/, '$q += $fr is illegal');
+}
+else {
+  cmp_ok($q, '==', 0, "addition of scalar ok");
+}
 
 eval {$q -= $fr;};
-like($@, qr/^Invalid argument supplied to Math::GMPq::overload_sub_eq/, '$q -= $fr is illegal');
+if(ref($fr)) {
+  like($@, qr/^Invalid argument supplied to Math::GMPq::overload_sub_eq/, '$q -= $fr is illegal');
+}
+else {
+  cmp_ok($q, '==', 0, "subtraction of scalar ok");
+}
 
 eval {$q /= $fr;};
-like($@, qr/^Invalid argument supplied to Math::GMPq::overload_div_eq/, '$q /= $fr is illegal');
+if(ref($fr)) {
+  like($@, qr/^Invalid argument supplied to Math::GMPq::overload_div_eq/, '$q /= $fr is illegal');
+}
+else {
+  like($@, qr/^Division by 0 not allowed in Math::GMPq::overload_div_eq/, 'division by zero is illegal')
+}
 
 eval {$q **= $fr;};
-like($@, qr/^Invalid argument supplied to Math::GMPq::overload_pow_eq/, '$q **= $fr is illegal');
+if(ref($fr)) {
+  like($@, qr/^Invalid argument supplied to Math::GMPq::overload_pow_eq/, '$q **= $fr is illegal');
+}
+else {
+  cmp_ok($q, '==', 1, "raising to power of 0 ok");
+}
 
 $Math::GMPq::RETYPE = 1;
 
 ############################################
 
 if($have_mpfr) {
+
+  cmp_ok($Math::GMPq::RETYPE, '==', 1, "retyping allowed");
 
   $q = Math::GMPq->new('1/11');
   cmp_ok(ref($q), 'eq', 'Math::GMPq', '$q is a Math::GMPq object');
