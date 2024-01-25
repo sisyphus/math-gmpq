@@ -1,6 +1,7 @@
 Revision history for Perl module Math::GMPq
 
 0.57
+ - Silence pointless compiler warnings.
 
 0.56
  - Skip Math::MPFR checks in t/overload_cross_class.t and t/overload_op_eq.t if
