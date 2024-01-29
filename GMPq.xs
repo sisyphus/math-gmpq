@@ -13,6 +13,7 @@
 
 
 #include "math_gmpq_include.h"
+#include "math_gmpq_unused.h"
 
 int _is_infstring(char * s) {
   int sign = 1;
@@ -156,8 +157,7 @@ void _mpf_set_doubledouble(mpf_t * q, SV * p) {
      mpf_clear(t);
 
 #else
-     PERL_UNUSED_ARG(q);
-     PERL_UNUSED_ARG(p);
+     PERL_UNUSED_ARG2(q, p);
      croak("_mpf_set_doubledouble not implemented because NV is not a doubledouble");
 
 #endif
@@ -968,8 +968,7 @@ SV * overload_div(pTHX_ SV * a, SV * b, SV * third) {
 SV * overload_string(pTHX_ mpq_t * p, SV * second, SV * third) {
      char * out;
      SV * outsv;
-     PERL_UNUSED_ARG(second);
-     PERL_UNUSED_ARG(third);
+     PERL_UNUSED_ARG2(second, third);
 
      New(123, out, mpz_sizeinbase(mpq_numref(*p), 10) + mpz_sizeinbase(mpq_denref(*p), 10) + 3, char);
      if(out == NULL) croak ("Failed to allocate memory in overload_string function");
@@ -1322,16 +1321,14 @@ SV * Rmpq_get_NV(pTHX_ mpq_t * x) {
 }
 
 SV * overload_num(pTHX_ mpq_t * p, SV * second, SV * third) {
-     PERL_UNUSED_ARG(second);
-     PERL_UNUSED_ARG(third);
+     PERL_UNUSED_ARG2(second, third);
   return Rmpq_get_NV(aTHX_ p);
 }
 
 SV * overload_copy(pTHX_ mpq_t * p, SV * second, SV * third) {
      mpq_t * mpq_t_obj;
      SV * obj_ref, * obj;
-     PERL_UNUSED_ARG(second);
-     PERL_UNUSED_ARG(third);
+     PERL_UNUSED_ARG2(second, third);
 
      New(1, mpq_t_obj, 1, mpq_t);
      if(mpq_t_obj == NULL) croak("Failed to allocate memory in overload_copy function");
@@ -1348,8 +1345,7 @@ SV * overload_copy(pTHX_ mpq_t * p, SV * second, SV * third) {
 SV * overload_abs(pTHX_ mpq_t * p, SV * second, SV * third) {
      mpq_t * mpq_t_obj;
      SV * obj_ref, * obj;
-     PERL_UNUSED_ARG(second);
-     PERL_UNUSED_ARG(third);
+     PERL_UNUSED_ARG2(second, third);
 
      New(1, mpq_t_obj, 1, mpq_t);
      if(mpq_t_obj == NULL) croak("Failed to allocate memory in overload_abs function");
@@ -1792,8 +1788,7 @@ SV * overload_not_equiv(pTHX_ mpq_t * a, SV * b, SV * third) {
 }
 
 SV * overload_not(pTHX_ mpq_t * a, SV * second, SV * third) {
-     PERL_UNUSED_ARG(second);
-     PERL_UNUSED_ARG(third);
+     PERL_UNUSED_ARG2(second, third);
      if(mpq_cmp_ui(*a, 0, 1)) return newSViv(0);
      return newSViv(1);
 }
@@ -1802,8 +1797,7 @@ SV * overload_int(pTHX_ mpq_t * p, SV * second, SV * third) {
      mpz_t z_num, z_den;
      mpq_t * mpq_t_obj;
      SV * obj_ref, * obj;
-     PERL_UNUSED_ARG(second);
-     PERL_UNUSED_ARG(third);
+     PERL_UNUSED_ARG2(second, third);
 
      New(1, mpq_t_obj, 1, mpq_t);
      if(mpq_t_obj == NULL) croak("Failed to allocate memory in overload_int function");
@@ -2453,8 +2447,7 @@ SV * ___GMP_CFLAGS(pTHX) {
 
 void overload_inc(pTHX_ SV * p, SV * second, SV * third) {
      mpq_t one;
-     PERL_UNUSED_ARG(second);
-     PERL_UNUSED_ARG(third);
+     PERL_UNUSED_ARG2(second, third);
 
      mpq_init(one);
      mpq_set_ui(one, 1, 1);
@@ -2465,8 +2458,7 @@ void overload_inc(pTHX_ SV * p, SV * second, SV * third) {
 
 void overload_dec(pTHX_ SV * p, SV * second, SV * third) {
      mpq_t one;
-     PERL_UNUSED_ARG(second);
-     PERL_UNUSED_ARG(third);
+     PERL_UNUSED_ARG2(second, third);
 
      mpq_init(one);
      mpq_set_ui(one, 1, 1);
