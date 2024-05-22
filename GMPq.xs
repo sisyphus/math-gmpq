@@ -2260,6 +2260,7 @@ SV * wrap_gmp_sprintf(pTHX_ SV * s, SV * a, SV * b, int buflen) {
          return newSViv(ret);
        }
 
+       Safefree(stream); /* In case the ensuing croak() is encased in an eval{} block */
        croak("Unrecognised object supplied as argument to Rmpq_sprintf");
      }
 
@@ -2291,6 +2292,7 @@ SV * wrap_gmp_sprintf(pTHX_ SV * s, SV * a, SV * b, int buflen) {
        return newSViv(ret);
      }
 
+     Safefree(stream); /* In case the ensuing croak() is encased in an eval{} block */
      croak("Unrecognised type supplied as argument to Rmpq_sprintf");
 }
 
@@ -2327,6 +2329,7 @@ SV * wrap_gmp_snprintf(pTHX_ SV * s, SV * bytes, SV * a, SV * b, int buflen) {
          return newSViv(ret);
        }
 
+       Safefree(stream); /* In case the ensuing croak() is encased in an eval{} block */
        croak("Unrecognised object supplied as argument to Rmpq_snprintf");
      }
 
@@ -2358,6 +2361,7 @@ SV * wrap_gmp_snprintf(pTHX_ SV * s, SV * bytes, SV * a, SV * b, int buflen) {
        return newSViv(ret);
      }
 
+     Safefree(stream); /* In case the ensuing croak() is encased in an eval{} block */
      croak("Unrecognised type supplied as argument to Rmpq_snprintf");
 }
 
