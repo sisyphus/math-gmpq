@@ -548,13 +548,13 @@
     Math::MPFR objects can provided as the second arg  with '+', '-',
     '*', '/' and '**'  operators - in which case the operation will
     return a Math::MPFR object.
-    If $Math::GMPq::RETYPE is set to 1, then Math::MPFR objects can also
-    be provided as the second arg with '+=', '*=', '-=', '/=' and '**='
-    operators. In such instances, the Math::GMPq object becomes
-    (is "retyped" to) a Math::MPFR object that contains the result of
-    the operation, using default Math::MPFR precision and default
-    Math::MPFR rounding mode.
-    $Math::GMPq::RETYPE is initially set to 0 (false).
+    If $Math::GMPq::RETYPE is set to 1 (as is the default setting), then
+    Math::MPFR objects can also be provided as the second arg with
+   '+=', '*=', '-=', '/=' and '**=' operators. In such instances,
+    the Math::GMPq object becomes (is "retyped" to) a Math::MPFR object
+    that contains the result of the operation, using default Math::MPFR
+    precision and default Math::MPFR rounding mode.
+    Set $Math::GMPq::RETYPE to 0, to disable this capability.
 
     To determine the type and value of the second argument the subroutine
     works through the following steps (in order), using the first value
