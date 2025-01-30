@@ -1,5 +1,7 @@
 Revision history for Perl module Math::GMPq
 
+0.58
+
 0.57
  - On Windows only: set the constant GMPQ_WIN32_FMT_BUG to 0 if the gmp
    library was built with -D__USE_MINGW_ANSI_STDIO; else set it to 1.
