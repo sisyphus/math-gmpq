@@ -23,13 +23,9 @@ if($Config{nvtype} eq 'double') {
   cmp_ok($buf, 'eq', '1.4142135623731', "sqrt 2 ok for 'double'");
 }
 
-unless($^O =~ /MSWin32/i && $Config{archname} =~ /x86/) {
-  # I have no fucking idea why this stipulation should be needed.
-  # All I know is that it *is* needed.
-  if($Config{nvtype} eq 'long double') {
-    Rmpq_sprintf($buf, "%.14Lg", $nv, $buflen);
-    cmp_ok($buf, 'eq', '1.4142135623731', "sqrt 2 ok for 'long double'");
-  }
+if($Config{nvtype} eq 'long double' && !Math::GMPq::GMPQ_WIN32_FMT_BUG) {
+  Rmpq_sprintf($buf, "%.14Lg", $nv, $buflen);
+  cmp_ok($buf, 'eq', '1.4142135623731', "sqrt 2 ok for 'long double'");
 }
 
 Rmpq_sprintf($buf, "%Qd", Math::GMPq->new('19/21'), $buflen);

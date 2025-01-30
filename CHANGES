@@ -1,7 +1,10 @@
 Revision history for Perl module Math::GMPq
 
 0.57
- - Silence pointless compiler warnings.
+ - On Windows only: set the constant GMPQ_WIN32_FMT_BUG to 0 if the gmp
+   library was built with -D__USE_MINGW_ANSI_STDIO; else set it to 1.
+ - Fix https://rt.cpan.org/Public/Bug/Display.html?id=158590
+   Thanks to @twata_1.
  - Change initial setting of Math::GMPq::RETYPE from 0 to 1.
 
 0.56

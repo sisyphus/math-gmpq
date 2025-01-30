@@ -2,6 +2,7 @@
     use strict;
     use warnings;
     use Math::GMPq::Random;
+    use Math::GMPq::V;
     require Exporter;
     *import = \&Exporter::import;
     require DynaLoader;
@@ -17,6 +18,7 @@
     use constant _MATH_GMP_T    => 9;
     use constant _MATH_MPC_T    => 10;
     use constant GMPQ_PV_NV_BUG => Math::GMPq::Random::_has_pv_nv_bug();
+    use constant GMPQ_WIN32_FMT_BUG => Math::GMPq::V::_buggy();
 
 use subs qw( __GNU_MP_VERSION __GNU_MP_VERSION_MINOR __GNU_MP_VERSION_PATCHLEVEL
              __GNU_MP_RELEASE __GMP_CC __GMP_CFLAGS GMP_LIMB_BITS GMP_NAIL_BITS);
@@ -55,7 +57,7 @@ IOK_flag NOK_flag POK_flag
     );
 
 my @tagged = qw(
-GMPQ_PV_NV_BUG
+GMPQ_PV_NV_BUG GMPQ_WIN32_FMT_BUG
 Rmpq_abs Rmpq_add Rmpq_canonicalize Rmpq_clear Rmpq_cmp Rmpq_cmp_si Rmpq_cmp_ui
 Rmpq_cmp_z Rmpq_add_z Rmpq_sub_z Rmpq_z_sub Rmpq_mul_z Rmpq_div_z Rmpq_z_div
 Rmpq_pow_ui
