@@ -112,7 +112,7 @@ void Rmpq_set_si(mpq_t * p1, long p2, long p3) {
      mpq_set_si(*p1, p2, p3);
 }
 
-void Rmpq_set_str(pTHX_ mpq_t * p1, SV * p2, SV * base) {
+void _Rmpq_set_str(pTHX_ mpq_t * p1, SV * p2, SV * base) {
      unsigned long b = (unsigned long)SvUV(base);
      if(b == 1 || b > 62) croak ("%u is not a valid base in Rmpq_set_str", (int)b);
      if(mpq_set_str(*p1, SvPV_nolen(p2), (int)SvIV(base)))
@@ -667,7 +667,7 @@ int Rmpq_cmp_IV(pTHX_ mpq_t * q, SV * iv1, SV * iv2) {
 
 /* Finish typemapping - typemap 1st arg only */
 
-SV * overload_mul(pTHX_ SV * a, SV * b, SV * third) {
+SV * _overload_mul(pTHX_ SV * a, SV * b, SV * third) {
      mpq_t * mpq_t_obj;
      SV * obj_ref, * obj;
      const char * h;
@@ -734,7 +734,59 @@ SV * overload_mul(pTHX_ SV * a, SV * b, SV * third) {
      croak("Invalid argument supplied to Math::GMPq::overload_mul");
 }
 
-SV * overload_add(pTHX_ SV * a, SV * b, SV * third) {
+void Rmpq_and (mpq_t * rop, mpq_t * a, mpq_t * b) {
+     mpz_t az, bz;
+     mpz_init(az);
+     mpz_init(bz);
+
+     mpz_set_q( az, *a );
+     mpz_set_q( bz, *b );
+     mpz_and  ( az, az, bz );
+
+     mpq_set_z(*rop, az);
+     mpz_clear(az);
+     mpz_clear(bz);
+}
+
+void Rmpq_ior (mpq_t * rop, mpq_t * a, mpq_t * b) {
+     mpz_t az, bz;
+     mpz_init(az);
+     mpz_init(bz);
+
+     mpz_set_q( az, *a );
+     mpz_set_q( bz, *b );
+     mpz_ior  ( az, az, bz );
+
+     mpq_set_z(*rop, az);
+     mpz_clear(az);
+     mpz_clear(bz);
+}
+
+void Rmpq_xor (mpq_t * rop, mpq_t * a, mpq_t * b) {
+     mpz_t az, bz;
+     mpz_init(az);
+     mpz_init(bz);
+
+     mpz_set_q( az, *a );
+     mpz_set_q( bz, *b );
+     mpz_xor  ( az, az, bz );
+
+     mpq_set_z(*rop, az);
+     mpz_clear(az);
+     mpz_clear(bz);
+}
+
+void Rmpq_com (mpq_t * rop, mpq_t * a) {
+     mpz_t az;
+     mpz_init(az);
+
+     mpz_set_q( az, *a );
+     mpz_com  (az, az);
+     mpq_set_z(*rop, az);
+     mpz_clear(az);
+}
+
+SV * _overload_add(pTHX_ SV * a, SV * b, SV * third) {
      mpq_t * mpq_t_obj;
      SV * obj_ref, * obj;
      const char *h;
@@ -801,7 +853,7 @@ SV * overload_add(pTHX_ SV * a, SV * b, SV * third) {
      croak("Invalid argument supplied to Math::GMPq::overload_add");
 }
 
-SV * overload_sub(pTHX_ SV * a, SV * b, SV * third) {
+SV * _overload_sub(pTHX_ SV * a, SV * b, SV * third) {
      mpq_t * mpq_t_obj;
      SV * obj_ref, * obj;
      const char *h;
@@ -876,7 +928,7 @@ SV * overload_sub(pTHX_ SV * a, SV * b, SV * third) {
 
 }
 
-SV * overload_div(pTHX_ SV * a, SV * b, SV * third) {
+SV * _overload_div(pTHX_ SV * a, SV * b, SV * third) {
      mpq_t * mpq_t_obj;
      SV * obj_ref, * obj;
      const char *h;
@@ -1359,7 +1411,7 @@ SV * overload_abs(pTHX_ mpq_t * p, SV * second, SV * third) {
      return obj_ref;
 }
 
-SV * overload_gt(pTHX_ mpq_t * a, SV * b, SV * third) {
+SV * _overload_gt(pTHX_ mpq_t * a, SV * b, SV * third) {
      mpq_t t;
      int ret;
 
@@ -1424,7 +1476,7 @@ SV * overload_gt(pTHX_ mpq_t * a, SV * b, SV * third) {
      croak("Invalid argument supplied to Math::GMPq::overload_gt");
 }
 
-SV * overload_gte(pTHX_ mpq_t * a, SV * b, SV * third) {
+SV * _overload_gte(pTHX_ mpq_t * a, SV * b, SV * third) {
      mpq_t t;
      int ret;
 
@@ -1489,7 +1541,7 @@ SV * overload_gte(pTHX_ mpq_t * a, SV * b, SV * third) {
      croak("Invalid argument supplied to Math::GMPq::overload_gte");
 }
 
-SV * overload_lt(pTHX_ mpq_t * a, SV * b, SV * third) {
+SV * _overload_lt(pTHX_ mpq_t * a, SV * b, SV * third) {
      mpq_t t;
      int ret;
 
@@ -1554,7 +1606,7 @@ SV * overload_lt(pTHX_ mpq_t * a, SV * b, SV * third) {
      croak("Invalid argument supplied to Math::GMPq::overload_lt");
 }
 
-SV * overload_lte(pTHX_ mpq_t * a, SV * b, SV * third) {
+SV * _overload_lte(pTHX_ mpq_t * a, SV * b, SV * third) {
      mpq_t t;
      int ret;
 
@@ -1620,7 +1672,7 @@ SV * overload_lte(pTHX_ mpq_t * a, SV * b, SV * third) {
      croak("Invalid argument supplied to Math::GMPq::overload_lte");
 }
 
-SV * overload_spaceship(pTHX_ mpq_t * a, SV * b, SV * third) {
+SV * _overload_spaceship(pTHX_ mpq_t * a, SV * b, SV * third) {
      mpq_t t;
      int ret;
 
@@ -1678,7 +1730,7 @@ SV * overload_spaceship(pTHX_ mpq_t * a, SV * b, SV * third) {
      croak("Invalid argument supplied to Math::GMPq::overload_spaceship");
 }
 
-SV * overload_equiv(pTHX_ mpq_t * a, SV * b, SV * third) {
+SV * _overload_equiv(pTHX_ mpq_t * a, SV * b, SV * third) {
      mpq_t t;
      int ret = 0;
      PERL_UNUSED_ARG(third);
@@ -1730,7 +1782,7 @@ SV * overload_equiv(pTHX_ mpq_t * a, SV * b, SV * third) {
      croak("Invalid argument supplied to Math::GMPq::overload_equiv");
 }
 
-SV * overload_not_equiv(pTHX_ mpq_t * a, SV * b, SV * third) {
+SV * _overload_not_equiv(pTHX_ mpq_t * a, SV * b, SV * third) {
      mpq_t t;
      int ret = 0;
      PERL_UNUSED_ARG(third);
@@ -1794,7 +1846,7 @@ SV * overload_not(pTHX_ mpq_t * a, SV * second, SV * third) {
 }
 
 SV * overload_int(pTHX_ mpq_t * p, SV * second, SV * third) {
-     mpz_t z_num, z_den;
+     mpz_t z;
      mpq_t * mpq_t_obj;
      SV * obj_ref, * obj;
      PERL_UNUSED_ARG2(second, third);
@@ -1805,14 +1857,61 @@ SV * overload_int(pTHX_ mpq_t * p, SV * second, SV * third) {
      obj = newSVrv(obj_ref, "Math::GMPq");
      mpq_init(*mpq_t_obj);
 
-     mpz_init(z_num);
-     mpz_init(z_den);
+     if( !mpz_cmp_ui(mpq_denref(*p), 1) ) {
+       mpq_set(*mpq_t_obj, *p);
+     }
+     else {
+       mpz_init(z);
+       mpz_set_q(z, *p);
+       mpq_set_z(*mpq_t_obj, z);
+       mpz_clear(z);
+     }
 
-     mpz_set(z_num, mpq_numref(*p));
-     mpz_set(z_den, mpq_denref(*p));
+     sv_setiv(obj, INT2PTR(IV, mpq_t_obj));
+     SvREADONLY_on(obj);
+     return obj_ref;
+}
 
-     mpz_tdiv_q(z_num, z_num, z_den);
-     mpq_set_z(*mpq_t_obj, z_num);
+SV * overload_ls(pTHX_ mpq_t * p, SV * ls, SV * third) {
+     mpz_t z;
+     mpq_t * mpq_t_obj;
+     SV * obj_ref, * obj;
+     PERL_UNUSED_ARG(third);
+
+     New(1, mpq_t_obj, 1, mpq_t);
+     if(mpq_t_obj == NULL) croak("Failed to allocate memory in overload_int function");
+     obj_ref = newSV(0);
+     obj = newSVrv(obj_ref, "Math::GMPq");
+     mpq_init(*mpq_t_obj);
+
+     mpz_init(z);
+     mpz_set_q(z, *p);
+     mpz_mul_2exp(z, z, SvIV(ls));
+     mpq_set_z(*mpq_t_obj, z);
+     mpz_clear(z);
+
+     sv_setiv(obj, INT2PTR(IV, mpq_t_obj));
+     SvREADONLY_on(obj);
+     return obj_ref;
+}
+
+SV * overload_rs(pTHX_ mpq_t * p, SV * rs, SV * third) {
+     mpz_t z;
+     mpq_t * mpq_t_obj;
+     SV * obj_ref, * obj;
+     PERL_UNUSED_ARG(third);
+
+     New(1, mpq_t_obj, 1, mpq_t);
+     if(mpq_t_obj == NULL) croak("Failed to allocate memory in overload_int function");
+     obj_ref = newSV(0);
+     obj = newSVrv(obj_ref, "Math::GMPq");
+     mpq_init(*mpq_t_obj);
+
+     mpz_init(z);
+     mpz_set_q(z, *p);
+     mpz_div_2exp(z, z, SvIV(rs));
+     mpq_set_z(*mpq_t_obj, z);
+     mpz_clear(z);
 
      sv_setiv(obj, INT2PTR(IV, mpq_t_obj));
      SvREADONLY_on(obj);
@@ -1821,7 +1920,7 @@ SV * overload_int(pTHX_ mpq_t * p, SV * second, SV * third) {
 
 /* Finish typemapping */
 
-SV * overload_mul_eq(pTHX_ SV * a, SV * b, SV * third) {
+SV * _overload_mul_eq(pTHX_ SV * a, SV * b, SV * third) {
      mpq_t t;
      PERL_UNUSED_ARG(third);
 
@@ -1885,7 +1984,7 @@ SV * overload_mul_eq(pTHX_ SV * a, SV * b, SV * third) {
 
 }
 
-SV * overload_add_eq(pTHX_ SV * a, SV * b, SV * third) {
+SV * _overload_add_eq(pTHX_ SV * a, SV * b, SV * third) {
      mpq_t t;
      PERL_UNUSED_ARG(third);
 
@@ -1948,7 +2047,7 @@ SV * overload_add_eq(pTHX_ SV * a, SV * b, SV * third) {
      croak("Invalid argument supplied to Math::GMPq::overload_add_eq");
 }
 
-SV * overload_sub_eq(pTHX_ SV * a, SV * b, SV * third) {
+SV * _overload_sub_eq(pTHX_ SV * a, SV * b, SV * third) {
      mpq_t t;
      PERL_UNUSED_ARG(third);
 
@@ -2012,7 +2111,7 @@ SV * overload_sub_eq(pTHX_ SV * a, SV * b, SV * third) {
 
 }
 
-SV * overload_div_eq(pTHX_ SV * a, SV * b, SV * third) {
+SV * _overload_div_eq(pTHX_ SV * a, SV * b, SV * third) {
      mpq_t t;
      PERL_UNUSED_ARG(third);
 
@@ -2088,7 +2187,7 @@ SV * overload_div_eq(pTHX_ SV * a, SV * b, SV * third) {
 
 }
 
-SV * overload_pow_eq(pTHX_ SV * a, SV * b, SV * third) {
+SV * _overload_pow_eq(pTHX_ SV * a, SV * b, SV * third) {
      PERL_UNUSED_ARG(third);
      SvREFCNT_inc(a);
      if(SvUOK(b) || (SV_IS_IOK(b) && SvIVX(b) >= 0)) {
@@ -2365,24 +2464,30 @@ SV * wrap_gmp_snprintf(pTHX_ SV * s, SV * bytes, SV * a, SV * b, int buflen) {
      croak("Unrecognised type supplied as argument to Rmpq_snprintf");
 }
 
-int _itsa(pTHX_ SV * a) {
-     if(SV_IS_IOK(a)) {
-       if(SvUOK(a)) return 1;
-       return 2;
-     }
-     if(SV_IS_POK(a)) {
-#if defined(GMPQ_PV_NV_BUG)        /* perl can set the POK flag when it should not */
-       if(SvNOK(a) && !SvIOKp(a))
-         return 3;                 /* designate it as NV */
+
+SV * _itsa(pTHX_ SV * a) {
+  if(SV_IS_IOK(a)) {
+    if(SvUOK(a)) return newSVuv(1);
+    return newSVuv(2);
+  }
+  if(SV_IS_POK(a)) {
+#if defined(MPFR_PV_NV_BUG)        /* perl can set the POK flag when it should not */
+    if(SvNOK(a) && !SvIOKp(a))
+      return newSVuv(3);        /* designate it as NV */
 #endif
-       return 4;                   /* designate it as PV */
-     }
-     if(SV_IS_NOK(a)) return 3;
-     if(sv_isobject(a)) {
-       const char *h = HvNAME(SvSTASH(SvRV(a)));
-       if(strEQ(h, "Math::GMPq")) return 7;
-       }
-     return 0;
+    return newSVuv(4);          /* designate it as PV */
+  }
+  if(SV_IS_NOK(a)) return newSVuv(3);
+  if(sv_isobject(a)) {
+    const char* h = HvNAME(SvSTASH(SvRV(a)));
+
+    if(strEQ(h, "Math::MPFR")) return newSVuv(5);
+    if(strEQ(h, "Math::GMPf")) return newSVuv(6);
+    if(strEQ(h, "Math::GMPq")) return newSVuv(7);
+    if(strEQ(h, "Math::GMPz")) return newSVuv(8);
+    if(strEQ(h, "Math::GMP")) return newSVuv(9);
+  }
+  return newSVuv(0);
 }
 
 int _has_longlong(void) {
@@ -2475,7 +2580,7 @@ SV * _wrap_count(pTHX) {
      return newSVuv(PL_sv_count);
 }
 
-SV * overload_pow(pTHX_ SV * a, SV * b, SV * third) {
+SV * _overload_pow(pTHX_ SV * a, SV * b, SV * third) {
      mpq_t * mpq_t_obj;
      SV * obj_ref, * obj;
      const char *h;
@@ -2585,6 +2690,12 @@ int _has_pv_nv_bug(void) {
 #endif
 }
 
+int _looks_like_number(pTHX_ SV * in) {
+  if(looks_like_number(in)) return 1;
+  return 0;
+}
+
+
 MODULE = Math::GMPq  PACKAGE = Math::GMPq
 
 PROTOTYPES: DISABLE
@@ -2686,12 +2797,12 @@ Rmpq_set_si (p1, p2, p3)
         XSRETURN_EMPTY; /* return empty stack */
 
 void
-Rmpq_set_str (p1, p2, base)
+_Rmpq_set_str (p1, p2, base)
 	mpq_t *	p1
 	SV *	p2
 	SV *	base
         CODE:
-        Rmpq_set_str(aTHX_ p1, p2, base);
+        _Rmpq_set_str(aTHX_ p1, p2, base);
         XSRETURN_EMPTY; /* return empty stack */
 
 double
@@ -3085,39 +3196,110 @@ CODE:
 OUTPUT:  RETVAL
 
 SV *
-overload_mul (a, b, third)
+_overload_mul (a, b, third)
 	SV *	a
 	SV *	b
 	SV *	third
 CODE:
-  RETVAL = overload_mul (aTHX_ a, b, third);
+  RETVAL = _overload_mul (aTHX_ a, b, third);
+OUTPUT:  RETVAL
+
+void
+Rmpq_and (rop, a, b)
+	mpq_t *	rop
+	mpq_t *	a
+	mpq_t *	b
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_and(rop, a, b);
+        if (PL_markstack_ptr != temp) {
+          /* truly void, because dXSARGS not invoked */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
+        }
+        /* must have used dXSARGS; list context implied */
+        return; /* assume stack size is correct */
+
+void
+Rmpq_ior (rop, a, b)
+	mpq_t *	rop
+	mpq_t *	a
+	mpq_t *	b
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_ior(rop, a, b);
+        if (PL_markstack_ptr != temp) {
+          /* truly void, because dXSARGS not invoked */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
+        }
+        /* must have used dXSARGS; list context implied */
+        return; /* assume stack size is correct */
+
+void
+Rmpq_xor (rop, a, b)
+	mpq_t *	rop
+	mpq_t *	a
+	mpq_t *	b
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_xor(rop, a, b);
+        if (PL_markstack_ptr != temp) {
+          /* truly void, because dXSARGS not invoked */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
+        }
+        /* must have used dXSARGS; list context implied */
+        return; /* assume stack size is correct */
+
+void
+Rmpq_com (rop, a)
+	mpq_t *	rop
+	mpq_t *	a
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        Rmpq_com(rop, a);
+        if (PL_markstack_ptr != temp) {
+          /* truly void, because dXSARGS not invoked */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
+        }
+        /* must have used dXSARGS; list context implied */
+        return; /* assume stack size is correct */
+
+SV *
+_overload_add (a, b, third)
+	SV *	a
+	SV *	b
+	SV *	third
+CODE:
+  RETVAL = _overload_add (aTHX_ a, b, third);
 OUTPUT:  RETVAL
 
 SV *
-overload_add (a, b, third)
+_overload_sub (a, b, third)
 	SV *	a
 	SV *	b
 	SV *	third
 CODE:
-  RETVAL = overload_add (aTHX_ a, b, third);
+  RETVAL = _overload_sub (aTHX_ a, b, third);
 OUTPUT:  RETVAL
 
 SV *
-overload_sub (a, b, third)
+_overload_div (a, b, third)
 	SV *	a
 	SV *	b
 	SV *	third
 CODE:
-  RETVAL = overload_sub (aTHX_ a, b, third);
-OUTPUT:  RETVAL
-
-SV *
-overload_div (a, b, third)
-	SV *	a
-	SV *	b
-	SV *	third
-CODE:
-  RETVAL = overload_div (aTHX_ a, b, third);
+  RETVAL = _overload_div (aTHX_ a, b, third);
 OUTPUT:  RETVAL
 
 SV *
@@ -3183,66 +3365,66 @@ CODE:
 OUTPUT:  RETVAL
 
 SV *
-overload_gt (a, b, third)
+_overload_gt (a, b, third)
 	mpq_t *	a
 	SV *	b
 	SV *	third
 CODE:
-  RETVAL = overload_gt (aTHX_ a, b, third);
+  RETVAL = _overload_gt (aTHX_ a, b, third);
 OUTPUT:  RETVAL
 
 SV *
-overload_gte (a, b, third)
+_overload_gte (a, b, third)
 	mpq_t *	a
 	SV *	b
 	SV *	third
 CODE:
-  RETVAL = overload_gte (aTHX_ a, b, third);
+  RETVAL = _overload_gte (aTHX_ a, b, third);
 OUTPUT:  RETVAL
 
 SV *
-overload_lt (a, b, third)
+_overload_lt (a, b, third)
 	mpq_t *	a
 	SV *	b
 	SV *	third
 CODE:
-  RETVAL = overload_lt (aTHX_ a, b, third);
+  RETVAL = _overload_lt (aTHX_ a, b, third);
 OUTPUT:  RETVAL
 
 SV *
-overload_lte (a, b, third)
+_overload_lte (a, b, third)
 	mpq_t *	a
 	SV *	b
 	SV *	third
 CODE:
-  RETVAL = overload_lte (aTHX_ a, b, third);
+  RETVAL = _overload_lte (aTHX_ a, b, third);
 OUTPUT:  RETVAL
 
 SV *
-overload_spaceship (a, b, third)
+_overload_spaceship (a, b, third)
 	mpq_t *	a
 	SV *	b
 	SV *	third
 CODE:
-  RETVAL = overload_spaceship (aTHX_ a, b, third);
+  RETVAL = _overload_spaceship (aTHX_ a, b, third);
 OUTPUT:  RETVAL
 
 SV *
-overload_equiv (a, b, third)
+_overload_equiv (a, b, third)
 	mpq_t *	a
 	SV *	b
 	SV *	third
 CODE:
-  RETVAL = overload_equiv (aTHX_ a, b, third);
+  RETVAL = _overload_equiv (aTHX_ a, b, third);
 OUTPUT:  RETVAL
 
 SV *
-overload_not_equiv (a, b, third)
+_overload_not_equiv (a, b, third)
 	mpq_t *	a
 	SV *	b
 	SV *	third
 CODE:
-  RETVAL = overload_not_equiv (aTHX_ a, b, third);
+  RETVAL = _overload_not_equiv (aTHX_ a, b, third);
 OUTPUT:  RETVAL
 
 SV *
@@ -3264,48 +3446,66 @@ CODE:
 OUTPUT:  RETVAL
 
 SV *
-overload_mul_eq (a, b, third)
-	SV *	a
-	SV *	b
+overload_ls (p, ls, third)
+	mpq_t *	p
+	SV *	ls
 	SV *	third
 CODE:
-  RETVAL = overload_mul_eq (aTHX_ a, b, third);
+  RETVAL = overload_ls (aTHX_ p, ls, third);
 OUTPUT:  RETVAL
 
 SV *
-overload_add_eq (a, b, third)
-	SV *	a
-	SV *	b
+overload_rs (p, rs, third)
+	mpq_t *	p
+	SV *	rs
 	SV *	third
 CODE:
-  RETVAL = overload_add_eq (aTHX_ a, b, third);
+  RETVAL = overload_rs (aTHX_ p, rs, third);
 OUTPUT:  RETVAL
 
 SV *
-overload_sub_eq (a, b, third)
+_overload_mul_eq (a, b, third)
 	SV *	a
 	SV *	b
 	SV *	third
 CODE:
-  RETVAL = overload_sub_eq (aTHX_ a, b, third);
+  RETVAL = _overload_mul_eq (aTHX_ a, b, third);
 OUTPUT:  RETVAL
 
 SV *
-overload_div_eq (a, b, third)
+_overload_add_eq (a, b, third)
 	SV *	a
 	SV *	b
 	SV *	third
 CODE:
-  RETVAL = overload_div_eq (aTHX_ a, b, third);
+  RETVAL = _overload_add_eq (aTHX_ a, b, third);
 OUTPUT:  RETVAL
 
 SV *
-overload_pow_eq (a, b, third)
+_overload_sub_eq (a, b, third)
 	SV *	a
 	SV *	b
 	SV *	third
 CODE:
-  RETVAL = overload_pow_eq (aTHX_ a, b, third);
+  RETVAL = _overload_sub_eq (aTHX_ a, b, third);
+OUTPUT:  RETVAL
+
+SV *
+_overload_div_eq (a, b, third)
+	SV *	a
+	SV *	b
+	SV *	third
+CODE:
+  RETVAL = _overload_div_eq (aTHX_ a, b, third);
+OUTPUT:  RETVAL
+
+SV *
+_overload_pow_eq (a, b, third)
+	SV *	a
+	SV *	b
+	SV *	third
+CODE:
+  RETVAL = _overload_pow_eq (aTHX_ a, b, third);
 OUTPUT:  RETVAL
 
 SV *
@@ -3353,7 +3553,7 @@ CODE:
   RETVAL = wrap_gmp_snprintf (aTHX_ s, bytes, a, b, buflen);
 OUTPUT:  RETVAL
 
-int
+SV *
 _itsa (a)
 	SV *	a
 CODE:
@@ -3440,12 +3640,12 @@ OUTPUT:  RETVAL
 
 
 SV *
-overload_pow (a, b, third)
+_overload_pow (a, b, third)
 	SV *	a
 	SV *	b
 	SV *	third
 CODE:
-  RETVAL = overload_pow (aTHX_ a, b, third);
+  RETVAL = _overload_pow (aTHX_ a, b, third);
 OUTPUT:  RETVAL
 
 SV *
@@ -3523,4 +3723,11 @@ NOK_flag (sv)
 int
 _has_pv_nv_bug ()
 
+
+int
+_looks_like_number (in)
+	SV *	in
+CODE:
+  RETVAL = _looks_like_number (aTHX_ in);
+OUTPUT:  RETVAL
 

@@ -17,6 +17,7 @@ Random/t/gmp_random.t
 README
 t/_1aaa_v.t
 t/_1basic.t
+t/bitwise.t
 t/_itsa.t
 t/cmp_z.t
 t/divby0.t

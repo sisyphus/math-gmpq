@@ -7,7 +7,7 @@
 =head1 DEPENDENCIES
 
    This module needs the GMP C library - available from:
-   https://gmplib.org.
+   L<https://gmplib.org>.
 
 =head1 DESCRIPTION
 
@@ -15,7 +15,7 @@
    Basically this module simply wraps all of the 'mpq'
    (rational number) functions provided by that library.
    The documentation below extensively plagiarises the GMP
-   documentation (which can be found at http://gmplib.org).
+   documentation (which can be found at L<https://gmplib.org>).
    See also the Math::GMPq test suite for examples of usage.
 
    IMPORTANT:
@@ -518,13 +518,18 @@
     ++ --
     == != !
     < <= > >= <=>
-    "" abs 0+
+    "" abs 0+ int
     =
 
     NOTE: Making use of the '=' overloading is not recommended unless
           you understand its caveats. See 'perldoc overload' and
           read it thoroughly, including the documentation regarding
           'copy constructors'.
+
+    For general compatibility with perl in general and Math::BigRat in
+    particular, overloading of the '&', '|', '^', '~', '>>' and '<<'
+    operators has now been added. (TODO - expand on this when it's all
+    done.)
 
     Atempting to use the overloaded operators with objects that
     have been blessed into some package other than 'Math::GMPq'
