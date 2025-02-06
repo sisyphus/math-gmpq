@@ -52,8 +52,10 @@ use overload
     '|'    => \&overload_ior,
     '^'    => \&overload_xor,
     '~'    => \&overload_com,
-    '>>'   => \&overload_rs,
-    '<<'   => \&overload_ls,
+    '>>'   => \&overload_rshift,
+    '<<'   => \&overload_lshift,
+    '>>='  => \&overload_rshift_eq,
+    '<<='  => \&overload_lshift_eq,
     'abs'  => \&overload_abs;
 
 
@@ -529,6 +531,37 @@ sub overload_not_equiv {
   }
 }
 
+sub overload_lshift {
+  if($_[2] || !_looks_like_number($_[1])) {
+    die "Math::GMPq: When overloading '<<', the argument that specifies the number of bits to be shifted must be a perl number";
+  }
+  return _overload_lshift(@_) if $_[1] >= 0;
+  return _overload_rshift($_[0], -$_[1], $_[2]);
+}
+
+sub overload_lshift_eq {
+  if($_[2] || !_looks_like_number($_[1])) {
+    die "Math::GMPq: When overloading '<<=', the argument that specifies the number of bits to be shifted must be a perl number";
+  }
+  return _overload_lshift_eq(@_) if $_[1] >= 0;
+  return _overload_rshift_eq($_[0], -$_[1], $_[2]);
+}
+
+sub overload_rshift {
+  if($_[2] || !_looks_like_number($_[1])) {
+    die "Math::GMPq: When overloading '>>', the argument that specifies the number of bits to be shifted must be a perl number";
+  }
+  return _overload_rshift(@_) if $_[1] >= 0;
+  return _overload_lshift($_[0], -$_[1], $_[2]);
+}
+
+sub overload_rshift_eq {
+  if($_[2] || !_looks_like_number($_[1])) {
+    die "Math::GMPq: When overloading '>>=', the argument that specifies the number of bits to be shifted must be a perl number";
+  }
+  return _overload_rshift_eq(@_) if $_[1] >= 0;
+  return _overload_lshift_eq($_[0], -$_[1], $_[2]);
+}
 
 sub __GNU_MP_VERSION            () {return ___GNU_MP_VERSION()}
 sub __GNU_MP_VERSION_MINOR      () {return ___GNU_MP_VERSION_MINOR()}

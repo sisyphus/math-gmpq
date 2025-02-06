@@ -1872,7 +1872,7 @@ SV * overload_int(pTHX_ mpq_t * p, SV * second, SV * third) {
      return obj_ref;
 }
 
-SV * overload_ls(pTHX_ mpq_t * p, SV * ls, SV * third) {
+SV * _overload_lshift(pTHX_ mpq_t * p, SV * ls, SV * third) {
      mpz_t z;
      mpq_t * mpq_t_obj;
      SV * obj_ref, * obj;
@@ -1886,7 +1886,7 @@ SV * overload_ls(pTHX_ mpq_t * p, SV * ls, SV * third) {
 
      mpz_init(z);
      mpz_set_q(z, *p);
-     mpz_mul_2exp(z, z, SvIV(ls));
+     mpz_mul_2exp(z, z, (mp_bitcnt_t)SvUV(ls)); /* ls is always >= 0 */
      mpq_set_z(*mpq_t_obj, z);
      mpz_clear(z);
 
@@ -1895,7 +1895,21 @@ SV * overload_ls(pTHX_ mpq_t * p, SV * ls, SV * third) {
      return obj_ref;
 }
 
-SV * overload_rs(pTHX_ mpq_t * p, SV * rs, SV * third) {
+SV * _overload_lshift_eq(pTHX_ SV * p, SV * ls, SV * third) {
+     mpz_t z;
+
+     PERL_UNUSED_ARG(third);
+     SvREFCNT_inc(p);
+     mpz_init(z);
+     mpz_set_q(z, *(INT2PTR(mpq_t *, SvIVX(SvRV(p)))));
+     mpz_mul_2exp(z, z, (mp_bitcnt_t)SvUV(ls));  /* ls is always >= 0 */
+     mpq_set_z(*(INT2PTR(mpq_t *, SvIVX(SvRV(p)))), z);
+     mpz_clear(z);
+
+     return p;
+}
+
+SV * _overload_rshift(pTHX_ mpq_t * p, SV * rs, SV * third) {
      mpz_t z;
      mpq_t * mpq_t_obj;
      SV * obj_ref, * obj;
@@ -1909,13 +1923,27 @@ SV * overload_rs(pTHX_ mpq_t * p, SV * rs, SV * third) {
 
      mpz_init(z);
      mpz_set_q(z, *p);
-     mpz_div_2exp(z, z, SvIV(rs));
+     mpz_div_2exp(z, z, (mp_bitcnt_t)SvUV(rs));  /* rs is always >= 0 */
      mpq_set_z(*mpq_t_obj, z);
      mpz_clear(z);
 
      sv_setiv(obj, INT2PTR(IV, mpq_t_obj));
      SvREADONLY_on(obj);
      return obj_ref;
+}
+
+SV * _overload_rshift_eq(pTHX_ SV * p, SV * rs, SV * third) {
+     mpz_t z;
+
+     PERL_UNUSED_ARG(third);
+     SvREFCNT_inc(p);
+     mpz_init(z);
+     mpz_set_q(z, *(INT2PTR(mpq_t *, SvIVX(SvRV(p)))));
+     mpz_div_2exp(z, z, (mp_bitcnt_t)SvUV(rs));  /* rs is always >= 0 */
+     mpq_set_z(*(INT2PTR(mpq_t *, SvIVX(SvRV(p)))), z);
+     mpz_clear(z);
+
+     return p;
 }
 
 /* Finish typemapping */
@@ -2708,7 +2736,7 @@ _is_infstring (s)
 void
 Rmpq_canonicalize (p)
 	mpq_t *	p
-        CODE:
+        PPCODE:
         Rmpq_canonicalize(p);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -2729,28 +2757,28 @@ OUTPUT:  RETVAL
 void
 DESTROY (p)
 	mpq_t *	p
-        CODE:
+        PPCODE:
         DESTROY(aTHX_ p);
         XSRETURN_EMPTY; /* return empty stack */
 
 void
 Rmpq_clear (p)
 	mpq_t *	p
-        CODE:
+        PPCODE:
         Rmpq_clear(aTHX_ p);
         XSRETURN_EMPTY; /* return empty stack */
 
 void
 Rmpq_clear_mpq (p)
 	mpq_t *	p
-        CODE:
+        PPCODE:
         Rmpq_clear_mpq(p);
         XSRETURN_EMPTY; /* return empty stack */
 
 void
 Rmpq_clear_ptr (p)
 	mpq_t *	p
-        CODE:
+        PPCODE:
         Rmpq_clear_ptr(aTHX_ p);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -2758,7 +2786,7 @@ void
 Rmpq_set (p1, p2)
 	mpq_t *	p1
 	mpq_t *	p2
-        CODE:
+        PPCODE:
         Rmpq_set(p1, p2);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -2766,7 +2794,7 @@ void
 Rmpq_swap (p1, p2)
 	mpq_t *	p1
 	mpq_t *	p2
-        CODE:
+        PPCODE:
         Rmpq_swap(p1, p2);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -2774,7 +2802,7 @@ void
 Rmpq_set_z (p1, p2)
 	mpq_t *	p1
 	mpz_t *	p2
-        CODE:
+        PPCODE:
         Rmpq_set_z(p1, p2);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -2783,7 +2811,7 @@ Rmpq_set_ui (p1, p2, p3)
 	mpq_t *	p1
 	unsigned long	p2
 	unsigned long	p3
-        CODE:
+        PPCODE:
         Rmpq_set_ui(p1, p2, p3);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -2792,7 +2820,7 @@ Rmpq_set_si (p1, p2, p3)
 	mpq_t *	p1
 	long	p2
 	long	p3
-        CODE:
+        PPCODE:
         Rmpq_set_si(p1, p2, p3);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -2801,7 +2829,7 @@ _Rmpq_set_str (p1, p2, base)
 	mpq_t *	p1
 	SV *	p2
 	SV *	base
-        CODE:
+        PPCODE:
         _Rmpq_set_str(aTHX_ p1, p2, base);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -2813,7 +2841,7 @@ void
 Rmpq_set_d (p, d)
 	mpq_t *	p
 	double	d
-        CODE:
+        PPCODE:
         Rmpq_set_d(p, d);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -2821,7 +2849,7 @@ void
 _mpf_set_doubledouble (q, p)
 	mpf_t *	q
 	SV *	p
-        CODE:
+        PPCODE:
         _mpf_set_doubledouble(q, p);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -2829,7 +2857,7 @@ void
 Rmpq_set_NV (copy, original)
 	mpq_t *	copy
 	SV *	original
-        CODE:
+        PPCODE:
         Rmpq_set_NV(aTHX_ copy, original);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -2845,7 +2873,7 @@ void
 Rmpq_set_f (p, f)
 	mpq_t *	p
 	mpf_t *	f
-        CODE:
+        PPCODE:
         Rmpq_set_f(p, f);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -2893,7 +2921,7 @@ Rmpq_add (p1, p2, p3)
 	mpq_t *	p1
 	mpq_t *	p2
 	mpq_t *	p3
-        CODE:
+        PPCODE:
         Rmpq_add(p1, p2, p3);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -2902,7 +2930,7 @@ Rmpq_sub (p1, p2, p3)
 	mpq_t *	p1
 	mpq_t *	p2
 	mpq_t *	p3
-        CODE:
+        PPCODE:
         Rmpq_sub(p1, p2, p3);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -2911,7 +2939,7 @@ Rmpq_mul (p1, p2, p3)
 	mpq_t *	p1
 	mpq_t *	p2
 	mpq_t *	p3
-        CODE:
+        PPCODE:
         Rmpq_mul(p1, p2, p3);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -2920,7 +2948,7 @@ Rmpq_div (p1, p2, p3)
 	mpq_t *	p1
 	mpq_t *	p2
 	mpq_t *	p3
-        CODE:
+        PPCODE:
         Rmpq_div(p1, p2, p3);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -2929,7 +2957,7 @@ Rmpq_mul_2exp (p1, p2, p3)
 	mpq_t *	p1
 	mpq_t *	p2
 	SV *	p3
-        CODE:
+        PPCODE:
         Rmpq_mul_2exp(aTHX_ p1, p2, p3);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -2938,7 +2966,7 @@ Rmpq_div_2exp (p1, p2, p3)
 	mpq_t *	p1
 	mpq_t *	p2
 	SV *	p3
-        CODE:
+        PPCODE:
         Rmpq_div_2exp(aTHX_ p1, p2, p3);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -2946,7 +2974,7 @@ void
 Rmpq_neg (p1, p2)
 	mpq_t *	p1
 	mpq_t *	p2
-        CODE:
+        PPCODE:
         Rmpq_neg(p1, p2);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -2954,7 +2982,7 @@ void
 Rmpq_abs (p1, p2)
 	mpq_t *	p1
 	mpq_t *	p2
-        CODE:
+        PPCODE:
         Rmpq_abs(p1, p2);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -2962,7 +2990,7 @@ void
 Rmpq_inv (p1, p2)
 	mpq_t *	p1
 	mpq_t *	p2
-        CODE:
+        PPCODE:
         Rmpq_inv(p1, p2);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -3063,7 +3091,7 @@ void
 Rmpq_numref (z, r)
 	mpz_t *	z
 	mpq_t *	r
-        CODE:
+        PPCODE:
         Rmpq_numref(z, r);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -3071,7 +3099,7 @@ void
 Rmpq_denref (z, r)
 	mpz_t *	z
 	mpq_t *	r
-        CODE:
+        PPCODE:
         Rmpq_denref(z, r);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -3079,7 +3107,7 @@ void
 Rmpq_get_num (z, r)
 	mpz_t *	z
 	mpq_t *	r
-        CODE:
+        PPCODE:
         Rmpq_get_num(z, r);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -3087,7 +3115,7 @@ void
 Rmpq_get_den (z, r)
 	mpz_t *	z
 	mpq_t *	r
-        CODE:
+        PPCODE:
         Rmpq_get_den(z, r);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -3095,7 +3123,7 @@ void
 Rmpq_set_num (r, z)
 	mpq_t *	r
 	mpz_t *	z
-        CODE:
+        PPCODE:
         Rmpq_set_num(r, z);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -3103,7 +3131,7 @@ void
 Rmpq_set_den (r, z)
 	mpq_t *	r
 	mpz_t *	z
-        CODE:
+        PPCODE:
         Rmpq_set_den(r, z);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -3119,7 +3147,7 @@ Rmpq_add_z (rop, op, z)
 	mpq_t *	rop
 	mpq_t *	op
 	mpz_t *	z
-        CODE:
+        PPCODE:
         Rmpq_add_z(rop, op, z);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -3128,7 +3156,7 @@ Rmpq_sub_z (rop, op, z)
 	mpq_t *	rop
 	mpq_t *	op
 	mpz_t *	z
-        CODE:
+        PPCODE:
         Rmpq_sub_z(rop, op, z);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -3137,7 +3165,7 @@ Rmpq_z_sub (rop, z, op)
 	mpq_t *	rop
 	mpz_t *	z
 	mpq_t *	op
-        CODE:
+        PPCODE:
         Rmpq_z_sub(rop, z, op);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -3146,7 +3174,7 @@ Rmpq_mul_z (rop, op, z)
 	mpq_t *	rop
 	mpq_t *	op
 	mpz_t *	z
-        CODE:
+        PPCODE:
         Rmpq_mul_z(rop, op, z);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -3155,7 +3183,7 @@ Rmpq_div_z (rop, op, z)
 	mpq_t *	rop
 	mpq_t *	op
 	mpz_t *	z
-        CODE:
+        PPCODE:
         Rmpq_div_z(rop, op, z);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -3164,7 +3192,7 @@ Rmpq_z_div (rop, z, op)
 	mpq_t *	rop
 	mpz_t *	z
 	mpq_t *	op
-        CODE:
+        PPCODE:
         Rmpq_z_div(rop, z, op);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -3173,7 +3201,7 @@ Rmpq_pow_ui (rop, op, ui)
 	mpq_t *	rop
 	mpq_t *	op
 	unsigned long	ui
-        CODE:
+        PPCODE:
         Rmpq_pow_ui(rop, op, ui);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -3182,7 +3210,7 @@ Rmpq_set_IV (a, my_iv1, my_iv2)
 	mpq_t *	a
 	SV *	my_iv1
 	SV *	my_iv2
-        CODE:
+        PPCODE:
         Rmpq_set_IV(aTHX_ a, my_iv1, my_iv2);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -3220,7 +3248,7 @@ Rmpq_and (rop, a, b)
           XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-        return; /* assume stack size is correct */
+        return;
 
 void
 Rmpq_ior (rop, a, b)
@@ -3238,7 +3266,7 @@ Rmpq_ior (rop, a, b)
           XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-        return; /* assume stack size is correct */
+        return;
 
 void
 Rmpq_xor (rop, a, b)
@@ -3256,7 +3284,7 @@ Rmpq_xor (rop, a, b)
           XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-        return; /* assume stack size is correct */
+        return;
 
 void
 Rmpq_com (rop, a)
@@ -3273,7 +3301,7 @@ Rmpq_com (rop, a)
           XSRETURN_EMPTY; /* return empty stack */
         }
         /* must have used dXSARGS; list context implied */
-        return; /* assume stack size is correct */
+        return;
 
 SV *
 _overload_add (a, b, third)
@@ -3446,21 +3474,39 @@ CODE:
 OUTPUT:  RETVAL
 
 SV *
-overload_ls (p, ls, third)
+_overload_lshift (p, ls, third)
 	mpq_t *	p
 	SV *	ls
 	SV *	third
 CODE:
-  RETVAL = overload_ls (aTHX_ p, ls, third);
+  RETVAL = _overload_lshift (aTHX_ p, ls, third);
 OUTPUT:  RETVAL
 
 SV *
-overload_rs (p, rs, third)
+_overload_lshift_eq (p, ls, third)
+	SV *	p
+	SV *	ls
+	SV *	third
+CODE:
+  RETVAL = _overload_lshift_eq (aTHX_ p, ls, third);
+OUTPUT:  RETVAL
+
+SV *
+_overload_rshift (p, rs, third)
 	mpq_t *	p
 	SV *	rs
 	SV *	third
 CODE:
-  RETVAL = overload_rs (aTHX_ p, rs, third);
+  RETVAL = _overload_rshift (aTHX_ p, rs, third);
+OUTPUT:  RETVAL
+
+SV *
+_overload_rshift_eq (p, rs, third)
+	SV *	p
+	SV *	rs
+	SV *	third
+CODE:
+  RETVAL = _overload_rshift_eq (aTHX_ p, rs, third);
 OUTPUT:  RETVAL
 
 SV *
@@ -3619,7 +3665,7 @@ overload_inc (p, second, third)
 	SV *	p
 	SV *	second
 	SV *	third
-        CODE:
+        PPCODE:
         overload_inc(aTHX_ p, second, third);
         XSRETURN_EMPTY; /* return empty stack */
 
@@ -3628,7 +3674,7 @@ overload_dec (p, second, third)
 	SV *	p
 	SV *	second
 	SV *	third
-        CODE:
+        PPCODE:
         overload_dec(aTHX_ p, second, third);
         XSRETURN_EMPTY; /* return empty stack */
 
