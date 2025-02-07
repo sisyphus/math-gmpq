@@ -1876,8 +1876,10 @@ SV * _overload_lshift(pTHX_ mpq_t * p, SV * ls, SV * third) {
      mpz_t z;
      mpq_t * mpq_t_obj;
      SV * obj_ref, * obj;
+
      PERL_UNUSED_ARG(third);
 
+     CHECK_MP_BITCNT_T_OVERFLOW(ls)
      New(1, mpq_t_obj, 1, mpq_t);
      if(mpq_t_obj == NULL) croak("Failed to allocate memory in overload_int function");
      obj_ref = newSV(0);
@@ -1899,6 +1901,8 @@ SV * _overload_lshift_eq(pTHX_ SV * p, SV * ls, SV * third) {
      mpz_t z;
 
      PERL_UNUSED_ARG(third);
+
+     CHECK_MP_BITCNT_T_OVERFLOW(ls)
      SvREFCNT_inc(p);
      mpz_init(z);
      mpz_set_q(z, *(INT2PTR(mpq_t *, SvIVX(SvRV(p)))));
@@ -1913,8 +1917,10 @@ SV * _overload_rshift(pTHX_ mpq_t * p, SV * rs, SV * third) {
      mpz_t z;
      mpq_t * mpq_t_obj;
      SV * obj_ref, * obj;
+
      PERL_UNUSED_ARG(third);
 
+     CHECK_MP_BITCNT_T_OVERFLOW(rs)
      New(1, mpq_t_obj, 1, mpq_t);
      if(mpq_t_obj == NULL) croak("Failed to allocate memory in overload_int function");
      obj_ref = newSV(0);
@@ -1936,6 +1942,8 @@ SV * _overload_rshift_eq(pTHX_ SV * p, SV * rs, SV * third) {
      mpz_t z;
 
      PERL_UNUSED_ARG(third);
+
+     CHECK_MP_BITCNT_T_OVERFLOW(rs)
      SvREFCNT_inc(p);
      mpz_init(z);
      mpz_set_q(z, *(INT2PTR(mpq_t *, SvIVX(SvRV(p)))));
