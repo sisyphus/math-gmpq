@@ -35,6 +35,8 @@ use overload
     '-='   => \&overload_sub_eq,
     '*='   => \&overload_mul_eq,
     '/='   => \&overload_div_eq,
+    '%'    => \&overload_fmod,
+    '%='   => \&overload_fmod_eq,
     '**='  => \&overload_pow_eq,
     '""'   => \&overload_string,
     '0+'   => \&overload_num,
@@ -176,6 +178,12 @@ sub new {
       }
       _Rmpq_set_str($ret, $arg1, $base);
       Rmpq_canonicalize($ret);
+      return $ret;
+    }
+
+    if($type == _MATH_GMPz_T || $type == _MATH_GMP_T) { # Math::GMPz or Math::GMP object
+      if(@_) {die "Too many arguments supplied to new() - expected only one"}
+      Rmpq_set_z($ret, $arg1);
       return $ret;
     }
 
@@ -561,6 +569,28 @@ sub overload_rshift_eq {
   }
   return _overload_rshift_eq(@_) if $_[1] >= 0;
   return _overload_lshift_eq($_[0], -$_[1], $_[2]);
+}
+
+sub overload_fmod {
+  if(ref($_[1]) eq 'Math::MPFR') {
+    return Math::MPFR::_overload_fmod(Math::MPFR->new($_[0]), $_[1], 0);
+  }
+  if(ref($_[1]) ne 'Math::GMPq') {
+    return _overload_fmod($_[0], Math::GMPq->new($_[1]), 0) unless $_[2];
+    return _overload_fmod(Math::GMPq->new($_[1]), $_[0], 0);
+  }
+  return _overload_fmod(@_);
+}
+
+sub overload_fmod_eq {
+  if(ref($_[1]) eq 'Math::MPFR') {
+    return Math::MPFR::_overload_fmod(Math::MPFR->new($_[0]), $_[1], 0);
+  }
+  if(ref($_[1]) ne 'Math::GMPq') {
+    return _overload_fmod_eq($_[0], Math::GMPq->new($_[1]), 0) unless $_[2];
+    return _overload_fmod_eq(Math::GMPq->new($_[1]), $_[0], 0);
+  }
+  return _overload_fmod_eq(@_);
 }
 
 sub __GNU_MP_VERSION            () {return ___GNU_MP_VERSION()}

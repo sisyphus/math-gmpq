@@ -1,6 +1,7 @@
 Revision history for Perl module Math::GMPq
 
 0.58
+ - Add overloading of '%' and '%='.
  - Add oveloading of '&', '|', '^', '~', '>>' and '<<' for compatibility with perl
    and Math::BigRat.
  - Allow new() to assign strings of the form (eg)'2.014' or '201.4e-2'. In both

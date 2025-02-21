@@ -2731,6 +2731,61 @@ int _looks_like_number(pTHX_ SV * in) {
   return 0;
 }
 
+SV * _overload_fmod (pTHX_ mpq_t * a, mpq_t *b, SV * third) {
+     mpz_t z;
+     mpq_t * mpq_t_obj;
+     SV * obj_ref, * obj;
+
+     mpz_init(z);
+
+     /* create new object */
+     New(1, mpq_t_obj, 1, mpq_t);
+     if(mpq_t_obj == NULL) croak("Failed to allocate memory in overload_div function");
+     obj_ref = newSV(0);
+     obj = newSVrv(obj_ref, "Math::GMPq");
+     mpq_init(*mpq_t_obj);
+     sv_setiv(obj, INT2PTR(IV, mpq_t_obj));
+     SvREADONLY_on(obj);
+
+     if(SWITCH_ARGS) {
+       mpq_div(*mpq_t_obj, *b, *a);
+       mpz_set_q(z, *mpq_t_obj);
+       mpq_set_z(*mpq_t_obj, z);
+       mpq_mul(*mpq_t_obj, *a, *mpq_t_obj);
+       mpq_sub(*mpq_t_obj, *b, *mpq_t_obj);
+     }
+     else {
+       mpq_div(*mpq_t_obj, *a, *b);
+       mpz_set_q(z, *mpq_t_obj);
+       mpq_set_z(*mpq_t_obj, z);
+       mpq_mul(*mpq_t_obj, *b, *mpq_t_obj);
+       mpq_sub(*mpq_t_obj, *a, *mpq_t_obj);
+     }
+     mpz_clear(z);
+     return obj_ref;
+}
+
+SV * _overload_fmod_eq (pTHX_ SV * a, mpq_t *b, SV * third) {
+     mpq_t t;
+     mpz_t z;
+
+     PERL_UNUSED_ARG(third);
+     SvREFCNT_inc(a);
+
+     mpq_init(t);
+     mpz_init(z);
+     mpq_div(t, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))), *b);
+     mpz_set_q(z, t);
+     mpq_set_z(t, z);
+     mpq_mul(t, *b, t);
+     mpq_sub(*(INT2PTR(mpq_t *, SvIVX(SvRV(a)))), *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))), t);
+
+     mpq_clear(t);
+     mpz_clear(z);
+
+     return a;
+}
+
 
 MODULE = Math::GMPq  PACKAGE = Math::GMPq
 
@@ -3783,5 +3838,23 @@ _looks_like_number (in)
 	SV *	in
 CODE:
   RETVAL = _looks_like_number (aTHX_ in);
+OUTPUT:  RETVAL
+
+SV *
+_overload_fmod (a, b, third)
+	mpq_t *	a
+	mpq_t *	b
+	SV *	third
+CODE:
+  RETVAL = _overload_fmod (aTHX_ a, b, third);
+OUTPUT:  RETVAL
+
+SV *
+_overload_fmod_eq (a, b, third)
+	SV *	a
+	mpq_t *	b
+	SV *	third
+CODE:
+  RETVAL = _overload_fmod_eq (aTHX_ a, b, third);
 OUTPUT:  RETVAL
 
