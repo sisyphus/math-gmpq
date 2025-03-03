@@ -423,30 +423,42 @@ sub overload_pow_eq {
 ##### overloaded comparisons #####
 
 sub overload_gt {
-  if( _itsa($_[1]) == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    _overload_gt($_[0], _reformatted($_[1]), $_[2]);
+  my $itsa = _itsa($_[1]);
+  if( $itsa == 5 ) { # Math::MPFR object
+    return 0 if Math::MPFR::Rmpfr_nan_p($_[1]);
+    return 1 if Math::MPFR::Rmpfr_cmp_q($_[1], $_[0]) <  0;
+    return 0;
   }
-  else {
-    _overload_gt($_[0], $_[1], $_[2]);
+  if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
+    return _overload_gt($_[0], _reformatted($_[1]), $_[2]);
   }
+  return _overload_gt($_[0], $_[1], $_[2]);
 }
 
 sub overload_gte {
-  if( _itsa($_[1]) == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    _overload_gte($_[0], _reformatted($_[1]), $_[2]);
+  my $itsa = _itsa($_[1]);
+  if( $itsa == 5 ) { # Math::MPFR object
+    return 0 if Math::MPFR::Rmpfr_nan_p($_[1]);
+    return 1 if Math::MPFR::Rmpfr_cmp_q($_[1], $_[0]) <=  0;
+    return 0;
   }
-  else {
-    _overload_gte($_[0], $_[1], $_[2]);
+  if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
+    return _overload_gte($_[0], _reformatted($_[1]), $_[2]);
   }
+  return _overload_gte($_[0], $_[1], $_[2]);
 }
 
 sub overload_lt {
-  if( _itsa($_[1]) == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    _overload_lt($_[0], _reformatted($_[1]), $_[2]);
+  my $itsa = _itsa($_[1]);
+  if( $itsa == 5 ) { # Math::MPFR object
+    return 0 if Math::MPFR::Rmpfr_nan_p($_[1]);
+    return 1 if Math::MPFR::Rmpfr_cmp_q($_[1], $_[0]) >  0;
+    return 0;
   }
-  else {
-    _overload_lt($_[0], $_[1], $_[2]);
+  if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
+    return _overload_lt($_[0], _reformatted($_[1]), $_[2]);
   }
+  return _overload_lt($_[0], $_[1], $_[2]);
 }
 
 sub overload_and {
@@ -504,39 +516,54 @@ sub _to_mpq {
 }
 
 sub overload_lte {
-  if( _itsa($_[1]) == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    _overload_lte($_[0], _reformatted($_[1]), $_[2]);
+  my $itsa = _itsa($_[1]);
+  if( $itsa == 5 ) { # Math::MPFR object
+    return 0 if Math::MPFR::Rmpfr_nan_p($_[1]);
+    return 1 if Math::MPFR::Rmpfr_cmp_q($_[1], $_[0]) >=  0;
+    return 0;
   }
-  else {
-    _overload_lte($_[0], $_[1], $_[2]);
+  if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
+    return _overload_lte($_[0], _reformatted($_[1]), $_[2]);
   }
+  return _overload_lte($_[0], $_[1], $_[2]);
 }
 
 sub overload_spaceship {
-  if( _itsa($_[1]) == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    _overload_spaceship($_[0], _reformatted($_[1]), $_[2]);
+  my $itsa = _itsa($_[1]);
+  if( $itsa == 5 ) { # Math::MPFR object
+    return undef if Math::MPFR::Rmpfr_nan_p($_[1]);
+    return Math::MPFR::Rmpfr_cmp_q($_[1], $_[0]) * -1;
   }
-  else {
-    _overload_spaceship($_[0], $_[1], $_[2]);
+  if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
+    return _overload_spaceship($_[0], _reformatted($_[1]), $_[2]);
   }
+  return _overload_spaceship($_[0], $_[1], $_[2]);
 }
 
 sub overload_equiv {
-  if( _itsa($_[1]) == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    _overload_equiv($_[0], _reformatted($_[1]), $_[2]);
+  my $itsa = _itsa($_[1]);
+  if( $itsa == 5 ) { # Math::MPFR object
+    return 0 if Math::MPFR::Rmpfr_nan_p($_[1]);
+    return 1 if Math::MPFR::Rmpfr_cmp_q($_[1], $_[0]) ==  0;
+    return 0;
   }
-  else {
-    _overload_equiv($_[0], $_[1], $_[2]);
+  if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
+    return _overload_equiv($_[0], _reformatted($_[1]), $_[2]);
   }
+  return _overload_equiv($_[0], $_[1], $_[2]);
 }
 
 sub overload_not_equiv {
-  if( _itsa($_[1]) == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    _overload_not_equiv($_[0], _reformatted($_[1]), $_[2]);
+  my $itsa = _itsa($_[1]);
+  if( $itsa == 5 ) { # Math::MPFR object
+    return 1 if Math::MPFR::Rmpfr_nan_p($_[1]);
+    return 1 if Math::MPFR::Rmpfr_cmp_q($_[1], $_[0]) !=  0;
+    return 0;
   }
-  else {
-    _overload_not_equiv($_[0], $_[1], $_[2]);
+  if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
+    return _overload_not_equiv($_[0], _reformatted($_[1]), $_[2]);
   }
+  return _overload_not_equiv($_[0], $_[1], $_[2]);
 }
 
 sub overload_lshift {

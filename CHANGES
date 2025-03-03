@@ -2,6 +2,8 @@ Revision history for Perl module Math::GMPq
 
 0.62
  - Simplify "overloading" documentation.
+ - Allow Math::GMPq to overload cmp ops between Math::GMPq and Math::MPFR objects.
+   Previously this could be handled only by Math::MPFR overloading of the cmp ops.
 
 0.61
  - Fix typo in GMPq.xs that caused https://rt.cpan.org/Ticket/Display.html?id=160045.

@@ -544,11 +544,6 @@
     and '**=' operators. In these cases, the operation will return a
     Math::MPFR object (calculated using default Math::MPFR precision and
     default Math::MPFR rounding mode).
-    For comparisons (==, !=, <, <=, >, >=, <=>) between Math::MPFR and
-    Math::GMPq objects, you need to invoke the Math::MPFR overloading
-    as the Math::GMPq overloading does not accommodate such comparisons.
-    eg - do ($mpfr_obj > $mpq_obj), not ($mpq_obj < $mpfr_obj).
-    TODO - enable Math::GMPq overloading to handle these comparisons.
 
     Comparisons between Math::GMPq and Math::GMPz objects can be performed
     using either the Math::GMPz or Math::GMPq overloading.
