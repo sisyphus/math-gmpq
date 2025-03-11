@@ -1,6 +1,8 @@
 Revision history for Perl module Math::GMPq
 
 0.62
+ - Remove $Math::GMPq::RETYPE and all references to it. (The option to turn off
+   the cross-class operator overloading no longer exists.)
  - Simplify "overloading" documentation.
  - Allow Math::GMPq to overload cmp ops between Math::GMPq and Math::MPFR objects.
    Previously this could be handled only by Math::MPFR overloading of the cmp ops.

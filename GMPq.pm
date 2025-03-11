@@ -103,15 +103,6 @@ qgmp_urandomb_ui qgmp_urandomm_ui
 
 sub dl_load_flags {0} # Prevent DynaLoader from complaining and croaking
 
-    $Math::GMPq::RETYPE = 1; # This variable used to be initially set to 0, but
-                             # this has changed, beginning with Math::GMPq-0.57.
-                             # This enables a Math::GMPq object to be coerced to
-                             # a Math::MPFR object in certain overloaded operations.
-                             # (See the 'OPERATOR OVERLOADING' section of the POD
-                             # documentation for details.)
-                             # Setting this variable to 0 will cause these "certain
-                             # overloaded operations" to throw a fatal error.
-
 sub new {
 
     # This function caters for 2 possibilities:
@@ -480,7 +471,7 @@ sub overload_ior {
     Rmpq_ior($ret, $_[0], $_[1]);
     return $ret;
   }
-  my $arg1 = _to_mpq($itsa, $_[1], '&');
+  my $arg1 = _to_mpq($itsa, $_[1], '|');
   return Rmpq_ior($ret,$_[0], $arg1);
   return $ret;
 }
@@ -492,7 +483,7 @@ sub overload_xor {
     Rmpq_xor($ret, $_[0], $_[1]);
     return $ret;
   }
-  my $arg1 = _to_mpq($itsa, $_[1], '&');
+  my $arg1 = _to_mpq($itsa, $_[1], '^');
   return Rmpq_xor($ret,$_[0], $arg1);
   return $ret;
 }
