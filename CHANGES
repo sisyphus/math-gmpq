@@ -1,6 +1,7 @@
 Revision history for Perl module Math::GMPq
 
 0.63
+ - Make correction to t/overload_op_eq.t.
 
 0.62
  - Remove $Math::GMPq::RETYPE and all references to it. (The option to turn off

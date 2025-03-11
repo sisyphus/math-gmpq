@@ -22,8 +22,11 @@ $fr = Math::MPFR->new(17.1) if $have_mpfr;
 if($have_mpfr) {
 
   if($Math::MPFR::VERSION < 4.19) {
+    is(1,1);
     warn "\n  Skipping remaining tests -  Math::MPFR version 4.19 (or later)\n" .
           "  is needed. We have only version $Math::MPFR::VERSION\n";
+    done_testing();
+    exit 0;
   }
   else {
 
@@ -60,6 +63,10 @@ if($have_mpfr) {
     cmp_ok(ref($q), 'eq', 'Math::MPFR', '$q changes to a Math::MPFR object');
     cmp_ok($q, '==', Math::GMPq->new(2) ** Math::MPFR->new(0.5), '$q **= Math::MPFR->new(0.5) sets $z to 1.41421356237309504880168872420969798');
   }
+}
+else {
+  is(1,1);
+  warn "Skipping all tests - could not load Math::MPFR";
 }
 
 done_testing();
