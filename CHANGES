@@ -1,5 +1,7 @@
 Revision history for Perl module Math::GMPq
 
+0.63
+
 0.62
  - Remove $Math::GMPq::RETYPE and all references to it. (The option to turn off
    the cross-class operator overloading no longer exists.)
