@@ -94,7 +94,7 @@ qgmp_urandomb_ui qgmp_urandomm_ui
     );
 
     @Math::GMPq::EXPORT_OK = (@untagged, @tagged);
-    our $VERSION = '0.63';
+    our $VERSION = '0.64';
     #$VERSION = eval $VERSION;
 
     Math::GMPq->DynaLoader::bootstrap($VERSION);
