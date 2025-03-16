@@ -178,6 +178,12 @@ sub new {
       return $ret;
     }
 
+    if($type == _MATH_MPFR_T) {
+      if(@_) {die "Too many arguments supplied to new() - expected only one"}
+      Math::MPFR::Rmpfr_get_q($ret, $arg1);
+      return $ret;
+    }
+
     if($type == _MATH_GMPq_T) { # Math::GMPq object
       if(@_) {die "Too many arguments supplied to new() - expected only one"}
       Rmpq_set($ret, $arg1);
