@@ -1,5 +1,7 @@
 Revision history for Perl module Math::GMPq
 
+0.65
+
 0.64
  - Allow new() to accept a Math::MPFR object as its argument.
  - Make correction to t/overload_cross_class.t.
