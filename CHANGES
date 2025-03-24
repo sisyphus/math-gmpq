@@ -1,8 +1,11 @@
 Revision history for Perl module Math::GMPq
 
 0.65
- -  Modify t/new.t to allow for old versions (pre 4.15) of Math::MPFR. Fixes:
-    http://www.cpantesters.org/cpan/report/df6770b4-043e-11f0-8390-311d6e8775ea
+ - Corrections to the 'op=' cross-class overloading where a Math::MPFR object is the
+   second arg. (Was returning a default precision value, but should return a value
+   that has the same precision as the given Math::MPFR object.)
+ - Modify t/new.t to allow for old versions (pre 4.15) of Math::MPFR. Fixes:
+   http://www.cpantesters.org/cpan/report/df6770b4-043e-11f0-8390-311d6e8775ea
 
 0.64
  - Allow new() to accept a Math::MPFR object as its argument.

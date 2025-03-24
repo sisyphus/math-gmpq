@@ -525,7 +525,6 @@
 
     NOTE: Overloading of '**' and '**=' accepts only a positive integer
           (IV) or a Math::MPFR object.
-          (The GMP library does not provide an mpq_pow() function.)
 
     NOTE: Making use of the '=' overloading is not recommended unless
           you understand its caveats. See 'perldoc overload' and
@@ -540,12 +539,15 @@
     have been blessed into some package other than 'Math::GMPq'
     or 'Math::MPFR'/'Math::GMPz'/'Math::GMP' will not work.
 
-    YMMV with older versions of Math::MPFR but, if you use Math-MPFR-4.35
+    YMMV with older versions of Math::MPFR but, if you use Math-MPFR-4.19
     or later, then Math::MPFR objects can be provided as the second arg
     with '+', '+=', '-', '-=', '*', '*=',  '/', '/=', '%', '%=', '**'
     and '**=' operators. In these cases, the operation will return a
-    Math::MPFR object (calculated using default Math::MPFR precision and
-    default Math::MPFR rounding mode).
+    Math::MPFR object, rounded in accordance with the current Math::MPFR
+    default rounding mode. For the '+', '-', '*', '/', '%' and '**'
+    operations the precision of the returned object will be the current
+    Math::MPFR default precision. For the others, the precision will be
+    the same as that of the given Math::MPFR operand.
 
     Comparisons between Math::GMPq and Math::GMPz objects can be performed
     using either the Math::GMPz or Math::GMPq overloading.

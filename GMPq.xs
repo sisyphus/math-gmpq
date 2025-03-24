@@ -2007,9 +2007,11 @@ SV * _overload_mul_eq(pTHX_ SV * a, SV * b, SV * third) {
          Rmpq_mul_z(INT2PTR(mpq_t *, SvIVX(SvRV(a))), INT2PTR(mpq_t *, SvIVX(SvRV(a))), INT2PTR(mpz_t *, SvIVX(SvRV(b))));
          return a;
        }
+       /* Relocated to GMPq.pm - this XS implementation returns a default precision object.
        if(strEQ(h, "Math::MPFR")) {
          _overload_callback("Math::MPFR::overload_mul", "Math::GMPq::overload_mul", newSViv(0));
        }
+       */
      }
 
      SvREFCNT_dec(a);
@@ -2067,10 +2069,11 @@ SV * _overload_add_eq(pTHX_ SV * a, SV * b, SV * third) {
          Rmpq_add_z(INT2PTR(mpq_t *, SvIVX(SvRV(a))), INT2PTR(mpq_t *, SvIVX(SvRV(a))), INT2PTR(mpz_t *, SvIVX(SvRV(b))));
          return a;
        }
-
+       /* Relocated to GMPq.pm - this XS implementation returns a default precision object.
        if(strEQ(h, "Math::MPFR")) {
          _overload_callback("Math::MPFR::overload_add", "Math::GMPq::overload_add", newSViv(0));
        }
+       */
      }
 
      SvREFCNT_dec(a);
@@ -2128,9 +2131,11 @@ SV * _overload_sub_eq(pTHX_ SV * a, SV * b, SV * third) {
          Rmpq_sub_z(INT2PTR(mpq_t *, SvIVX(SvRV(a))), INT2PTR(mpq_t *, SvIVX(SvRV(a))), INT2PTR(mpz_t *, SvIVX(SvRV(b))));
          return a;
        }
+       /* Relocated to GMPq.pm - this XS implementation returns a default precision object.
        if(strEQ(h, "Math::MPFR")) {
          _overload_callback("Math::MPFR::overload_sub", "Math::GMPq::overload_sub", &PL_sv_yes);
        }
+       */
      }
 
      SvREFCNT_dec(a);
@@ -2201,9 +2206,11 @@ SV * _overload_div_eq(pTHX_ SV * a, SV * b, SV * third) {
          Rmpq_div_z(INT2PTR(mpq_t *, SvIVX(SvRV(a))), INT2PTR(mpq_t *, SvIVX(SvRV(a))), INT2PTR(mpz_t *, SvIVX(SvRV(b))));
          return a;
        }
+       /* Relocated to GMPq.pm - this XS implementation returns a default precision object.
        if(strEQ(h, "Math::MPFR")) {
          _overload_callback("Math::MPFR::overload_div", "Math::GMPq::overload_div", &PL_sv_yes);
        }
+       */
      }
 
      SvREFCNT_dec(a);
@@ -2218,14 +2225,14 @@ SV * _overload_pow_eq(pTHX_ SV * a, SV * b, SV * third) {
        Rmpq_pow_ui(INT2PTR(mpq_t *, SvIVX(SvRV(a))), INT2PTR(mpq_t *, SvIVX(SvRV(a))), (unsigned long)SvUVX(b));
        return a;
      }
-
+     /* Relocated to GMPq.pm - this XS implementation returns a default precision object.
      if(sv_isobject(b)) {
        const char *h = HvNAME(SvSTASH(SvRV(b)));
        if(strEQ(h, "Math::MPFR")) {
          _overload_callback("Math::MPFR::overload_pow", "Math::GMPq::overload_pow", &PL_sv_yes);
        }
      }
-
+     */
      SvREFCNT_dec(a);
      croak("Invalid argument supplied to Math::GMPq::overload_pow_eq function");
 }

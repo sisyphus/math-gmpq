@@ -329,92 +329,122 @@ sub _reformatted {
 
 sub overload_add {
   if( _itsa($_[1]) == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    _overload_add($_[0], _reformatted($_[1]), $_[2]);
+    return _overload_add($_[0], _reformatted($_[1]), $_[2]);
   }
-  else {
-    _overload_add($_[0], $_[1], $_[2]);
-  }
+
+  return _overload_add($_[0], $_[1], $_[2]);
 }
 
 sub overload_add_eq {
-  if( _itsa($_[1]) == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    _overload_add_eq($_[0], _reformatted($_[1]), $_[2]);
+  my $itsa = _itsa($_[1]);
+  if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
+    return _overload_add_eq($_[0], _reformatted($_[1]), $_[2]);
   }
-  else {
-    _overload_add_eq($_[0], $_[1], $_[2]);
+
+  if( $itsa == 5) { # Math::MPFR object
+    my $ret = Math::MPFR::Rmpfr_init2(Math::MPFR::Rmpfr_get_prec($_[1]));
+    Math::MPFR::Rmpfr_add_q($ret, $_[1], $_[0], Math::MPFR::Rmpfr_get_default_rounding_mode());
+    return $ret;
   }
+
+  return _overload_add_eq($_[0], $_[1], $_[2]);
 }
 
 sub overload_mul {
   if( _itsa($_[1]) == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    _overload_mul($_[0], _reformatted($_[1]), $_[2]);
+    return _overload_mul($_[0], _reformatted($_[1]), $_[2]);
   }
-  else {
-    _overload_mul($_[0], $_[1], $_[2]);
-  }
+
+  return _overload_mul($_[0], $_[1], $_[2]);
 }
 
 sub overload_mul_eq {
-  if( _itsa($_[1]) == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    _overload_mul_eq($_[0], _reformatted($_[1]), $_[2]);
+  my $itsa = _itsa($_[1]);
+  if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
+    return _overload_mul_eq($_[0], _reformatted($_[1]), $_[2]);
   }
-  else {
-    _overload_mul_eq($_[0], $_[1], $_[2]);
+
+  if( $itsa == 5) { # Math::MPFR object
+    my $ret = Math::MPFR::Rmpfr_init2(Math::MPFR::Rmpfr_get_prec($_[1]));
+    Math::MPFR::Rmpfr_mul_q($ret, $_[1], $_[0], Math::MPFR::Rmpfr_get_default_rounding_mode());
+    return $ret;
   }
+
+  return _overload_mul_eq($_[0], $_[1], $_[2]);
 }
 
 sub overload_sub {
   if( _itsa($_[1]) == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    _overload_sub($_[0], _reformatted($_[1]), $_[2]);
+    return _overload_sub($_[0], _reformatted($_[1]), $_[2]);
   }
-  else {
-    _overload_sub($_[0], $_[1], $_[2]);
-  }
+
+  return _overload_sub($_[0], $_[1], $_[2]);
 }
 
 sub overload_sub_eq {
-  if( _itsa($_[1]) == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    _overload_sub_eq($_[0], _reformatted($_[1]), $_[2]);
+  my $itsa = _itsa($_[1]);
+  if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
+    return _overload_sub_eq($_[0], _reformatted($_[1]), $_[2]);
   }
-  else {
-    _overload_sub_eq($_[0], $_[1], $_[2]);
+
+  if( $itsa == 5) { # Math::MPFR object
+    my $ret = Math::MPFR::Rmpfr_init2(Math::MPFR::Rmpfr_get_prec($_[1]));
+    Math::MPFR::Rmpfr_sub_q($ret, $_[1], $_[0], Math::MPFR::Rmpfr_get_default_rounding_mode());
+    Math::MPFR::Rmpfr_neg($ret, $ret, Math::MPFR::Rmpfr_get_default_rounding_mode());
+    return $ret;
   }
+
+  return _overload_sub_eq($_[0], $_[1], $_[2]);
 }
 
 sub overload_div {
   if( _itsa($_[1]) == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    _overload_div($_[0], _reformatted($_[1]), $_[2]);
+    return _overload_div($_[0], _reformatted($_[1]), $_[2]);
   }
-  else {
-    _overload_div($_[0], $_[1], $_[2]);
-  }
+
+  return _overload_div($_[0], $_[1], $_[2]);
 }
 
 sub overload_div_eq {
-  if( _itsa($_[1]) == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    _overload_div_eq($_[0], _reformatted($_[1]), $_[2]);
+  my $itsa = _itsa($_[1]);
+  if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
+    return _overload_div_eq($_[0], _reformatted($_[1]), $_[2]);
   }
-  else {
-    _overload_div_eq($_[0], $_[1], $_[2]);
+
+  if( $itsa == 5) { # Math::MPFR object
+    my $ret = Math::MPFR::Rmpfr_init2(Math::MPFR::Rmpfr_get_prec($_[1]));
+    Math::MPFR::Rmpfr_q_div($ret, $_[0], $_[1], Math::MPFR::Rmpfr_get_default_rounding_mode());
+    return $ret;
   }
+
+  return _overload_div_eq($_[0], $_[1], $_[2]);
 }
 
 sub overload_pow {
   if( _itsa($_[1]) == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    _overload_pow($_[0], _reformatted($_[1]), $_[2]);
+    return _overload_pow($_[0], _reformatted($_[1]), $_[2]);
   }
-  else {
-    _overload_pow($_[0], $_[1], $_[2]);
-  }
+
+  return _overload_pow($_[0], $_[1], $_[2]);
 }
 
 sub overload_pow_eq {
-  if( _itsa($_[1]) == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    _overload_pow_eq($_[0], _reformatted($_[1]), $_[2]);
+  my $itsa = _itsa($_[1]);
+  if( $itsa  == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
+    return _overload_pow_eq($_[0], _reformatted($_[1]), $_[2]);
   }
-  else {
-    _overload_pow_eq($_[0], $_[1], $_[2]);
+
+  if($itsa == 5) { # Math::MPFR object
+    my $gmpq_val = Math::MPFR::Rmpfr_init(); # $gmpq_val has default precision
+    Math::MPFR::Rmpfr_set_q($gmpq_val, $_[0], Math::MPFR::Rmpfr_get_default_rounding_mode());
+
+    my $ret = Math::MPFR::Rmpfr_init2(Math::MPFR::Rmpfr_get_prec($_[1]));
+    Math::MPFR::Rmpfr_pow($ret, $gmpq_val, $_[1], Math::MPFR::Rmpfr_get_default_rounding_mode());
+
+    return $ret;
   }
+
+  return _overload_pow_eq($_[0], $_[1], $_[2]);
 }
 
 ##### overloaded comparisons #####
@@ -608,9 +638,11 @@ sub overload_fmod {
 
 sub overload_fmod_eq {
   if(ref($_[1]) eq 'Math::MPFR') {
-    return Math::MPFR::_overload_fmod(Math::MPFR->new($_[0]), $_[1], 0);
+    my $to_mpfr = Math::MPFR::Rmpfr_init2(Math::MPFR::Rmpfr_get_prec($_[1]));
+    Math::MPFR::Rmpfr_set_q($to_mpfr, $_[0], 0);
+    return Math::MPFR::_overload_fmod_eq($to_mpfr, $_[1], 0);
   }
-  if(ref($_[1]) ne 'Math::GMPq') {
+  if (ref($_[1]) ne 'Math::GMPq') {
     return _overload_fmod_eq($_[0], Math::GMPq->new($_[1]), 0) unless $_[2];
     return _overload_fmod_eq(Math::GMPq->new($_[1]), $_[0], 0);
   }
