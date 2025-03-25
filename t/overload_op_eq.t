@@ -186,36 +186,39 @@ if($have_mpfr) {
       }
     ############################################################
     ############################################################
-      {
-      Math::MPFR::Rmpfr_set_default_prec($p);
-      my $mpfr_op = Math::MPFR::Rmpfr_init2(100);
-      Math::MPFR::Rmpfr_set_NV($mpfr_op, 2.5, 0);
-      my $gmpq_op = Rmpq_init();
-      Rmpq_set_NV($gmpq_op,22.8125);
+      if($Math::MPFR::VERSION >= 4.35) {
+        Math::MPFR::Rmpfr_set_default_prec($p);
+        my $mpfr_op = Math::MPFR::Rmpfr_init2(100);
+        Math::MPFR::Rmpfr_set_NV($mpfr_op, 2.5, 0);
+        my $gmpq_op = Rmpq_init();
+        Rmpq_set_NV($gmpq_op,22.8125);
 
-      my($c1, $c2) = ($mpfr_op % $gmpq_op, $gmpq_op % $mpfr_op);
-      cmp_ok(Math::MPFR::Rmpfr_get_prec($c1), '==', $p, "$p: \$c1: correct precision returned for '%' op");
-      cmp_ok(Math::MPFR::Rmpfr_get_prec($c2), '==', $p, "$p: \$c2: correct precision returned for '%' op");
-      cmp_ok($c1, '==', 2.5, "$p: \$c1: value unaltered for '%' op");
-      cmp_ok($c2, '==', 0.3125, "$p: \$c2: correct value for '%' op");
+        my($c1, $c2) = ($mpfr_op % $gmpq_op, $gmpq_op % $mpfr_op);
+        cmp_ok(Math::MPFR::Rmpfr_get_prec($c1), '==', $p, "$p: \$c1: correct precision returned for '%' op");
+        cmp_ok(Math::MPFR::Rmpfr_get_prec($c2), '==', $p, "$p: \$c2: correct precision returned for '%' op");
+        cmp_ok($c1, '==', 2.5, "$p: \$c1: value unaltered for '%' op");
+        cmp_ok($c2, '==', 0.3125, "$p: \$c2: correct value for '%' op");
 
-      $mpfr_op %= $gmpq_op;
-      my $c3 = Math::MPFR::Rmpfr_init2(Math::MPFR::Rmpfr_get_prec($mpfr_op));
-      Math::MPFR::Rmpfr_set($c3, $mpfr_op, 0);
-      cmp_ok(Math::MPFR::Rmpfr_get_prec($c3), '==', 100, "$p: \$c3: correct precision returned for '%=' op");
-      cmp_ok($c3, '==', 2.5, "$p: \$c3: value unaltered for '%=' op");
+        $mpfr_op %= $gmpq_op;
+        my $c3 = Math::MPFR::Rmpfr_init2(Math::MPFR::Rmpfr_get_prec($mpfr_op));
+        Math::MPFR::Rmpfr_set($c3, $mpfr_op, 0);
+        cmp_ok(Math::MPFR::Rmpfr_get_prec($c3), '==', 100, "$p: \$c3: correct precision returned for '%=' op");
+        cmp_ok($c3, '==', 2.5, "$p: \$c3: value unaltered for '%=' op");
 
-      Math::MPFR::Rmpfr_set_NV($mpfr_op, 2.5, 0); # Reset to original value
+        Math::MPFR::Rmpfr_set_NV($mpfr_op, 2.5, 0); # Reset to original value
 
-      cmp_ok(Math::MPFR::Rmpfr_get_prec($mpfr_op), '==', 100, "$p: \$mpfr_op: correct precision returned for '%=' op");
+        cmp_ok(Math::MPFR::Rmpfr_get_prec($mpfr_op), '==', 100, "$p: \$mpfr_op: correct precision returned for '%=' op");
 
-      $gmpq_op %= $mpfr_op;
-      cmp_ok(Math::MPFR::Rmpfr_get_prec($gmpq_op), '==', $p, "$p: \$gmpq_op: correct precision returned for '%=' op");
-      my $c4 = Math::MPFR::Rmpfr_init2(Math::MPFR::Rmpfr_get_prec($gmpq_op));
-      Math::MPFR::Rmpfr_set($c4, $gmpq_op, 0);
+        $gmpq_op %= $mpfr_op;
+        cmp_ok(Math::MPFR::Rmpfr_get_prec($gmpq_op), '==', $p, "$p: \$gmpq_op: correct precision returned for '%=' op");
+        my $c4 = Math::MPFR::Rmpfr_init2(Math::MPFR::Rmpfr_get_prec($gmpq_op));
+        Math::MPFR::Rmpfr_set($c4, $gmpq_op, 0);
 
-      cmp_ok(Math::MPFR::Rmpfr_get_prec($c4), '==', $p, "$p: \$c4: correct precision returned for '%=' op");
-      cmp_ok($c4, '==', 0.3125, "$p: \$c4: correct value for '%=' op");
+        cmp_ok(Math::MPFR::Rmpfr_get_prec($c4), '==', $p, "$p: \$c4: correct precision returned for '%=' op");
+        cmp_ok($c4, '==', 0.3125, "$p: \$c4: correct value for '%=' op");
+      }
+      else {
+        warn "Skipping some '%' and '%=' overloading tests as Math-MPFR-4.35 or later is required - have only $Math::MPFR::VERSION\n";
       }
     ############################################################
     ############################################################
