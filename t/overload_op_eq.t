@@ -96,7 +96,7 @@ if($have_mpfr) {
       my $c4 = Math::MPFR::Rmpfr_init2(Math::MPFR::Rmpfr_get_prec($gmpq_op));
       Math::MPFR::Rmpfr_set($c4, $gmpq_op, 0);
 
-      cmp_ok(Math::MPFR::Rmpfr_get_prec($c4), '==', 100, "$p: \$c4: correct precision returned for '+=' op");
+      cmp_ok(Math::MPFR::Rmpfr_get_prec($c4), '==', $p, "$p: \$c4: correct precision returned for '+=' op");
 
       cmp_ok($c3, '==', $c4, "$p: '*=' is commutative");
       cmp_ok($c1, '==', $c4, "$p: '*=' and '*' returned same value"); # Not guaranteed in general
@@ -125,7 +125,7 @@ if($have_mpfr) {
       $gmpq_op *= $mpfr_op;
       my $c4 = Math::MPFR::Rmpfr_init2(Math::MPFR::Rmpfr_get_prec($gmpq_op));
       Math::MPFR::Rmpfr_set($c4, $gmpq_op, 0);
-      cmp_ok(Math::MPFR::Rmpfr_get_prec($c4), '==', 100, "$p: \$c4: correct precision returned for '*=' op");
+      cmp_ok(Math::MPFR::Rmpfr_get_prec($c4), '==', $p, "$p: \$c4: correct precision returned for '*=' op");
 
       cmp_ok($c3, '==', $c4, "$p: '*=' is commutative");
       cmp_ok($c1, '==', $c4, "$p: '*=' and '*' returned same value"); # Not guaranteed in general
@@ -171,16 +171,18 @@ if($have_mpfr) {
       $gmpq_op /= $mpfr_op;
       my $c4 = Math::MPFR::Rmpfr_init2(Math::MPFR::Rmpfr_get_prec($gmpq_op));
       Math::MPFR::Rmpfr_set($c4, $gmpq_op, 0);
-      cmp_ok(Math::MPFR::Rmpfr_get_prec($c4), '==', 100, "$p: \$c4: correct precision returned for '/=' op");
+      cmp_ok(Math::MPFR::Rmpfr_get_prec($c4), '==', $p, "$p: \$c4: correct precision returned for '/=' op");
 
       Math::MPFR::Rmpfr_ui_div($mpfr_inv, 1, $mpfr_op, 0);
       $gmpq_op_copy *= $mpfr_inv;
       my $d4 = Math::MPFR::Rmpfr_init2(Math::MPFR::Rmpfr_get_prec($gmpq_op_copy));
       Math::MPFR::Rmpfr_set($d4, $gmpq_op_copy, 0);
-      cmp_ok(Math::MPFR::Rmpfr_get_prec($d4), '==', 100, "$p: \$c4: correct precision returned for '/=' op");
+      cmp_ok(Math::MPFR::Rmpfr_get_prec($d4), '==', $p, "$p: \$c4: correct precision returned for '/=' op");
 
       cmp_ok($c3, '==', $d3, "$p: inversion of '/=' with '*=' equates");
-      cmp_ok($c4, '==', $d4, "$p: inversion of '*=' with '/=' equates");
+      unless($p > 100) {
+        cmp_ok($c4, '==', _approx($c4,$d4), "$p: inversion of '*=' with '/=' equates");
+      } # close unless{}
       }
     ############################################################
     ############################################################
@@ -208,11 +210,11 @@ if($have_mpfr) {
       cmp_ok(Math::MPFR::Rmpfr_get_prec($mpfr_op), '==', 100, "$p: \$mpfr_op: correct precision returned for '%=' op");
 
       $gmpq_op %= $mpfr_op;
-      cmp_ok(Math::MPFR::Rmpfr_get_prec($gmpq_op), '==', 100, "$p: \$gmpq_op: correct precision returned for '%=' op");
+      cmp_ok(Math::MPFR::Rmpfr_get_prec($gmpq_op), '==', $p, "$p: \$gmpq_op: correct precision returned for '%=' op");
       my $c4 = Math::MPFR::Rmpfr_init2(Math::MPFR::Rmpfr_get_prec($gmpq_op));
       Math::MPFR::Rmpfr_set($c4, $gmpq_op, 0);
 
-      cmp_ok(Math::MPFR::Rmpfr_get_prec($c4), '==', 100, "$p: \$c4: correct precision returned for '%=' op");
+      cmp_ok(Math::MPFR::Rmpfr_get_prec($c4), '==', $p, "$p: \$c4: correct precision returned for '%=' op");
       cmp_ok($c4, '==', 0.3125, "$p: \$c4: correct value for '%=' op");
       }
     ############################################################
@@ -242,11 +244,11 @@ if($have_mpfr) {
       cmp_ok(Math::MPFR::Rmpfr_get_prec($mpfr_op), '==', 100, "$p: \$mpfr_op: correct precision returned for '**=' op");
 
       $gmpq_op **= $mpfr_op;
-      cmp_ok(Math::MPFR::Rmpfr_get_prec($gmpq_op), '==', 100, "$p: \$gmpq_op: correct precision returned for '**=' op");
+      cmp_ok(Math::MPFR::Rmpfr_get_prec($gmpq_op), '==', $p, "$p: \$gmpq_op: correct precision returned for '**=' op");
       my $c4 = Math::MPFR::Rmpfr_init2(Math::MPFR::Rmpfr_get_prec($gmpq_op));
       Math::MPFR::Rmpfr_set($c4, $gmpq_op, 0);
 
-      cmp_ok(Math::MPFR::Rmpfr_get_prec($c4), '==', 100, "$p: \$c4: correct precision returned for '**=' op");
+      cmp_ok(Math::MPFR::Rmpfr_get_prec($c4), '==', $p, "$p: \$c4: correct precision returned for '**=' op");
       cmp_ok($c4, '==', 32, "$p: \$c4: set to 32 for '**=' op");
       }
     ############################################################

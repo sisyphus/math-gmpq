@@ -544,10 +544,10 @@
     with '+', '+=', '-', '-=', '*', '*=',  '/', '/=', '%', '%=', '**'
     and '**=' operators. In these cases, the operation will return a
     Math::MPFR object, rounded in accordance with the current Math::MPFR
-    default rounding mode. For the '+', '-', '*', '/', '%' and '**'
-    operations the precision of the returned object will be the current
-    Math::MPFR default precision. For the others, the precision will be
-    the same as that of the given Math::MPFR operand.
+    default precision and the current Math::MPFR default rounding mode.
+    For the '%', '%=', '**' and '**=' overloading, the  value of the
+    Math::GMPq object is first set to a Math::MPFR object using the
+    same default precision and defauilt rounding mode.
 
     Comparisons between Math::GMPq and Math::GMPz objects can be performed
     using either the Math::GMPz or Math::GMPq overloading.
