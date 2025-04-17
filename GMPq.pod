@@ -181,14 +181,17 @@
     will return a non-zero value if and only if the IOK flag is set.
 
    Rmpq_set_d ($rop, $double);
-   Rmpq_set_f ($rop, $f); # $f is a Math::GnumMPf object
+   Rmpq_set_f ($rop, $f); # $f is a Math::GMPf object
    Rmpq_set_d ($rop, $op);
    Rmpq_set_NV($rop, $nv);
+   $rop = mpfr2mpq($fr); # $fr is a Math::MPFR object
     Set $rop to the value of the 2nd arg, without rounding.
     Assigning an Inf or NaN is a fatal error.
     With Rmpq_set_NV, $nv must have its NOK flag set, or the function
     will croak. Best to first check NOK_flag($nv), which will return a
     non-zero value if and only if the NOK flag is set.
+
+
 
    Rmpq_set_str($rop, $str, $base);
     Set $rop from $str in the given base $base. The string can be

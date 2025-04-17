@@ -69,6 +69,7 @@ IOK_flag NOK_flag POK_flag
 
 my @tagged = qw(
 GMPQ_PV_NV_BUG GMPQ_WIN32_FMT_BUG
+mpfr2mpq
 Rmpq_abs Rmpq_add Rmpq_canonicalize Rmpq_clear Rmpq_cmp Rmpq_cmp_si Rmpq_cmp_ui
 Rmpq_and Rmpq_ior Rmpq_xor Rmpq_com
 Rmpq_cmp_z Rmpq_add_z Rmpq_sub_z Rmpq_z_sub Rmpq_mul_z Rmpq_div_z Rmpq_z_div
@@ -615,6 +616,13 @@ sub overload_fmod_eq {
     return _overload_fmod_eq(Math::GMPq->new($_[1]), $_[0], 0);
   }
   return _overload_fmod_eq(@_);
+}
+
+sub mpfr2mpq {
+  die "The argument provided to Math::GMPq::mpfr2mpq must be a Math::MPFR::object"
+    unless ref($_[0]) eq 'Math::MPFR';
+  Math::MPFR::Rmpfr_get_q( my $mpq_from_mpfr = Math::GMPq->new(), shift );
+  return $mpq_from_mpfr;
 }
 
 sub __GNU_MP_VERSION            () {return ___GNU_MP_VERSION()}

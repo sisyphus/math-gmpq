@@ -23,6 +23,7 @@ t/cmp_z.t
 t/divby0.t
 t/get_set_cmp_IV_NV.t
 t/longdouble.t
+t/mpfr2mpq.t
 t/NV_overloading.t
 t/NOK_and_POK.t
 t/overload.t
