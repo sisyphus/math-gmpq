@@ -158,20 +158,36 @@ sub new {
       return $ret;
     }
 
+#    if($type == _POK_T) {
+#      if(@_ > 1) {die "Too many arguments supplied to new() - expected no more than two"}
+#      $base = shift if @_;
+#      if(($base < 2 && $base != 0) || $base > 62) {die "Invalid value for base"}
+#      if( ($base == 0 || $base == 10) && _looks_like_number($arg1) ) {
+#        # Added in 0.58:
+#        # Convert (eg) a string such as '20.14e-1' into
+#        # an acceptable input arg of '2014/1000'.
+#        $arg1 = _reformatted($arg1);
+#      }
+#      _Rmpq_set_str($ret, $arg1, $base);
+#      Rmpq_canonicalize($ret);
+#      return $ret;
+#    }
+
     if($type == _POK_T) {
       if(@_ > 1) {die "Too many arguments supplied to new() - expected no more than two"}
       $base = shift if @_;
-      if(($base < 2 && $base != 0) || $base > 62) {die "Invalid value for base"}
-      if( ($base == 0 || $base == 10) && _looks_like_number($arg1) ) {
-        # Added in 0.58:
-        # Convert (eg) a string such as '20.14e-1' into
-        # an acceptable input arg of '2014/1000'.
-        $arg1 = _reformatted($arg1);
-      }
-      _Rmpq_set_str($ret, $arg1, $base);
-      Rmpq_canonicalize($ret);
+#      if(($base < 2 && $base != 0) || $base > 62) {die "Invalid value for base"}
+#      if( ($base == 0 || $base == 10) && _looks_like_number($arg1) ) {
+#        # Added in 0.58:
+#        # Convert (eg) a string such as '20.14e-1' into
+#        # an acceptable input arg of '2014/1000'.
+#        $arg1 = _reformatted($arg1);
+#      }
+      Rmpq_set_str($ret, $arg1, $base);
+
       return $ret;
     }
+
 
     if($type == _MATH_GMPz_T || $type == _MATH_GMP_T) { # Math::GMPz or Math::GMP object
       if(@_) {die "Too many arguments supplied to new() - expected only one"}
@@ -291,14 +307,147 @@ sub Rmpq_snprintf {
     return $len;
 }
 
-sub Rmpq_set_str {
+sub Rmpq_set_str { # $str, $base
+  my ($ret, $str, $base, $exp) = (shift, shift, shift);
+  my $str_orig = "$str";
+  my $base_to_pass = abs($base);
+  die "Invalid value for base"
+    if($base_to_pass == 1 || $base_to_pass > 62);
+
+  # If $str =~ /\// then the 2 values on either
+  # side of the '/' must be integers. Otherwise
+  # the assignment should abort with "illegal
+  # characters errors.
+  if($str =~ /\//) {
+    _Rmpq_set_str($ret, $str, $base_to_pass);
+    Rmpq_canonicalize($ret);
+    return;
+  }
+
+  if($base == 0) {
+    if($str =~ s/^0x//i) {
+      my($s, $exp) = split /p/i, $str;
+
+      # Remove any radix point, and
+      # adjust $exp accordingly.
+      my @temp = split /\./, $s;
+      {
+        no warnings 'uninitialized';
+        $exp -= length($temp[1]) * 4;
+      }
+      $s =~ s/\.//;
+
+      _Rmpq_set_str($ret, $s, 16);
+      if($exp < 0) {
+        Rmpq_div_2exp($ret, $ret, -$exp);
+        return;
+      }
+
+      Rmpq_mul_2exp($ret, $ret, $exp);
+      return;
+    }
+    elsif($str =~ s/^0b//i) {
+      my($s, $exp) = split /p/i, $str;
+
+      # Remove any radix point, and
+      # adjust $exp accordingly.
+      my @temp = split /\./, $s;
+      {
+        no warnings 'uninitialized';
+        $exp -= length($temp[1]);
+      }
+      $s =~ s/\.//;
+
+      _Rmpq_set_str($ret, $s, 2);
+      if($exp < 0) {
+        Rmpq_div_2exp($ret, $ret, -$exp);
+        return;
+      }
+
+      Rmpq_mul_2exp($ret, $ret, $exp);
+      return;
+    }
+    elsif($str =~ s/^0o//i) {
+      my($s, $exp) = split /p/i, $str;
+
+      # Remove any radix point, and
+      # adjust $exp accordingly.
+      my @temp = split /\./, $s;
+      {
+        no warnings 'uninitialized';
+        $exp -= length($temp[1]) * 3;
+      }
+      $s =~ s/\.//;
+      _Rmpq_set_str($ret, $s, 8);
+      if($exp < 0) {
+        Rmpq_div_2exp($ret, $ret, -$exp);
+        return;
+      }
+
+      Rmpq_mul_2exp($ret, $ret, $exp);
+      return;
+    }
+    else {
+      $base_to_pass = 10;
+    }
+  }
+
+  if($base_to_pass <= 15) { $str =~ s/e/@/i }
+
+  unless($str =~ /[^a-zA-Z0-9]/) {
+    _Rmpq_set_str($ret, $str, $base_to_pass);
+    # Rmpq_canonicalize($ret); # not needed - value is an integer
+    return;
+  }
+
+  ($str, $exp) = split /@/, $str;
+
+  my $den = Rmpq_init();
+  $str =~ s/^0+//g;
+  my($s1, $s2) = split /\./, $str;
+  $s2 = '' unless defined $s2; # Avoid uninitialized warning at next 2 lines
+
+  _Rmpq_set_str($ret, $s1 . $s2, $base_to_pass);
+  _Rmpq_set_str($den, '1' . ('0' x length($s2)), $base_to_pass);
+  Rmpq_div($ret, $ret, $den);
+  return unless $exp;
+
+  # Deal with the exponent:
+  # $exp is to be treated as a base 10 value
+  # whevever $base is negative. Otherwise it
+  # needs to be treated as a base $base value
+  # and we need to convert the given $base
+  # exponent to it's base 10 equivalent value.
+
+  my($q_modifier, $exp_adj) = (Rmpq_init());
+  if($base < 0 || $base == 10) {
+    $exp_adj = $exp + 0;
+  }
+  else {
+    $exp_adj = _to_base($exp, $base_to_pass);
+  }
+
+  _Rmpq_set_str($q_modifier, '1' . ('0') x abs($exp_adj), $base_to_pass);
+
+  if($exp > 0) {
+    Rmpq_mul($ret, $ret, $q_modifier);
+    return;
+  }
+
+  Rmpq_div($ret, $ret, $q_modifier);
+  return;
+
+  die "Slipped thru: $str_orig $base\n";
+}
+
+sub Rmpq_set_str_prev {
   if( _itsa($_[1]) == 4 && _looks_like_number($_[1]) && ($_[2] == 0 || $_[2] == 10) ) {
     _Rmpq_set_str($_[0], _reformatted($_[1]), $_[2]);
   }
   else { _Rmpq_set_str($_[0], $_[1], $_[2]) }
 }
 
-sub _reformatted {
+sub _reformatted_obsolete {
   # The argument has already been as assessed
   # as looks_like_number()
   my ($sign, $ppos) = ('', '');
@@ -329,8 +478,10 @@ sub _reformatted {
 }
 
 sub overload_add {
-  if( _itsa($_[1]) == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    _overload_add($_[0], _reformatted($_[1]), $_[2]);
+  if( _itsa($_[1]) == 4 && $_[1] !~ /inf|nan/i ) {
+    my $q = Rmpq_init();
+    Rmpq_set_str($q, $_[1], 0);
+    _overload_add($_[0], $q, $_[2]);
   }
   else {
     _overload_add($_[0], $_[1], $_[2]);
@@ -338,8 +489,10 @@ sub overload_add {
 }
 
 sub overload_add_eq {
-  if( _itsa($_[1]) == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    _overload_add_eq($_[0], _reformatted($_[1]), $_[2]);
+  if( _itsa($_[1]) == 4 && $_[1] !~ /inf|nan/i ) {
+    my $q = Rmpq_init();
+    Rmpq_set_str($q, $_[1], 0);
+    _overload_add_eq($_[0], $q, $_[2]);
   }
   else {
     _overload_add_eq($_[0], $_[1], $_[2]);
@@ -347,8 +500,10 @@ sub overload_add_eq {
 }
 
 sub overload_mul {
-  if( _itsa($_[1]) == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    _overload_mul($_[0], _reformatted($_[1]), $_[2]);
+  if( _itsa($_[1]) == 4 && $_[1] !~ /inf|nan/i ) {
+    my $q = Rmpq_init();
+    Rmpq_set_str($q, $_[1], 0);
+    _overload_mul($_[0], $q, $_[2]);
   }
   else {
     _overload_mul($_[0], $_[1], $_[2]);
@@ -356,8 +511,10 @@ sub overload_mul {
 }
 
 sub overload_mul_eq {
-  if( _itsa($_[1]) == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    _overload_mul_eq($_[0], _reformatted($_[1]), $_[2]);
+  if( _itsa($_[1]) == 4 && $_[1] !~ /inf|nan/i ) {
+    my $q = Rmpq_init();
+    Rmpq_set_str($q, $_[1], 0);
+    _overload_mul_eq($_[0], $q, $_[2]);
   }
   else {
     _overload_mul_eq($_[0], $_[1], $_[2]);
@@ -365,8 +522,11 @@ sub overload_mul_eq {
 }
 
 sub overload_sub {
-  if( _itsa($_[1]) == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    _overload_sub($_[0], _reformatted($_[1]), $_[2]);
+  if( _itsa($_[1]) == 4 && $_[1] !~ /inf|nan/i ) {
+    my $q = Rmpq_init();
+    Rmpq_set_str($q, $_[1], 0);
+    if($_[2]) { _overload_sub($q, $_[0], 0) }
+    else { _overload_sub($_[0], $q, 0) }
   }
   else {
     _overload_sub($_[0], $_[1], $_[2]);
@@ -374,8 +534,11 @@ sub overload_sub {
 }
 
 sub overload_sub_eq {
-  if( _itsa($_[1]) == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    _overload_sub_eq($_[0], _reformatted($_[1]), $_[2]);
+  if( _itsa($_[1]) == 4 && $_[1] !~ /inf|nan/i ) {
+    my $q = Rmpq_init();
+    Rmpq_set_str($q, $_[1], 0);
+    if($_[2]) { _overload_sub_eq($q, $_[0], 0) }
+    else { _overload_sub_eq($_[0], $q, 0) }
   }
   else {
     _overload_sub_eq($_[0], $_[1], $_[2]);
@@ -383,8 +546,11 @@ sub overload_sub_eq {
 }
 
 sub overload_div {
-  if( _itsa($_[1]) == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    _overload_div($_[0], _reformatted($_[1]), $_[2]);
+  if( _itsa($_[1]) == 4 && $_[1] !~ /inf|nan/i ) {
+    my $q = Rmpq_init();
+    Rmpq_set_str($q, $_[1], 0);
+    if($_[2]) { _overload_div($q, $_[0], 0) }
+    else { _overload_div($_[0], $q, 0) }
   }
   else {
     _overload_div($_[0], $_[1], $_[2]);
@@ -392,8 +558,11 @@ sub overload_div {
 }
 
 sub overload_div_eq {
-  if( _itsa($_[1]) == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    _overload_div_eq($_[0], _reformatted($_[1]), $_[2]);
+  if( _itsa($_[1]) == 4 && $_[1] !~ /inf|nan/i ) {
+    my $q = Rmpq_init();
+    Rmpq_set_str($q, $_[1], 0);
+    if($_[2]) { _overload_div_eq($q, $_[0], 0) }
+    else { _overload_div_eq($_[0], $q, 0) }
   }
   else {
     _overload_div_eq($_[0], $_[1], $_[2]);
@@ -401,8 +570,10 @@ sub overload_div_eq {
 }
 
 sub overload_pow {
-  if( _itsa($_[1]) == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    _overload_pow($_[0], _reformatted($_[1]), $_[2]);
+  if( _itsa($_[1]) == 4 && $_[1] !~ /inf|nan/i ) {
+    my $q = Rmpq_init();
+    Rmpq_set_str($q, $_[1], 0);
+    _overload_pow($_[0], $q, $_[2]);
   }
   else {
     _overload_pow($_[0], $_[1], $_[2]);
@@ -410,8 +581,10 @@ sub overload_pow {
 }
 
 sub overload_pow_eq {
-  if( _itsa($_[1]) == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    _overload_pow_eq($_[0], _reformatted($_[1]), $_[2]);
+  if( _itsa($_[1]) == 4 && $_[1] !~ /inf|nan/i ) {
+    my $q = Rmpq_init();
+    Rmpq_set_str($q, $_[1], 0);
+    _overload_pow_eq($_[0], $q, $_[2]);
   }
   else {
     _overload_pow_eq($_[0], $_[1], $_[2]);
@@ -427,8 +600,12 @@ sub overload_gt {
     return 1 if Math::MPFR::Rmpfr_cmp_q($_[1], $_[0]) <  0;
     return 0;
   }
-  if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    return _overload_gt($_[0], _reformatted($_[1]), $_[2]);
+  #if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
+  if($itsa == 4 && $_[1] !~ /inf|nan/i) {
+    my $q = Rmpq_init();
+    Rmpq_set_str($q, $_[1], 0);
+    if($_[2]) { return _overload_gt($q, $_[0], 0) }
+    else { return _overload_gt($_[0], $q, 0) }
   }
   return _overload_gt($_[0], $_[1], $_[2]);
 }
@@ -440,8 +617,12 @@ sub overload_gte {
     return 1 if Math::MPFR::Rmpfr_cmp_q($_[1], $_[0]) <=  0;
     return 0;
   }
-  if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    return _overload_gte($_[0], _reformatted($_[1]), $_[2]);
+  #if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
+  if($itsa == 4 && $_[1] !~ /inf|nan/i) {
+    my $q = Rmpq_init();
+    Rmpq_set_str($q, $_[1], 0);
+    if($_[2]) { return _overload_gte($q, $_[0], 0) }
+    else { return _overload_gte($_[0], $q, 0) }
   }
   return _overload_gte($_[0], $_[1], $_[2]);
 }
@@ -453,11 +634,82 @@ sub overload_lt {
     return 1 if Math::MPFR::Rmpfr_cmp_q($_[1], $_[0]) >  0;
     return 0;
   }
-  if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    return _overload_lt($_[0], _reformatted($_[1]), $_[2]);
+  #if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
+  if($itsa == 4 && $_[1] !~ /inf|nan/i) {
+    my $q = Rmpq_init();
+    Rmpq_set_str($q, $_[1], 0);
+    if($_[2]) { return _overload_lt($q, $_[0], 0) }
+    else { return _overload_lt($_[0], $q, 0) }
   }
   return _overload_lt($_[0], $_[1], $_[2]);
 }
+
+sub overload_lte {
+  my $itsa = _itsa($_[1]);
+  if( $itsa == 5 ) { # Math::MPFR object
+    return 0 if Math::MPFR::Rmpfr_nan_p($_[1]);
+    return 1 if Math::MPFR::Rmpfr_cmp_q($_[1], $_[0]) >=  0;
+    return 0;
+  }
+  #if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
+  if($itsa == 4 && $_[1] !~ /inf|nan/i) {
+    my $q = Rmpq_init();
+    Rmpq_set_str($q, $_[1], 0);
+    if($_[2]) { return _overload_lte($q, $_[0], 0) }
+    else { return _overload_lte($_[0], $q, 0) }
+  }
+  return _overload_lte($_[0], $_[1], $_[2]);
+}
+
+sub overload_spaceship {
+  my $itsa = _itsa($_[1]);
+  if( $itsa == 5 ) { # Math::MPFR object
+    return undef if Math::MPFR::Rmpfr_nan_p($_[1]);
+    return Math::MPFR::Rmpfr_cmp_q($_[1], $_[0]) * -1;
+  }
+  #if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
+  if($itsa == 4 && $_[1] !~ /inf|nan/i) {
+    my $q = Rmpq_init();
+    Rmpq_set_str($q, $_[1], 0);
+    if($_[2]) { return _overload_spaceship($q, $_[0], 0) }
+    else { return _overload_spaceship($_[0], $q, 0) }
+  }
+  return _overload_spaceship($_[0], $_[1], $_[2]);
+}
+
+sub overload_equiv {
+  my $itsa = _itsa($_[1]);
+  if( $itsa == 5 ) { # Math::MPFR object
+    return 0 if Math::MPFR::Rmpfr_nan_p($_[1]);
+    return 1 if Math::MPFR::Rmpfr_cmp_q($_[1], $_[0]) ==  0;
+    return 0;
+  }
+  #if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
+  if($itsa == 4 && $_[1] !~ /inf|nan/i) {
+    my $q = Rmpq_init();
+    Rmpq_set_str($q, $_[1], 0);
+    return _overload_equiv($_[0], $q, $_[2]);
+  }
+  return _overload_equiv($_[0], $_[1], $_[2]);
+}
+
+sub overload_not_equiv {
+  my $itsa = _itsa($_[1]);
+  if( $itsa == 5 ) { # Math::MPFR object
+    return 1 if Math::MPFR::Rmpfr_nan_p($_[1]);
+    return 1 if Math::MPFR::Rmpfr_cmp_q($_[1], $_[0]) !=  0;
+    return 0;
+  }
+  #if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
+  if($itsa == 4 && $_[1] !~ /inf|nan/i) {
+    my $q = Rmpq_init();
+    Rmpq_set_str($q, $_[1], 0);
+    return _overload_not_equiv($_[0], $q, $_[2]);
+  }
+  return _overload_not_equiv($_[0], $_[1], $_[2]);
+}
+
+#### end overloaded comparisons ####
 
 sub overload_and {
   my $itsa = _itsa($_[1]);
@@ -513,56 +765,6 @@ sub _to_mpq {
   die "Bad argument given to '$op' overloading";
 }
 
-sub overload_lte {
-  my $itsa = _itsa($_[1]);
-  if( $itsa == 5 ) { # Math::MPFR object
-    return 0 if Math::MPFR::Rmpfr_nan_p($_[1]);
-    return 1 if Math::MPFR::Rmpfr_cmp_q($_[1], $_[0]) >=  0;
-    return 0;
-  }
-  if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    return _overload_lte($_[0], _reformatted($_[1]), $_[2]);
-  }
-  return _overload_lte($_[0], $_[1], $_[2]);
-}
-
-sub overload_spaceship {
-  my $itsa = _itsa($_[1]);
-  if( $itsa == 5 ) { # Math::MPFR object
-    return undef if Math::MPFR::Rmpfr_nan_p($_[1]);
-    return Math::MPFR::Rmpfr_cmp_q($_[1], $_[0]) * -1;
-  }
-  if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    return _overload_spaceship($_[0], _reformatted($_[1]), $_[2]);
-  }
-  return _overload_spaceship($_[0], $_[1], $_[2]);
-}
-
-sub overload_equiv {
-  my $itsa = _itsa($_[1]);
-  if( $itsa == 5 ) { # Math::MPFR object
-    return 0 if Math::MPFR::Rmpfr_nan_p($_[1]);
-    return 1 if Math::MPFR::Rmpfr_cmp_q($_[1], $_[0]) ==  0;
-    return 0;
-  }
-  if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    return _overload_equiv($_[0], _reformatted($_[1]), $_[2]);
-  }
-  return _overload_equiv($_[0], $_[1], $_[2]);
-}
-
-sub overload_not_equiv {
-  my $itsa = _itsa($_[1]);
-  if( $itsa == 5 ) { # Math::MPFR object
-    return 1 if Math::MPFR::Rmpfr_nan_p($_[1]);
-    return 1 if Math::MPFR::Rmpfr_cmp_q($_[1], $_[0]) !=  0;
-    return 0;
-  }
-  if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-    return _overload_not_equiv($_[0], _reformatted($_[1]), $_[2]);
-  }
-  return _overload_not_equiv($_[0], $_[1], $_[2]);
-}
 
 sub overload_lshift {
   if($_[2] || !_looks_like_number($_[1])) {
