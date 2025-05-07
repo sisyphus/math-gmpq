@@ -110,7 +110,7 @@ if($insane) {
   }
 }
 else {
-  if($@ =~ /Invalid string supplied to Math::GMPq::overload_mul/) {print "ok 10\n"}
+  if($@ =~ /Invalid string supplied to Math::GMPq::overload_add/) {print "ok 10\n"}
   else {
     warn "\n\$\@: $@\n";
     print "not ok 10\n";
@@ -169,7 +169,7 @@ if($insane) {
   }
 }
 else {
-  if($@ =~ /Invalid string supplied to Math::GMPq::overload_mul/) {print "ok 16\n"}
+  if($@ =~ /Invalid string supplied to Math::GMPq::overload_div/) {print "ok 16\n"}
   else {
     warn "\n\$\@: $@\n";
     print "not ok 16\n";
@@ -228,7 +228,7 @@ if($insane) {
   }
 }
 else {
-  if($@ =~ /Invalid string supplied to Math::GMPq::overload_mul/) {print "ok 22\n"}
+  if($@ =~ /Invalid string supplied to Math::GMPq::overload_sub/) {print "ok 22\n"}
   else {
     warn "\n\$\@: $@\n";
     print "not ok 22\n";
@@ -341,7 +341,7 @@ if($insane) {
   }
 }
 else {
-  if($@ =~ /Invalid string supplied to Math::GMPq::overload_mul/) {print "ok 34\n"}
+  if($@ =~ /Invalid string supplied to Math::GMPq::overload_add_eq/) {print "ok 34\n"}
   else {
     warn "\n\$\@: $@\n";
     print "not ok 34\n";
@@ -394,7 +394,7 @@ if($insane) {
   }
 }
 else {
-  if($@ =~ /Invalid string supplied to Math::GMPq::overload_mul/) {print "ok 40\n"}
+  if($@ =~ /Invalid string supplied to Math::GMPq::overload_sub_eq/) {print "ok 40\n"}
   else {
     warn "\n\$\@: $@\n";
     print "not ok 40\n";
@@ -446,7 +446,7 @@ if($insane) {
   }
 }
 else {
-  if($@ =~ /Invalid string supplied to Math::GMPq::overload_mul/) {print "ok 46\n"}
+  if($@ =~ /Invalid string supplied to Math::GMPq::overload_div_eq/) {print "ok 46\n"}
   else {
     warn "\n\$\@: $@\n";
     print "not ok 46\n";
@@ -511,7 +511,7 @@ if($insane) {
   }
 }
 else {
-  if($@ =~ /Invalid string supplied to Math::GMPq::overload_mul/) {print "ok 53\n"}
+  if($@ =~ /Invalid string supplied to Math::GMPq::overload_equiv/) {print "ok 53\n"}
   else {
     warn "\n\$\@: $@\n";
     print "not ok 53\n";
@@ -572,7 +572,7 @@ if($insane) {
   }
 }
 else {
-  if($@ =~ /Invalid string supplied to Math::GMPq::overload_mul/) {print "ok 60\n"}
+  if($@ =~ /Invalid string supplied to Math::GMPq::overload_not_equiv/) {print "ok 60\n"}
   else {
     warn "\n\$\@: $@\n";
     print "not ok 60\n";
@@ -633,7 +633,7 @@ if($insane) {
   }
 }
 else {
-  if($@ =~ /Invalid string supplied to Math::GMPq::overload_mul/) {print "ok 67\n"}
+  if($@ =~ /Invalid string supplied to Math::GMPq::overload_lt/) {print "ok 67\n"}
   else {
     warn "\n\$\@: $@\n";
     print "not ok 67\n";
@@ -695,7 +695,7 @@ if($insane) {
   }
 }
 else {
-  if($@ =~ /Invalid string supplied to Math::GMPq::overload_mul/) {print "ok 74\n"}
+  if($@ =~ /Invalid string supplied to Math::GMPq::overload_lte/) {print "ok 74\n"}
   else {
     warn "\n\$\@: $@\n";
     print "not ok 74\n";
@@ -756,7 +756,7 @@ if($insane) {
   }
 }
 else {
-  if($@ =~ /Invalid string supplied to Math::GMPq::overload_mul/) {print "ok 81\n"}
+  if($@ =~ /Invalid string supplied to Math::GMPq::overload_gte/) {print "ok 81\n"}
   else {
     warn "\n\$\@: $@\n";
     print "not ok 81\n";
@@ -818,7 +818,7 @@ if($insane) {
   }
 }
 else {
-  if($@ =~ /Invalid string supplied to Math::GMPq::overload_mul/) {print "ok 88\n"}
+  if($@ =~ /Invalid string supplied to Math::GMPq::overload_gt/) {print "ok 88\n"}
   else {
     warn "\n\$\@: $@\n";
     print "not ok 88\n";
@@ -930,7 +930,7 @@ if($insane) {
   }
 }
 else {
-  if($@ =~ /Invalid string supplied to Math::GMPq::overload_mul/) {print "ok 103\n"}
+  if($@ =~ /Invalid string supplied to Math::GMPq::overload_spaceship/) {print "ok 103\n"}
   else {
     warn "\n\$\@: $@\n";
     print "not ok 103\n";
