@@ -139,22 +139,74 @@ cmp_ok("$q", 'eq', '56487/65536', '(0o671234p-18, 0) is 56487/65536');
 
 # Check some claims made in GMP's mpq_set_str documentation
 
-Rmpq_set_str($q, ' 0xEF/100', 0);
+Rmpq_set_str($q, '0xEF/100', 0);
 cmp_ok("$q", 'eq', '239/100', '(0xEF/100,   0) is 239/100');
 
-Rmpq_set_str($q, ' 0XEF/100', 0);
+Rmpq_set_str($q, '0XEF/100', 0);
 cmp_ok("$q", 'eq', '239/100', '(0XEF/100,   0) is 239/100');
 
-Rmpq_set_str($q, ' 0xEF/0x100', 0);
+Rmpq_set_str($q, '0xEF/0x100', 0);
 cmp_ok("$q", 'eq', '239/256', '(0xEF/0x100, 0) is 239/256');
 
-Rmpq_set_str($q, ' 0xEF/0100', 0);
+Rmpq_set_str($q, '0xEF/0100', 0);
 cmp_ok("$q", 'eq', '239/64', '(0xEF/0100,  0) is 239/64');
 
-Rmpq_set_str($q, ' 0xEF/0b100', 0);
+Rmpq_set_str($q, '0xEF/0b100', 0);
 cmp_ok("$q", 'eq', '239/4', '(0xEF/0b100, 0) is 239/4');
 
-Rmpq_set_str($q, ' 0xEF/0B100', 0);
+Rmpq_set_str($q, '0xEF/0B100', 0);
 cmp_ok("$q", 'eq', '239/4', '(0xEF/0B100, 0) is 239/4');
+
+Rmpq_set_str($q, '0xEF/0B100', 0);
+cmp_ok("$q", 'eq', '239/4', '(0xEF/0B100, 0) is 239/4');
+
+eval { Rmpq_set_str($q, 'inf/nan', 62);};
+my $ok = 1;
+if($@) {
+  warn "\$\@: $@\n";
+  $ok = 0;
+}
+cmp_ok($ok, '==', 1, "No error thrown by 'inf/nan', base 62, in Rmpq_set_str()");
+
+eval { my $q = Math::GMPq->new('inf/nan', 62);};
+$ok = 1;
+if($@) {
+  warn "\$\@: $@\n";
+  $ok = 0;
+}
+cmp_ok($ok, '==', 1, "No error thrown by 'inf/nan', base 62, in new()");
+
+eval { Rmpq_set_str($q, 'inf', 62);};
+$ok = 1;
+if($@) {
+  warn "\$\@: $@\n";
+  $ok = 0;
+}
+cmp_ok($ok, '==', 1, "No error thrown by 'inf', base 62, in Rmpq_set_str()");
+
+eval { my $q = Math::GMPq->new('inf', 62);};
+$ok = 1;
+if($@) {
+  warn "\$\@: $@\n";
+  $ok = 0;
+}
+cmp_ok($ok, '==', 1, "No error thrown by 'inf', base 62, in new()");
+
+eval { Rmpq_set_str($q, 'nan', 62);};
+$ok = 1;
+if($@) {
+  warn "\$\@: $@\n";
+  $ok = 0;
+}
+cmp_ok($ok, '==', 1, "No error thrown by 'nan', base 62, in Rmpq_set_str()");
+
+eval { my $q = Math::GMPq->new('nan', 62);};
+$ok = 1;
+if($@) {
+  warn "\$\@: $@\n";
+  $ok = 0;
+}
+cmp_ok($ok, '==', 1, "No error thrown by 'nan', base 62, in new()");
+
 
 done_testing();

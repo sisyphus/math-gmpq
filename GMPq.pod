@@ -233,8 +233,8 @@
     so, for instance 0xEF/100 is 239/100, whereas 0xEF/0x100 is 239/256.
     Legal values for the base are 0 and 2..62.
 
-    Beginning with version 0.65, new(), along with the Rmpq_init_set_str
-    & Rmpq_set_str functions, and the operator-overloading functions all
+    Beginning with version 0.65, new(), along with the Rmpq_set_str
+    function, and the operator-overloading functions all
     handle certain strings that GMP's mpq_set_set_str() deems illegal.
     For these additional strings, if base is '0' (or not provided) then
     octal strings are signified with either the '0o' or '0O' prefix.
@@ -254,7 +254,7 @@
                          # the exponent is read as the decimal 16.
      new('12@4', 61);    # 872287983
      new('-12@-5', 61)   # 64/844596301
-     And same for Rmpq_init_set_str and Rmpq_set_str.
+     And the same applies to Rmpq_set_str.
      Note: When using the "mantissa@exponent" notation, both "mantissa"
      (aka significand) and "exponent" must be integers, and must be
      expressed in their full integer form (ie not in scientific notation).
@@ -265,9 +265,6 @@
     provision for specifying the base of the given string. Allowable
     bases are therefore limited to 16 (via 0x prefix), 8 (via 0o prefix),
     2 (via 0b prefix) and 10 (no prefix).
-
-   $rop = Rmpq_init_set_str($arg, $base);
-    As for new() but a second arg must be provided.
 
    ####################
 
