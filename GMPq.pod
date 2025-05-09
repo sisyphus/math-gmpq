@@ -233,8 +233,8 @@
     so, for instance 0xEF/100 is 239/100, whereas 0xEF/0x100 is 239/256.
     Legal values for the base are 0 and 2..62.
 
-    Beginning with version 0.65, new(), along with the Rmpq_set_str
-    function, and the operator-overloading functions all
+    Beginning with version 0.65, the new() and Rmpq_set_str()
+    functions, and the operator-overloading functions all
     handle certain strings that GMP's mpq_set_set_str() deems illegal.
     For these additional strings, if base is '0' (or not provided) then
     octal strings are signified with either the '0o' or '0O' prefix.
@@ -242,8 +242,10 @@
     A prefix should NOT be included if a base other than 0 is provided
     as an argument.
     Eg. we handle the following, though GMP's mpq_set_str() does not:
+     new('0.1', $base);  # 1/$base (or 1/10 if $base is 0)
      new('0.9e-2');      # 9/1000
      new('9@-3');        # 9/1000
+     new('9@-3', 16);    # 9/4096
      new('0x1.7p-1');    # 23/32
      new('0x1.7p-1', 16) # invalid as non hex characters are included
      new('0o1.34p-1);    # 23/32 but '01.34p-1' is invalid
@@ -549,7 +551,8 @@
    Strings are first converted to Math::GMPq objects, then canonicalized.
    See the new() documentation (above) in the section "COMBINED
    INITIALIZATION AND ASSIGNMENT FUNCTIONS" regarding permissible string
-   formats. The following operators are overloaded:
+   formats - the range of which has been extended beginning Math-GMPq-0.65.
+   The following operators are overloaded:
 
     + - * / % **
     += -= *= /= %= **=
