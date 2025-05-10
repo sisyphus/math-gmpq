@@ -194,15 +194,9 @@
 
 
    Rmpq_set_str($rop, $str, $base);
-    Set $rop from $str in the given base $base. The string can be
-    an integer like "41" or a fraction like "41/152".  The fraction
-    must be in canonical form, or if not then `Rmpq_canonicalize'
-    must be called. The numerator and optional denominator are
-    parsed the same as in `Rmpz_set_str'. $base can vary from 2 to
-    62, or if $base is 0 then the leading characters are used: `0x'
-    for hex, `0' for octal, or decimal otherwise.  Note that this
-    is done separately for the numerator and denominator, so for
-    instance `0xEF/100' is 239/100, whereas `0xEF/0x100' is 239/256.
+    Set $rop from $str in the given base $base.
+    Allowed strings, and their interpretations, are specified below
+    in the COMBINED INITIALIZATION AND ASSIGNMENT section.
 
    Rmpq_swap($rop1, $rop2);
     Swap the values.
