@@ -8,12 +8,17 @@ use Math::GMPq qw(:mpq);
 
 use Test::More;
 
-for(1 .. 10) {
+for(1 .. 20) {
 
   my $num = rand(10000);
+  next if $num =~ /e/i;
   my $den = rand(100000);
+  next if $den =~ /e/i;
+
   my $s1 = rand;
+  next if $s1 =~ /e/i;
   my $s2 = rand;
+  next if $s2 =~ /e/i;
   my($q1, $q2, $inv1, $inv2) = (Rmpq_init(), Rmpq_init(), Rmpq_init(), Rmpq_init());
 
   for my $base(10 .. 20) {
