@@ -311,21 +311,25 @@ sub Rmpq_set_str { # $str, $base
   my ($ret, $str, $base, $exp) = (shift, shift, shift);
   my $str_orig = "$str";
   my $base_to_pass = abs($base);
-  die "Invalid value for base"
+  die "Invalid value for base ($base)"
     if($base_to_pass == 1 || $base_to_pass > 62);
 
   # If $str =~ /\// then the 2 values on either
   # side of the '/' must be integers. Otherwise
   # the assignment should abort with "illegal
   # characters errors.
-  if($str =~ /\//) {
+  if($str =~ /\// || ( !$base && _represents_allowable_integer($str))) {
     _Rmpq_set_str($ret, $str, $base_to_pass);
     Rmpq_canonicalize($ret);
     return;
   }
 
+  my $prefix = '';
+  $prefix = '-' if $str =~ s/^\-//;
+
   if($base == 0) {
     if($str =~ s/^0x//i) {
+      #return '0' if $str eq '';
       my($s, $exp) = split /p/i, $str;
 
       # Remove any radix point, and
@@ -337,7 +341,7 @@ sub Rmpq_set_str { # $str, $base
       }
       $s =~ s/\.//;
 
-      _Rmpq_set_str($ret, $s, 16);
+      _Rmpq_set_str($ret, $prefix . $s, 16);
       if($exp < 0) {
         Rmpq_div_2exp($ret, $ret, -$exp);
         return;
@@ -347,6 +351,7 @@ sub Rmpq_set_str { # $str, $base
       return;
     }
     elsif($str =~ s/^0b//i) {
+      #return '0' if $str eq '';
       my($s, $exp) = split /p/i, $str;
 
       # Remove any radix point, and
@@ -358,7 +363,7 @@ sub Rmpq_set_str { # $str, $base
       }
       $s =~ s/\.//;
 
-      _Rmpq_set_str($ret, $s, 2);
+      _Rmpq_set_str($ret, $prefix . $s, 2);
       if($exp < 0) {
         Rmpq_div_2exp($ret, $ret, -$exp);
         return;
@@ -378,7 +383,7 @@ sub Rmpq_set_str { # $str, $base
         $exp -= length($temp[1]) * 3;
       }
       $s =~ s/\.//;
-      _Rmpq_set_str($ret, $s, 8);
+      _Rmpq_set_str($ret, $prefix . $s, 8);
       if($exp < 0) {
         Rmpq_div_2exp($ret, $ret, -$exp);
         return;
@@ -395,7 +400,7 @@ sub Rmpq_set_str { # $str, $base
   if($base_to_pass <= 15) { $str =~ s/e/@/i }
 
   unless($str =~ /[^a-zA-Z0-9]/) {
-    _Rmpq_set_str($ret, $str, $base_to_pass);
+    _Rmpq_set_str($ret, $prefix . $str, $base_to_pass);
     # Rmpq_canonicalize($ret); # not needed - value is an integer
     return;
   }
@@ -407,7 +412,7 @@ sub Rmpq_set_str { # $str, $base
   my($s1, $s2) = split /\./, $str;
   $s2 = '' unless defined $s2; # Avoid uninitialized warning at next 2 lines
 
-  _Rmpq_set_str($ret, $s1 . $s2, $base_to_pass);
+  _Rmpq_set_str($ret, $prefix . $s1 . $s2, $base_to_pass);
   _Rmpq_set_str($den, '1' . ('0' x length($s2)), $base_to_pass);
   Rmpq_div($ret, $ret, $den);
   return unless $exp;
@@ -843,6 +848,24 @@ sub mpfr2mpq {
     unless ref($_[0]) eq 'Math::MPFR';
   Math::MPFR::Rmpfr_get_q( my $mpq_from_mpfr = Math::GMPq->new(), shift );
   return $mpq_from_mpfr;
+}
+
+sub _represents_allowable_integer {
+  # Will be called only if base is zero.
+  my $str = shift;
+  if($str =~ s/^\-?0x//i) {
+    return 0 if $str =~ /[^0-9a-fA-F]/;
+    return 1;
+  }
+  if($str =~ s/^\-?0b//i) {
+    return 0 if $str =~ /[^0-1]/;
+    return 1;
+  }
+  if($str =~ s/^\-?0//i) {
+    return 0 if $str =~ /[^0-7]/;
+    return 1;
+  }
+  return 0;
 }
 
 sub __GNU_MP_VERSION            () {return ___GNU_MP_VERSION()}
