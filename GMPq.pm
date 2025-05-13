@@ -314,6 +314,10 @@ sub Rmpq_set_str { # $str, $base
   die "Invalid value for base ($base)"
     if($base_to_pass == 1 || $base_to_pass > 62);
 
+  # GMP's mpq_aer_str() won't allow a leading '+'.
+  $str =~ s/^\+//;
+  $str =~ s/\/\+//;
+
   # If $str =~ /\// then the 2 values on either
   # side of the '/' must be integers. Otherwise
   # the assignment should abort with "illegal
@@ -398,7 +402,7 @@ sub Rmpq_set_str { # $str, $base
   }
 
   if($base_to_pass <= 15) { $str =~ s/e/@/i }
-
+    $str =~ s/@\+/@/; # GMP's mpq_set_str() won't allow a leading '+'.
   unless($str =~ /[^a-zA-Z0-9]/) {
     _Rmpq_set_str($ret, $prefix . $str, $base_to_pass);
     # Rmpq_canonicalize($ret); # not needed - value is an integer
@@ -441,8 +445,6 @@ sub Rmpq_set_str { # $str, $base
 
   Rmpq_div($ret, $ret, $q_modifier);
   return;
-
-  die "Slipped thru: $str_orig $base\n";
 }
 
 sub Rmpq_set_str_prev {
@@ -450,36 +452,6 @@ sub Rmpq_set_str_prev {
     _Rmpq_set_str($_[0], _reformatted($_[1]), $_[2]);
   }
   else { _Rmpq_set_str($_[0], $_[1], $_[2]) }
-}
-
-sub _reformatted_obsolete {
-  # The argument has already been as assessed
-  # as looks_like_number()
-  my ($sign, $ppos) = ('', '');
-  my $arg = shift;
-  $arg =~ s/^0+//;
-  my($man, $exp) = split /e/i, $arg;
-  return '0' unless defined $man;
-  $exp = 0 if !$exp;
-  if($man =~ s/^[\+\-]//) { $sign = '-' if $& eq'-' }
-  my $len = length($man);
-  $len --;
-  for my $i (0 .. $len) {
-    if(substr($man, $i, 1) eq '.') {
-      substr ($man, $i, 1, '');
-      $ppos = "$i";
-      last;
-    }
-  }
-
-  return '0' unless $man =~ /[^0]/;
-
-  $ppos = $len if $ppos eq '';
-  $exp += $ppos - $len;
-
-  $man =~ s/^0+//;
-  return $sign . $man . ('0' x $exp) . '/1' if $exp >= 0;
-  return $sign . $man . '/1' . ('0' x -$exp);
 }
 
 sub overload_add {
