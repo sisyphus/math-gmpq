@@ -455,9 +455,10 @@ sub Rmpq_set_str_prev {
 }
 
 sub overload_add {
-  if( _itsa($_[1]) == 4 && $_[1] !~ /inf|nan/i ) {
-    my $q = Rmpq_init();
-    Rmpq_set_str($q, $_[1], 0);
+  if( _itsa($_[1]) == 4 ) {# && $_[1] !~ /inf|nan/i ) {
+    #my $q = Rmpq_init();
+    #Rmpq_set_str($q, $_[1], 0);
+    my $q = Math::GMPq->new($_[1], 0);
     _overload_add($_[0], $q, $_[2]);
   }
   else {
@@ -466,9 +467,10 @@ sub overload_add {
 }
 
 sub overload_add_eq {
-  if( _itsa($_[1]) == 4 && $_[1] !~ /inf|nan/i ) {
-    my $q = Rmpq_init();
-    Rmpq_set_str($q, $_[1], 0);
+  if( _itsa($_[1]) == 4 ) {# && $_[1] !~ /inf|nan/i ) {
+    #my $q = Rmpq_init();
+    #Rmpq_set_str($q, $_[1], 0);
+    my $q = Math::GMPq->new($_[1], 0);
     _overload_add_eq($_[0], $q, $_[2]);
   }
   else {
@@ -477,9 +479,10 @@ sub overload_add_eq {
 }
 
 sub overload_mul {
-  if( _itsa($_[1]) == 4 && $_[1] !~ /inf|nan/i ) {
-    my $q = Rmpq_init();
-    Rmpq_set_str($q, $_[1], 0);
+  if( _itsa($_[1]) == 4 ) {# && $_[1] !~ /inf|nan/i ) {
+    #my $q = Rmpq_init();
+    #Rmpq_set_str($q, $_[1], 0);
+    my $q = Math::GMPq->new($_[1], 0);
     _overload_mul($_[0], $q, $_[2]);
   }
   else {
@@ -488,9 +491,10 @@ sub overload_mul {
 }
 
 sub overload_mul_eq {
-  if( _itsa($_[1]) == 4 && $_[1] !~ /inf|nan/i ) {
-    my $q = Rmpq_init();
-    Rmpq_set_str($q, $_[1], 0);
+  if( _itsa($_[1]) == 4 ) {# && $_[1] !~ /inf|nan/i ) {
+    #my $q = Rmpq_init();
+    #Rmpq_set_str($q, $_[1], 0);
+    my $q = Math::GMPq->new($_[1], 0);
     _overload_mul_eq($_[0], $q, $_[2]);
   }
   else {
@@ -499,9 +503,10 @@ sub overload_mul_eq {
 }
 
 sub overload_sub {
-  if( _itsa($_[1]) == 4 && $_[1] !~ /inf|nan/i ) {
-    my $q = Rmpq_init();
-    Rmpq_set_str($q, $_[1], 0);
+  if( _itsa($_[1]) == 4 ) {# && $_[1] !~ /inf|nan/i ) {
+    #my $q = Rmpq_init();
+    #Rmpq_set_str($q, $_[1], 0);
+    my $q = Math::GMPq->new($_[1], 0);
     # _overload_sub() doesn't check $_[2] if both args are
     # Math::GMPq objects - so we perform the check here.
     if($_[2]) { _overload_sub($q, $_[0], 0) }
@@ -527,9 +532,10 @@ sub overload_sub_eq {
 }
 
 sub overload_div {
-  if( _itsa($_[1]) == 4 && $_[1] !~ /inf|nan/i ) {
-    my $q = Rmpq_init();
-    Rmpq_set_str($q, $_[1], 0);
+  if( _itsa($_[1]) == 4 ) {# && $_[1] !~ /inf|nan/i ) {
+    #my $q = Rmpq_init();
+    #Rmpq_set_str($q, $_[1], 0);
+    my $q = Math::GMPq->new($_[1], 0);
     # _overload_div() doesn't check $_[2] if both args are
     # Math::GMPq objects - so we perform the check here.
     if($_[2]) { _overload_div($q, $_[0], 0) }
@@ -541,9 +547,10 @@ sub overload_div {
 }
 
 sub overload_div_eq {
-  if( _itsa($_[1]) == 4 && $_[1] !~ /inf|nan/i ) {
-    my $q = Rmpq_init();
-    Rmpq_set_str($q, $_[1], 0);
+  if( _itsa($_[1]) == 4 ) {# && $_[1] !~ /inf|nan/i ) {
+    #my $q = Rmpq_init();
+    #Rmpq_set_str($q, $_[1], 0);
+    my $q = Math::GMPq->new($_[1], 0);
     # _overload_div_eq() doesn't check $_[2] if both args are
     # Math::GMPq objects - so we perform the check here.
     if($_[2]) { _overload_div_eq($q, $_[0], 0) }
@@ -555,9 +562,10 @@ sub overload_div_eq {
 }
 
 sub overload_pow {
-  if( _itsa($_[1]) == 4 && $_[1] !~ /inf|nan/i ) {
-    my $q = Rmpq_init();
-    Rmpq_set_str($q, $_[1], 0);
+  if( _itsa($_[1]) == 4 ) {# && $_[1] !~ /inf|nan/i ) {
+    #my $q = Rmpq_init();
+    #Rmpq_set_str($q, $_[1], 0);
+    my $q = Math::GMPq->new($_[1], 0);
     _overload_pow($_[0], $q, $_[2]);
   }
   else {
@@ -566,9 +574,10 @@ sub overload_pow {
 }
 
 sub overload_pow_eq {
-  if( _itsa($_[1]) == 4 && $_[1] !~ /inf|nan/i ) {
-    my $q = Rmpq_init();
-    Rmpq_set_str($q, $_[1], 0);
+  if( _itsa($_[1]) == 4 ) {# && $_[1] !~ /inf|nan/i ) {
+    #my $q = Rmpq_init();
+    #Rmpq_set_str($q, $_[1], 0);
+    my $q = Math::GMPq->new($_[1], 0);
     _overload_pow_eq($_[0], $q, $_[2]);
   }
   else {
@@ -586,9 +595,10 @@ sub overload_gt {
     return 0;
   }
   #if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-  if($itsa == 4 && $_[1] !~ /inf|nan/i) {
-    my $q = Rmpq_init();
-    Rmpq_set_str($q, $_[1], 0);
+  if($itsa == 4 ) {# && $_[1] !~ /inf|nan/i) {
+    #my $q = Rmpq_init();
+    #Rmpq_set_str($q, $_[1], 0);
+    my $q = Math::GMPq->new($_[1], 0);
     # _overload_gt() doesn't check $_[2] if both args are
     # Math::GMPq objects - so we perform the check here.
     if($_[2]) { return _overload_gt($q, $_[0], 0) }
@@ -604,10 +614,11 @@ sub overload_gte {
     return 1 if Math::MPFR::Rmpfr_cmp_q($_[1], $_[0]) <=  0;
     return 0;
   }
-  #if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-  if($itsa == 4 && $_[1] !~ /inf|nan/i) {
-    my $q = Rmpq_init();
-    Rmpq_set_str($q, $_[1], 0);
+  #if( $itsa == 4  && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
+  if($itsa == 4 ) {# && $_[1] !~ /inf|nan/i) {
+    #my $q = Rmpq_init();
+    #Rmpq_set_str($q, $_[1], 0);
+    my $q = Math::GMPq->new($_[1], 0);
     # _overload_gte() doesn't check $_[2] if both args are
     # Math::GMPq objects - so we perform the check here.
     if($_[2]) { return _overload_gte($q, $_[0], 0) }
@@ -624,9 +635,10 @@ sub overload_lt {
     return 0;
   }
   #if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-  if($itsa == 4 && $_[1] !~ /inf|nan/i) {
-    my $q = Rmpq_init();
-    Rmpq_set_str($q, $_[1], 0);
+  if($itsa == 4 ) {# && $_[1] !~ /inf|nan/i) {
+    #my $q = Rmpq_init();
+    #Rmpq_set_str($q, $_[1], 0);
+    my $q = Math::GMPq->new($_[1], 0);
     # _overload_lt() doesn't check $_[2] if both args are
     # Math::GMPq objects - so we perform the check here.
     if($_[2]) { return _overload_lt($q, $_[0], 0) }
@@ -643,9 +655,10 @@ sub overload_lte {
     return 0;
   }
   #if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-  if($itsa == 4 && $_[1] !~ /inf|nan/i) {
-    my $q = Rmpq_init();
-    Rmpq_set_str($q, $_[1], 0);
+  if($itsa == 4 ) {# && $_[1] !~ /inf|nan/i) {
+    #my $q = Rmpq_init();
+    #Rmpq_set_str($q, $_[1], 0);
+    my $q = Math::GMPq->new($_[1], 0);
     # _overload_lte() doesn't check $_[2] if both args are
     # Math::GMPq objects - so we perform the check here.
     if($_[2]) { return _overload_lte($q, $_[0], 0) }
@@ -661,9 +674,10 @@ sub overload_spaceship {
     return Math::MPFR::Rmpfr_cmp_q($_[1], $_[0]) * -1;
   }
   #if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-  if($itsa == 4 && $_[1] !~ /inf|nan/i) {
-    my $q = Rmpq_init();
-    Rmpq_set_str($q, $_[1], 0);
+  if($itsa == 4 ) {# && $_[1] !~ /inf|nan/i) {
+    #my $q = Rmpq_init();
+    #Rmpq_set_str($q, $_[1], 0);
+    my $q = Math::GMPq->new($_[1], 0);
     # _overload_spaceship() doesn't check $_[2] if both args are
     # Math::GMPq objects - so we perform the check here.
     if($_[2]) { return _overload_spaceship($q, $_[0], 0) }
@@ -680,9 +694,10 @@ sub overload_equiv {
     return 0;
   }
   #if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-  if($itsa == 4 && $_[1] !~ /inf|nan/i) {
-    my $q = Rmpq_init();
-    Rmpq_set_str($q, $_[1], 0);
+  if($itsa == 4 ) {# && $_[1] !~ /inf|nan/i) {
+    #my $q = Rmpq_init();
+    #Rmpq_set_str($q, $_[1], 0);
+    my $q = Math::GMPq->new($_[1], 0);
     return _overload_equiv($_[0], $q, $_[2]);
   }
   return _overload_equiv($_[0], $_[1], $_[2]);
@@ -696,9 +711,10 @@ sub overload_not_equiv {
     return 0;
   }
   #if( $itsa == 4 && _looks_like_number($_[1]) && $_[1] !~ /inf|nan/i ) {
-  if($itsa == 4 && $_[1] !~ /inf|nan/i) {
-    my $q = Rmpq_init();
-    Rmpq_set_str($q, $_[1], 0);
+  if($itsa == 4 ) {# && $_[1] !~ /inf|nan/i) {
+    #my $q = Rmpq_init();
+    #Rmpq_set_str($q, $_[1], 0);
+    my $q = Math::GMPq->new($_[1], 0);
     return _overload_not_equiv($_[0], $q, $_[2]);
   }
   return _overload_not_equiv($_[0], $_[1], $_[2]);

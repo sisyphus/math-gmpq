@@ -384,5 +384,28 @@ for my $prefix('-0x', '-0X', '-0b', '-0B', '-0') {
   cmp_ok("$q5", 'eq', '-16700', "new('-167@+002') is -16700");
 }
 
+{
+  cmp_ok(Math::GMPq->new('1.672@3'), '==', Math::GMPq->new('1672'), "new('1.672@3') == new('1672')");
+
+  eval {my $q = Math::GMPq->new('0x1.672@3');};
+  like($@, qr/String supplied to Rmpq_set_str function \(1672\@3\)/, "new('0x1.672@3') throws expected error");
+
+  eval { my $q = Math::GMPq->new('0x1.672/3');};
+  like($@, qr/String supplied to Rmpq_set_str function \(0x1.672\/3\)/, "new('0x1.672/3') throws expected error");
+
+  cmp_ok(Math::GMPq->new('1.672@3', 16), '==', Math::GMPq->new('1672', 16), 'new("1.672@3", 16) == new("1672", 16)');
+
+  my $ok = 0;
+  eval { my $q0 = Math::GMPq->new(0.5) * '01.2p-1';};
+  $ok = 1 if $@;
+
+  my $q1 = Math::GMPq->new(0.5) * '0o1.2p-1';
+  cmp_ok("$q1", 'eq', '5/16', '0o prefix interpetted correctly');
+
+  my $q2 = Math::GMPq->new(0.5) * '0O1.2p-1';
+  cmp_ok($q1, '==', $q2, '0O prefix interpetted correctly');
+
+}
+
 ##################
 done_testing();
