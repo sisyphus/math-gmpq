@@ -405,6 +405,17 @@ for my $prefix('-0x', '-0X', '-0b', '-0B', '-0') {
   my $q2 = Math::GMPq->new(0.5) * '0O1.2p-1';
   cmp_ok($q1, '==', $q2, '0O prefix interpetted correctly');
 
+  my $q3 = Math::GMPq->new('+17/+68');
+  cmp_ok("$q3", 'eq', '1/4', "new('+17/+68') is '1/4'");
+
+  my $q4 = Math::GMPq->new('+17/-68');
+  cmp_ok("$q4", 'eq', '-1/4', "new('+17/-68') is '-1/4'");
+
+  my $q5 = Math::GMPq->new('-17/+68');
+  cmp_ok("$q5", 'eq', '-1/4', "new('-17/+68') is '-1/4'");
+
+  my $q6 = Math::GMPq->new('-17/-68');
+  cmp_ok("$q6", 'eq', '1/4', "new('-17/-68') is '1/4'");
 }
 
 ##################

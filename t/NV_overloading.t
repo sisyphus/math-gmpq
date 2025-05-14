@@ -318,7 +318,7 @@ else {
 }
 
 eval{$ret -= "$strinf"};
-if($@ =~ /Invalid string supplied to Math::GMPq::overload_sub_eq/) {print "ok 38\n"}
+if($@ =~ /String supplied to Rmpq_set_str function \(/) {print "ok 38\n"}
 else {
   warn "\n\$\@: $@\n";
   print "not ok 38\n";
@@ -332,19 +332,10 @@ else {
 }
 
 eval{$ret -= "$strnan"};
-if($insane) {
-  if($@ =~ /String supplied to Rmpq_set_str function \(/) {print "ok 40\n"}
-  else {
-    warn "\n\$\@: $@\n";
-    print "not ok 40\n";
-  }
-}
+if($@ =~ /String supplied to Rmpq_set_str function \(/) {print "ok 40\n"}
 else {
-  if($@ =~ /Invalid string supplied to Math::GMPq::overload_sub_eq/) {print "ok 40\n"}
-  else {
-    warn "\n\$\@: $@\n";
-    print "not ok 40\n";
-  }
+  warn "\n\$\@: $@\n";
+  print "not ok 40\n";
 }
 
 $ret -= 60.5;
