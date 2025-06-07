@@ -531,8 +531,8 @@ sub overload_sub_eq {
 
   if($itsa == 5) { # Math::MPFR object
     my $ret = Math::MPFR::Rmpfr_init2(Math::MPFR::Rmpfr_get_prec($_[1]));
-    Math::MPFR::Rmpfr_q_sub($ret, $_[0], $_[1], Math::MPFR::Rmpfr_get_default_rounding_mode());
-    return $ret;
+    Math::MPFR::Rmpfr_sub_q($ret, $_[1], $_[0], Math::MPFR::Rmpfr_get_default_rounding_mode());
+    return -$ret;
   }
 
   return _overload_sub_eq($_[0], $_[1], $_[2]);
