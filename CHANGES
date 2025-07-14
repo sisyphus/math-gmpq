@@ -4,7 +4,7 @@ Revision history for Perl module Math::GMPq
  - Fix test in t/overload_cross_class.t. Fixes (eg):
    https://www.cpantesters.org/cpan/report/3d47714c-454f-11f0-9a27-d5266e8775ea
  - Ensure that overloaded <=> operations return one of 1, -1, 0, and undef.
-   Required some amendments to GMPz.xs, and some rewriting of parts of some
+   Required some amendments to GMPq.xs, and some rewriting of parts of some
    test scripts.
    Issue raised by https://rt.cpan.org/Ticket/Display.html?id=168076 .
 
