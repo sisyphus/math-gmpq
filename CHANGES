@@ -1,5 +1,7 @@
 Revision history for Perl module Math::GMPq
 
+0.69
+
 0.68
  - Fix test in t/overload_cross_class.t. Fixes (eg):
    https://www.cpantesters.org/cpan/report/3d47714c-454f-11f0-9a27-d5266e8775ea
