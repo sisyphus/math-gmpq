@@ -1458,7 +1458,7 @@ SV * _overload_gt(pTHX_ mpq_t * a, SV * b, SV * third) {
          return newSViv(0);
        }
 
-       if(strEQ(h, "Math::GMPz")) {
+       if(strEQ(h, "Math::GMPz") || strEQ(h, "Math::GMP")) {
 #if __GNU_MP_RELEASE < 60099
          ret = Rmpq_cmp_z(a, INT2PTR(mpz_t *, SvIVX(SvRV(b))));
          if(ret > 0) return newSViv(1);
@@ -1523,7 +1523,7 @@ SV * _overload_gte(pTHX_ mpq_t * a, SV * b, SV * third) {
          return newSViv(0);
        }
 
-       if(strEQ(h, "Math::GMPz")) {
+       if(strEQ(h, "Math::GMPz") || strEQ(h, "Math::GMP")) {
 #if __GNU_MP_RELEASE < 60099
          ret = Rmpq_cmp_z(a, INT2PTR(mpz_t *, SvIVX(SvRV(b))));
          if(ret >= 0) return newSViv(1);
@@ -1588,7 +1588,7 @@ SV * _overload_lt(pTHX_ mpq_t * a, SV * b, SV * third) {
          return newSViv(0);
        }
 
-       if(strEQ(h, "Math::GMPz")) {
+       if(strEQ(h, "Math::GMPz") || strEQ(h, "Math::GMP")) {
 #if __GNU_MP_RELEASE < 60099
          ret = Rmpq_cmp_z(a, INT2PTR(mpz_t *, SvIVX(SvRV(b))));
          if(ret < 0) return newSViv(1);
@@ -1653,7 +1653,7 @@ SV * _overload_lte(pTHX_ mpq_t * a, SV * b, SV * third) {
          return newSViv(0);
        }
 
-       if(strEQ(h, "Math::GMPz")) {
+       if(strEQ(h, "Math::GMPz") || strEQ(h, "Math::GMP")) {
 #if __GNU_MP_RELEASE < 60099
          ret = Rmpq_cmp_z(a, INT2PTR(mpz_t *, SvIVX(SvRV(b))));
          if(ret <= 0) return newSViv(1);
@@ -1728,7 +1728,7 @@ SV * _overload_spaceship(pTHX_ mpq_t * a, SV * b, SV * third) {
          if(ret < 0) ret = -1;
          return newSViv(ret);
        }
-       if(strEQ(h, "Math::GMPz")) {
+       if(strEQ(h, "Math::GMPz") || strEQ(h, "Math::GMP")) {
 #if __GNU_MP_RELEASE < 60099
          ret = Rmpq_cmp_z(a, INT2PTR(mpz_t *, SvIVX(SvRV(b))));
          if(ret > 0) ret = 1;
@@ -1784,7 +1784,7 @@ SV * _overload_equiv(pTHX_ mpq_t * a, SV * b, SV * third) {
          return newSViv(mpq_equal(*a, *(INT2PTR(mpq_t *, SvIVX(SvRV(b))))));
        }
 
-       if(strEQ(h, "Math::GMPz")) {
+       if(strEQ(h, "Math::GMPz") || strEQ(h, "Math::GMP")) {
 #if __GNU_MP_RELEASE < 60099
          if(Rmpq_cmp_z(a, INT2PTR(mpz_t *, SvIVX(SvRV(b))))) return newSViv(0);
          return newSViv(1);
@@ -1835,7 +1835,7 @@ SV * _overload_not_equiv(pTHX_ mpq_t * a, SV * b, SV * third) {
 
      if(sv_isobject(b)) {
        const char *h = HvNAME(SvSTASH(SvRV(b)));
-       if(strEQ(h, "Math::GMPq")) {
+       if(strEQ(h, "Math::GMPq") || strEQ(h, "Math::GMP")) {
          ret = mpq_equal(*a, *(INT2PTR(mpq_t *, SvIVX(SvRV(b)))));
          if(ret) return newSViv(0);
          return newSViv(1);
@@ -2757,7 +2757,7 @@ SV * _overload_fmod (pTHX_ mpq_t * a, mpq_t *b, SV * third) {
 
      /* create new object */
      New(1, mpq_t_obj, 1, mpq_t);
-     if(mpq_t_obj == NULL) croak("Failed to allocate memory in overload_div function");
+     if(mpq_t_obj == NULL) croak("Failed to allocate memory in overload_fmod function");
      obj_ref = newSV(0);
      obj = newSVrv(obj_ref, "Math::GMPq");
      mpq_init(*mpq_t_obj);

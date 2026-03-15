@@ -582,7 +582,7 @@ sub overload_pow {
 
 sub overload_pow_eq {
   my $itsa = _itsa($_[1]);
-  if( _itsa($_[1]) == 4 ) {
+  if( $itsa == 4 ) {
     my $q = Math::GMPq->new($_[1], 0);
     return _overload_pow_eq($_[0], $q, $_[2]);
   }
