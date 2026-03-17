@@ -30,7 +30,7 @@ use overload
     '-'    => \&overload_sub,
     '*'    => \&overload_mul,
     '/'    => \&overload_div,
-    '**'   => \&overload_pow,
+    '**'   => \&_overload_pow,
     '+='   => \&overload_add_eq,
     '-='   => \&overload_sub_eq,
     '*='   => \&overload_mul_eq,
@@ -73,12 +73,12 @@ mpfr2mpq
 Rmpq_abs Rmpq_add Rmpq_canonicalize Rmpq_clear Rmpq_cmp Rmpq_cmp_si Rmpq_cmp_ui
 Rmpq_and Rmpq_ior Rmpq_xor Rmpq_com
 Rmpq_cmp_z Rmpq_add_z Rmpq_sub_z Rmpq_z_sub Rmpq_mul_z Rmpq_div_z Rmpq_z_div
-Rmpq_pow_ui
 Rmpq_create_noval Rmpq_denref Rmpq_div Rmpq_div_2exp Rmpq_equal
-Rmpq_fprintf
+Rmpq_fits_uint_p Rmpq_fprintf
 Rmpq_get_d
 Rmpq_get_den Rmpq_get_num Rmpq_get_str Rmpq_init Rmpq_init_nobless Rmpq_inp_str
 Rmpq_inv Rmpq_mul Rmpq_mul_2exp Rmpq_neg Rmpq_numref Rmpq_out_str Rmpq_printf
+Rmpq_pow_ui
 Rmpq_set Rmpq_set_d Rmpq_set_den Rmpq_set_f Rmpq_set_num Rmpq_set_si Rmpq_set_str
 Rmpq_set_NV Rmpq_get_NV Rmpq_cmp_NV
 Rmpq_set_IV Rmpq_cmp_IV
@@ -314,7 +314,7 @@ sub Rmpq_set_str { # $str, $base
   die "Invalid value for base ($base)"
     if($base_to_pass == 1 || $base_to_pass > 62);
 
-  # GMP's mpq_aer_str() won't allow a leading '+'.
+  # GMP's mpq_set_str() won't allow a leading '+'.
   $str =~ s/^\+//;
   $str =~ s/\/\+/\//;
 
@@ -570,7 +570,7 @@ sub overload_div_eq {
   return _overload_div_eq($_[0], $_[1], $_[2]);
 }
 
-sub overload_pow {
+sub overload_pow_hide {
   if( _itsa($_[1]) == 4 ) {
     my $q = Math::GMPq->new($_[1], 0);
     _overload_pow($_[0], $q, $_[2]);
@@ -582,10 +582,10 @@ sub overload_pow {
 
 sub overload_pow_eq {
   my $itsa = _itsa($_[1]);
-  if( $itsa == 4 ) {
-    my $q = Math::GMPq->new($_[1], 0);
-    return _overload_pow_eq($_[0], $q, $_[2]);
-  }
+  #if( $itsa == 4 ) {
+  #  my $q = Math::GMPq->new($_[1], 0);
+  #  return _overload_pow_eq($_[0], $q, $_[2]);
+  #}
 
   if($itsa == 5) { # Math::MPFR object
     my $ret = Math::MPFR::Rmpfr_init2(Math::MPFR::Rmpfr_get_prec($_[1]));

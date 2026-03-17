@@ -97,7 +97,7 @@
    being done, the "$op" argument(s) being the input(s) into that
    calculation.
    Generally, $rop, $op1, $op2, etc. can be the same perl variable,
-   though usually they will be distinct perl variables referencing
+   though often they will be distinct perl variables referencing
    distinct GMP structures.
    Eg. something like Rmpq_add($r1, $r1, $r1),
    where $r1 *is* the same reference to the same GMP structure,
@@ -541,9 +541,8 @@
 
    OPERATOR OVERLOADING
 
-   Overloading occurs with numbers, strings,Math::GMPq objects,
-   Math::GMPz objects and Math::MPFR objects.
-   There is also some limited support for using Math::GMP objects.
+   Overloading occurs with numbers, strings, Math::GMPq objects,
+   Math::GMPz objects, Math::GMP objects and Math::MPFR objects.
    Strings are first converted to Math::GMPq objects, then canonicalized.
    See the new() documentation (above) in the section "COMBINED
    INITIALIZATION AND ASSIGNMENT FUNCTIONS" regarding permissible string
@@ -558,8 +557,13 @@
     "" abs 0+ int
     =
 
-    NOTE: Overloading of '**' and '**=' accepts only a positive integer
-          (IV or PV) or a Math::MPFR object.
+    Overloading of '**' and '**=' accepts only positive integer  values -
+    in the form of a string, an IV, a Math::MPFR object, a  Math::GMPz, a
+    Math::GMP object or a Math::GMPq object. An exception will be raised
+    unless the value of the Math::GMPz/Math::GMP/Math::GMPq object fits
+    into an unsigned int. (Math::MPFR object values are allowed to be
+    negative and/or fractional as the '**' and '**=' operations return a
+    Math::MPFR object.)
 
     NOTE: Making use of the '=' overloading is not recommended unless
           you understand its caveats. See 'perldoc overload' and
@@ -573,6 +577,13 @@
     Atempting to use the overloaded operators with objects that
     have been blessed into some package other than 'Math::GMPq',
     Math::MPFR', 'Math::GMPz', or 'Math::GMP' will throw an error.
+
+    When overloading operations that involve Math::GMP and Math::GMPq
+    objects, a Math::GMPq object is always returned. You will also need
+    to load the Math::GMP_OLOAD module for operations that call
+    Math::GMP's overloading subs.
+    For such operations that instead call Math::GMPq's overloading subs,
+    then Math::GMP_OLOAD is not needed.
 
     YMMV with older versions of Math::MPFR but, if you use Math-MPFR-4.19
     or later, then Math::MPFR objects can be provided as the second arg
@@ -590,7 +601,7 @@
     current Math::MPFR default precision and default rounding mode.
 
     Comparisons between Math::GMPq and Math::GMPz objects can be performed
-    using either the Math::GMPz or Math::GMPq overloading.
+    using either the Math::GMPz/Math::GMP or Math::GMPq overloading.
     For example, ($mpq > $mpz) is equivalent to ($mpz < $mpq).
 
     To determine the type and value of the second argument the subroutine
@@ -616,13 +627,21 @@
        assessed individually. ie '0xa123/ff' is not a valid number
        (because 'ff' is not a valid base 10 number). That needs to
        be rewritten as '0xa123/0xff'.
+       NOTE: String (PV) values given to '**' and '**=' must be +ve
+             integers that fit into an unsigned long int.
 
     4. If the variable is an NV, then that value is used. The
        variable is considered to be a NV if the NOK flag is set.
+       NOTE: Providing an NV to the overloaded '**' and '**='
+             subroutines currently generates an error.
 
     5. If the variable is a Math::GMPq object (or, for operators
        specified above, a Math::MPFR/Math::GMP/Math::GMPz object)
        then the value of that object is used.
+       NOTE: Providing a Math::GMPq object as the exponent to the
+             overloaded '**' and '**=' subroutines generates an
+             error if that object does not contain a +ve integer
+             value that fits into an unsigned int.
 
     6. If none of the above is true, then the second variable is
        deemed to be of an invalid type. The subroutine croaks with

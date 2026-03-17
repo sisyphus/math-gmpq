@@ -619,6 +619,13 @@ void Rmpq_z_div(mpq_t * rop, mpz_t * z, mpq_t * op) {
      mpq_canonicalize(*rop);
 }
 
+int Rmpq_fits_uint_p(mpq_t * op) {
+    if(mpq_cmp_ui(*op, 0, 1) < 0) return 0;
+    if(mpz_cmp_ui(mpq_denref(*op), 1) != 0) return 0;
+    if(mpz_fits_uint_p(mpq_denref(*op))) return 1;
+    return 0;
+}
+
 void Rmpq_pow_ui(mpq_t * rop, mpq_t * op, unsigned long ui) {
      mpz_pow_ui(mpq_numref(*rop), mpq_numref(*op), ui);
      mpz_pow_ui(mpq_denref(*rop), mpq_denref(*op), ui);
@@ -2243,6 +2250,8 @@ SV * _overload_div_eq(pTHX_ SV * a, SV * b, SV * third) {
 }
 
 SV * _overload_pow_eq(pTHX_ SV * a, SV * b, SV * third) {
+     unsigned int ui;
+     mpq_t temp;
      PERL_UNUSED_ARG(third);
      SvREFCNT_inc(a);
      if(SvUOK(b) || (SV_IS_IOK(b) && SvIVX(b) >= 0)) {
@@ -2257,6 +2266,48 @@ SV * _overload_pow_eq(pTHX_ SV * a, SV * b, SV * third) {
        }
      }
      */
+
+#if defined(GMPQ_PV_NV_BUG)
+     if( (SV_IS_POK(b) && !SV_IS_NOK(b))
+           ||
+         (SV_IS_POK(b) && SV_IS_NOK(b) && SvIOKp(b)) ) {
+#else
+     if(SV_IS_POK(b)) {
+#endif
+       mpq_init(temp);
+       if(mpq_set_str(temp, SvPV_nolen(b), 0)) {
+         SvREFCNT_dec(a);
+         mpq_clear(temp);
+         croak("Invalid string passed to Math::GMPq::overload_pow_eq");
+       }
+       mpq_canonicalize(temp);
+       if(Rmpq_fits_uint_p(&temp)) {
+         ui = mpz_get_ui(mpq_numref(temp));
+         mpq_clear(temp);
+         Rmpq_pow_ui(INT2PTR(mpq_t *, SvIVX(SvRV(a))), INT2PTR(mpq_t *, SvIVX(SvRV(a))), ui);
+         return a;
+       }
+     }
+
+     if(sv_isobject(b)) {
+       const char *h = HvNAME(SvSTASH(SvRV(b)));
+       if(strEQ(h, "Math::GMPz") || strEQ(h, "Math::GMP")) {
+         if(mpz_fits_uint_p(*(INT2PTR(mpz_t *, SvIVX(SvRV(b)))))) {
+           ui = mpz_get_ui (*(INT2PTR(mpz_t *, SvIVX(SvRV(b)))));
+           Rmpq_pow_ui(INT2PTR(mpq_t *, SvIVX(SvRV(a))), INT2PTR(mpq_t *, SvIVX(SvRV(a))), (unsigned long)ui);
+           return a;
+         }
+       }
+
+       if(strEQ(h, "Math::GMPq")) {
+         if(Rmpq_fits_uint_p(INT2PTR(mpq_t *, SvIVX(SvRV(b))))) {
+           ui = mpz_get_ui(mpq_numref(*(INT2PTR(mpq_t *, SvIVX(SvRV(b))))));
+           Rmpq_pow_ui(INT2PTR(mpq_t *, SvIVX(SvRV(a))), INT2PTR(mpq_t *, SvIVX(SvRV(a))), (unsigned long)ui);
+           return a;
+         }
+       }
+
+     }
 
      SvREFCNT_dec(a);
      croak("Invalid argument supplied to Math::GMPq::overload_pow_eq function");
@@ -2634,8 +2685,9 @@ SV * _wrap_count(pTHX) {
 }
 
 SV * _overload_pow(pTHX_ SV * a, SV * b, SV * third) {
-     mpq_t * mpq_t_obj;
+     mpq_t * mpq_t_obj, temp;
      SV * obj_ref, * obj;
+     unsigned int ui, error;
      const char *h;
 
      if(SWITCH_ARGS) croak("Raising a value to an mpq_t power is not allowed in '**' operation in Math::GMPq::overload_pow");
@@ -2651,10 +2703,69 @@ SV * _overload_pow(pTHX_ SV * a, SV * b, SV * third) {
        Rmpq_pow_ui(mpq_t_obj, INT2PTR(mpq_t *, SvIVX(SvRV(a))), (unsigned long)SvUVX(b));
        return obj_ref;
      }
+
+#if defined(GMPQ_PV_NV_BUG)
+     if( (SV_IS_POK(b) && !SV_IS_NOK(b))
+           ||
+         (SV_IS_POK(b) && SV_IS_NOK(b) && SvIOKp(b)) ) {
+#else
+     if(SV_IS_POK(b)) {
+#endif
+       mpq_init(temp);
+       error = mpq_set_str(temp, SvPV_nolen(b), 0);
+       if(!error && Rmpq_fits_uint_p(&temp)) {
+         ui = mpz_get_ui(mpq_numref(temp));
+         mpq_clear(temp);
+         New(1, mpq_t_obj, 1, mpq_t);
+         if(mpq_t_obj == NULL) croak("Failed to allocate memory in overload_pow function");
+         obj_ref = newSV(0);
+         obj = newSVrv(obj_ref, "Math::GMPq");
+         mpq_init(*mpq_t_obj);
+         mpq_set(*mpq_t_obj, *(INT2PTR(mpq_t *, SvIVX(SvRV(a)))));
+         Rmpq_pow_ui(mpq_t_obj, mpq_t_obj, ui);
+         sv_setiv(obj, INT2PTR(IV, mpq_t_obj));
+         SvREADONLY_on(obj);
+         return obj_ref;
+       }
+       else {
+         mpq_clear(temp);
+       }
+     }
+
      if(sv_isobject(b)) {
        h = HvNAME(SvSTASH(SvRV(b)));
        if(strEQ(h, "Math::MPFR")) {
          _overload_callback("Math::MPFR::overload_pow", "Math::GMPq:overload_pow", &PL_sv_yes);
+       }
+
+       if(strEQ(h, "Math::GMPz") || strEQ(h, "Math::GMP")) {
+         if(mpz_fits_uint_p(*(INT2PTR(mpz_t *, SvIVX(SvRV(b)))))) {
+           New(1, mpq_t_obj, 1, mpq_t);
+           if(mpq_t_obj == NULL) croak("Failed to allocate memory in overload_pow function");
+           obj_ref = newSV(0);
+           obj = newSVrv(obj_ref, "Math::GMPq");
+           mpq_init(*mpq_t_obj);
+           sv_setiv(obj, INT2PTR(IV, mpq_t_obj));
+           SvREADONLY_on(obj);
+           ui = mpz_get_ui (*(INT2PTR(mpz_t *, SvIVX(SvRV(b)))));
+           Rmpq_pow_ui(mpq_t_obj, INT2PTR(mpq_t *, SvIVX(SvRV(a))), (unsigned long)ui);
+           return obj_ref;
+         }
+       }
+
+       if(strEQ(h, "Math::GMPq")) {
+         if(Rmpq_fits_uint_p(INT2PTR(mpq_t *, SvIVX(SvRV(b))))) {
+           ui = mpz_get_ui(mpq_numref(*(INT2PTR(mpq_t *, SvIVX(SvRV(b))))));
+           New(1, mpq_t_obj, 1, mpq_t);
+           if(mpq_t_obj == NULL) croak("Failed to allocate memory in overload_pow function");
+           obj_ref = newSV(0);
+           obj = newSVrv(obj_ref, "Math::GMPq");
+           mpq_init(*mpq_t_obj);
+           sv_setiv(obj, INT2PTR(IV, mpq_t_obj));
+           SvREADONLY_on(obj);
+           Rmpq_pow_ui(mpq_t_obj, INT2PTR(mpq_t *, SvIVX(SvRV(a))), (unsigned long)ui);
+           return obj_ref;
+         }
        }
      }
 
@@ -3295,6 +3406,10 @@ Rmpq_z_div (rop, z, op)
         Rmpq_z_div(rop, z, op);
         XSRETURN_EMPTY; /* return empty stack */
 
+int
+Rmpq_fits_uint_p (op)
+	mpq_t *	op
+
 void
 Rmpq_pow_ui (rop, op, ui)
 	mpq_t *	rop
@@ -3336,71 +3451,35 @@ Rmpq_and (rop, a, b)
 	mpq_t *	rop
 	mpq_t *	a
 	mpq_t *	b
-        PREINIT:
-        I32* temp;
         PPCODE:
-        temp = PL_markstack_ptr++;
         Rmpq_and(rop, a, b);
-        if (PL_markstack_ptr != temp) {
-          /* truly void, because dXSARGS not invoked */
-          PL_markstack_ptr = temp;
-          XSRETURN_EMPTY; /* return empty stack */
-        }
-        /* must have used dXSARGS; list context implied */
-        return;
+        XSRETURN_EMPTY; /* return empty stack */
 
 void
 Rmpq_ior (rop, a, b)
 	mpq_t *	rop
 	mpq_t *	a
 	mpq_t *	b
-        PREINIT:
-        I32* temp;
         PPCODE:
-        temp = PL_markstack_ptr++;
         Rmpq_ior(rop, a, b);
-        if (PL_markstack_ptr != temp) {
-          /* truly void, because dXSARGS not invoked */
-          PL_markstack_ptr = temp;
-          XSRETURN_EMPTY; /* return empty stack */
-        }
-        /* must have used dXSARGS; list context implied */
-        return;
+        XSRETURN_EMPTY; /* return empty stack */
 
 void
 Rmpq_xor (rop, a, b)
 	mpq_t *	rop
 	mpq_t *	a
 	mpq_t *	b
-        PREINIT:
-        I32* temp;
         PPCODE:
-        temp = PL_markstack_ptr++;
         Rmpq_xor(rop, a, b);
-        if (PL_markstack_ptr != temp) {
-          /* truly void, because dXSARGS not invoked */
-          PL_markstack_ptr = temp;
-          XSRETURN_EMPTY; /* return empty stack */
-        }
-        /* must have used dXSARGS; list context implied */
-        return;
+        XSRETURN_EMPTY; /* return empty stack */
 
 void
 Rmpq_com (rop, a)
 	mpq_t *	rop
 	mpq_t *	a
-        PREINIT:
-        I32* temp;
         PPCODE:
-        temp = PL_markstack_ptr++;
         Rmpq_com(rop, a);
-        if (PL_markstack_ptr != temp) {
-          /* truly void, because dXSARGS not invoked */
-          PL_markstack_ptr = temp;
-          XSRETURN_EMPTY; /* return empty stack */
-        }
-        /* must have used dXSARGS; list context implied */
-        return;
+        XSRETURN_EMPTY; /* return empty stack */
 
 SV *
 _overload_add (a, b, third)
