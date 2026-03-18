@@ -541,12 +541,10 @@
 
    OPERATOR OVERLOADING
 
-   Overloading occurs with numbers, strings, Math::GMPq objects,
-   Math::GMPz objects, Math::GMP objects and Math::MPFR objects.
-   Strings are first converted to Math::GMPq objects, then canonicalized.
-   See the new() documentation (above) in the section "COMBINED
-   INITIALIZATION AND ASSIGNMENT FUNCTIONS" regarding permissible string
-   formats - the range of which has been extended beginning Math-GMPq-0.65.
+   Overloading occurs with numbers, strings (bases 2, 8,10 & 16 only),
+   Math::GMPq objects, Math::GMPz objects, Math::GMP objects and
+   Math::MPFR objects. Strings are first converted to Math::GMPq
+   objects, then canonicalized.
    The following operators are overloaded:
 
     + - * / % **
