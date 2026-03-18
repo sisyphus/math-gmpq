@@ -30,7 +30,7 @@ use overload
     '-'    => \&overload_sub,
     '*'    => \&overload_mul,
     '/'    => \&overload_div,
-    '**'   => \&_overload_pow,
+    '**'   => \&overload_pow,
     '+='   => \&overload_add_eq,
     '-='   => \&overload_sub_eq,
     '*='   => \&overload_mul_eq,
@@ -570,14 +570,12 @@ sub overload_div_eq {
   return _overload_div_eq($_[0], $_[1], $_[2]);
 }
 
-sub overload_pow_hide {
-  if( _itsa($_[1]) == 4 ) {
-    my $q = Math::GMPq->new($_[1], 0);
-    _overload_pow($_[0], $q, $_[2]);
-  }
-  else {
-    _overload_pow($_[0], $_[1], $_[2]);
-  }
+sub overload_pow {
+  # Math::GMP_OLOAD (and perhaps other modules, too)
+  # expect that they can call "overload_pow".
+  # We'll keep this dummy "overload_pow" in case we want
+  # to perform some tweaks here at a future date.
+  _overload_pow($_[0], $_[1], $_[2]);
 }
 
 sub overload_pow_eq {
