@@ -645,8 +645,17 @@
 
    $bool = Rmpq_integer_p($op);
     Returns true if $op is an integer (ie denominator of $op is 1).
-    Else returns false. The mpq_integer_p function is not
-    implemented in gmp.
+    Else returns false.
+    The mpq_integer_p function is not implemented in gmp.
+
+   $bool = Rmpq_fits_uint_p($op);
+    Returns true if $op >= 0 && $op holds an integer value that
+    fits into an unsigned int. Else returns false.
+    The mpq_fits_uint_p function is not implemented in gmp.
+
+   Rmpq_pow_ui($rop, $op, $ui);
+    Sets $rop top the value of $op ** $ui.
+    The mpq_pow_ui function is not implemented in gmp.
 
    $si = IOK_flag($sv); # $sv is a perl scalar variable.
    $si = NOK_flag($sv);
