@@ -627,8 +627,6 @@
        assessed individually. ie '0xa123/ff' is not a valid number
        (because 'ff' is not a valid base 10 number). That needs to
        be rewritten as '0xa123/0xff'.
-       NOTE: String (PV) values given to '**' and '**=' must be +ve
-             integers that fit into an unsigned long int.
 
     4. If the variable is an NV, then that value is used. The
        variable is considered to be a NV if the NOK flag is set.
@@ -638,10 +636,6 @@
     5. If the variable is a Math::GMPq object (or, for operators
        specified above, a Math::MPFR/Math::GMP/Math::GMPz object)
        then the value of that object is used.
-       NOTE: Providing a Math::GMPq object as the exponent to the
-             overloaded '**' and '**=' subroutines generates an
-             error if that object does not contain a +ve integer
-             value that fits into an unsigned int.
 
     6. If none of the above is true, then the second variable is
        deemed to be of an invalid type. The subroutine croaks with
