@@ -70,18 +70,16 @@ like($@, qr/Invalid string passed to Math::GMPq::overload_pow_eq/, "Test 19: Pro
 
 ######## TESTING Math::GMPq OBJECTS ########
 
-$rop = Math::GMPq->new('2/3') ** Math::GMPq->new(3);
-cmp_ok(ref($rop), 'eq', 'Math::GMPq', "Test 20: returned a Math::GMPq object");
-cmp_ok("$rop", 'eq', '8/27', "Test 21: returned correct value");
+eval { $rop = Math::GMPq->new('2/3') ** Math::GMPq->new(3);};
+like($@, qr/^Only Math::MPFR's overloading of '\*\*' can handle Math::GMPq exponents/, "Test 20: Produced expected error");
 
-$rop **= Math::GMPq->new(3);
-cmp_ok(ref($rop), 'eq', 'Math::GMPq', "Test 22: returned a Math::GMPq object");
-cmp_ok("$rop", 'eq', '512/19683', "Test 23: returned correct value");
+eval { $rop **= Math::GMPq->new(3);};
+like($@, qr/^Only Math::MPFR's overloading of '\*\*=' can handle Math::GMPq exponents/, "Test 21: Produced expected error");
 
 eval { $rop = Math::GMPq->new('2/3') ** Math::GMPq->new('3/4');};
-like($@, qr/Invalid argument supplied to Math::GMPq::overload_pow/, "Test 24: Produced expected error");
+like($@, qr/^Only Math::MPFR's overloading of '\*\*' can handle Math::GMPq exponents/, "Test 22: Produced expected error");
 
 eval { $rop **= Math::GMPq->new('3/4');};
-like($@, qr/Invalid argument supplied to Math::GMPq::overload_pow_eq/, "Test 25: Produced expected error");
+like($@, qr/^Only Math::MPFR's overloading of '\*\*=' can handle Math::GMPq exponents/, "Test 23: Produced expected error");
 
 done_testing();

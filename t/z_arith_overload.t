@@ -100,7 +100,7 @@ else {
 
 eval {my $xception = 2 ** Math::GMPq->new('5/1');};
 
-if($@ =~ /^Raising an IV to an mpq_t power is not allowed/) {print "ok 11\n"}
+if($@ =~ /^Only Math::MPFR's overloading of '\*\*' can handle Math::GMPq exponents/) {print "ok 11\n"}
 else {
   warn "\n\$\@: $@";
   print "not ok 11\n";
