@@ -721,7 +721,7 @@ sub overload_and {
     return $ret;
   }
   my $arg1 = _to_mpq($itsa, $_[1], '&');
-  return Rmpq_and($ret,$_[0], $arg1);
+  Rmpq_and($ret,$_[0], $arg1);
   return $ret;
 }
 
@@ -733,7 +733,7 @@ sub overload_ior {
     return $ret;
   }
   my $arg1 = _to_mpq($itsa, $_[1], '|');
-  return Rmpq_ior($ret,$_[0], $arg1);
+  Rmpq_ior($ret,$_[0], $arg1);
   return $ret;
 }
 
@@ -745,7 +745,7 @@ sub overload_xor {
     return $ret;
   }
   my $arg1 = _to_mpq($itsa, $_[1], '^');
-  return Rmpq_xor($ret,$_[0], $arg1);
+  Rmpq_xor($ret,$_[0], $arg1);
   return $ret;
 }
 
