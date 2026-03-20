@@ -541,76 +541,107 @@
 
    OPERATOR OVERLOADING
 
-   Overloading occurs with numbers, strings (bases 2, 8,10 & 16 only),
-   Math::GMPq objects, Math::GMPz objects, Math::GMP objects and
-   Math::MPFR objects. Strings are first converted to Math::GMPq
-   objects, then canonicalized.
+   Overloading occurs with IVs, strings (bases 2, 8,10 & 16 only), NVs,
+   Math::GMPq(v0.68) objects, Math::GMPz(v0.69) objects, Math::GMP(v2.11)
+   objects and Math::MPFR (v4.19) objects.
+   Strings are first converted to Math::GMPq objects, then canonicalized.
    The following operators are overloaded:
 
-    + - * / % **
-    += -= *= /= %= **=
+    + - * / ** %        # '%'  is fmod.
+    += -= *= /= %= **=  # '%=' is fmod.
     ++ --
     == != !
     < <= > >= <=>
     "" abs 0+ int
+    &, |, ^, ~, >> <<
     =
 
-    Overloading of '**' and '**=' accepts only positive integer  values -
-    in the form of a string, an IV, a Math::MPFR object, a  Math::GMPz, a
-    Math::GMP object or a Math::GMPq object. An exception will be raised
-    unless the value of the Math::GMPz/Math::GMP/Math::GMPq object fits
-    into an unsigned int. (Math::MPFR object values are allowed to be
-    negative and/or fractional as the '**' and '**=' operations return a
-    Math::MPFR object.)
+    Let $LHS' and '$RHS' denote a variable that is any one of those data
+    types just specified; let '$MPQ' denote a Math::GMPq object; let 'OP'
+    denote any one of the '+', '-', '*', '/' and '%' arithmetic operators.
+    Then, so long as one (or both) of $LHS and $RHS is a Math::GMPq
+    object we can do the following:
+
+      $RET = $LHS OP $RHS;
+
+      If $LHS is a Math::MPFR object, then so too is $RET. otherwise
+      $RET is a Math::GMPq object.
+      NOTE: If $LHS is a Math::GMP object then our code needs to also:
+            use Math::GMP_OLOAD;
+
+    Let 'OP=' denote any one of the '+=', '-=', '*=', '/=' and '%='
+    operators. Then we can do:
+
+      $MPQ OP= $RHS;
+
+      Again, if $RHS is a Math::MPFR object, then a Math::MPFR object
+      is returned - with $MPQ changing to a Math::MPFR object.
+
+    And similarly for the '**' and '**=' operators - except that,
+    unless $LHS is a Math::MPFR object, $RHS must be neither a
+    Math::GMPq object nor an NV, and must hold a non-negative integer
+    value that fits into an unsigned int.
+
+    Let 'CMP' denote  any one of the overloaded '==', '!=', '<', '<=',
+    '>', '>=', '<=>' comparison operators. We can test the condition:
+
+      ($LHS CMP $RHS)
+
+      with the only caveat being that, if $LHS is a Math::GMP object,
+      we need to:
+         use Math::GMP_OLOAD;
 
     NOTE: Making use of the '=' overloading is not recommended unless
           you understand its caveats. See 'perldoc overload' and
           read it thoroughly, including the documentation regarding
           'copy constructors'.
 
-    For compatibility with perl in general and Math::BigRat in
-    particular, overloading of the '&', '|', '^', '~', '%', '>>' and
-   '<<' operators has now been added.
-
     Atempting to use the overloaded operators with objects that
     have been blessed into some package other than 'Math::GMPq',
     Math::MPFR', 'Math::GMPz', or 'Math::GMP' will throw an error.
 
-    When overloading operations that involve Math::GMP and Math::GMPq
-    objects, a Math::GMPq object is always returned. You will also need
-    to load the Math::GMP_OLOAD module for operations that call
-    Math::GMP's overloading subs.
-    For such operations that instead call Math::GMPq's overloading subs,
-    then Math::GMP_OLOAD is not needed.
-
-    YMMV with older versions of Math::MPFR but, if you use Math-MPFR-4.19
-    or later, then Math::MPFR objects can be provided as the second arg
-    with '+', '+=', '-', '-=', '*', '*=',  '/', '/=', '%', '%=', '**'
-    and '**=' operators. In these cases, the operation will return a
-    Math::MPFR object, rounded in accordance with the current Math::MPFR
-    default rounding mode.
-    The precision of Math::MPFR objects returned by the '+=', '-=', '*=',
-    '/=', '%=' and '**=' operators will be the same as the Math::MPFR
-    object that was provided as an argument.
-    For the other operators, the returned Math::MPFR object will have
+    When the 'OP' operations return a Math::MPFR object, the precision
+    of that Math::MPFR object will be the same as the Math::MPFR object
+    that was provided as an argument.
+    For the 'OP=' operations, the returned Math::MPFR object will have
     current Math::MPFR default precision.
-    For the '%', '%=', '**' and '**=' operations, the  value of the
-    Math::GMPq argument is first set to a Math::MPFR object using the
-    current Math::MPFR default precision and default rounding mode.
+    When the '%', '%=', '**' and '**=' operations will return a Math::MPFR
+    object, the  value of the Math::GMPq argument is first set to a
+    Math::MPFR object using the current Math::MPFR default precision and
+    default rounding mode.
 
     Comparisons between Math::GMPq and Math::GMPz objects can be performed
     using either the Math::GMPz/Math::GMP or Math::GMPq overloading.
     For example, ($mpq > $mpz) is equivalent to ($mpz < $mpq).
 
-    To determine the type and value of the second argument the subroutine
-    works through the following steps (in order), using the first value
-    it finds, or croaking if it gets to step 6:
+    Let 'BITWISE' denote any one of the overloaded '&', '|' and '^'
+    operations, introduced for compatibility with Math::BigRat. We can do:
+
+      $RET = $GMP BITWISE $RHS; # $RHS excludes Math::MPFR here.
+
+      which will firstly convert $RHS to a Math::GMPq object (if it's not
+      already a Math::GMPq object). $RET is a Math::GMPq object.
+      The converse operation of:
+
+      $RET = $LHS BITWISE $GMP;
+
+      will likely (not tested) fail.
+
+    Let 'SHIFT' denote either of '<<' or '>>', also introduced for
+    compatibility with Math::BigRat:
+
+      $RET = $MPQ SHIFT $perlnumber; # $RET is a Math::GMPq object.
+
+    The first argument recieved by the Math::GMPq overloading subroutines
+    is always the Math::GMPq object. To determine the type of the second
+    argument, these subroutines work through the following steps, using
+    the first value it finds, or croaking if it gets to step 6:
 
     1. If the variable is a UV then that value is used. The variable
        is considered to be a UV if the IOK and IsUV flags are set.
 
-    2. If the variable is an IV, then that value is used.
-       The variable is considered to be an IV if the IOK flag is set.
+    2. If the variable is an IV (IOK but not IsUIV), then the IV value
+       is used.
 
     3. If the variable is a string (ie the POK flag is set) then the
        value of that string is used. Octal strings should begin with
