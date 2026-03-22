@@ -2299,10 +2299,6 @@ SV * _overload_pow_eq(pTHX_ SV * a, SV * b, SV * third) {
          }
        }
 
-       if(strEQ(h, "Math::GMPq")) {
-         croak ("Only Math::MPFR's overloading of '**=' can handle Math::GMPq exponents");
-       }
-
      }
 
      SvREFCNT_dec(a);
@@ -2687,7 +2683,7 @@ SV * _overload_pow(pTHX_ SV * a, SV * b, SV * third) {
      const char *h;
 
      if(SvUOK(b) || (SV_IS_IOK(b) && SvIVX(b) >= 0)) {
-       if(SWITCH_ARGS) croak("Only Math::MPFR's overloading of '**' can handle Math::GMPq exponents");
+       if(SWITCH_ARGS) croak("Raising a value to an mpq_t power is not allowed in '**' operation in Math::GMPq::overload_pow");
        New(1, mpq_t_obj, 1, mpq_t);
        if(mpq_t_obj == NULL) croak("Failed to allocate memory in overload_pow function");
        obj_ref = newSV(0);
@@ -2706,7 +2702,7 @@ SV * _overload_pow(pTHX_ SV * a, SV * b, SV * third) {
 #else
      if(SV_IS_POK(b)) {
 #endif
-       if(SWITCH_ARGS) croak("Only Math::MPFR's overloading of '**' can handle Math::GMPq exponents");
+       if(SWITCH_ARGS) croak("Raising a value to an mpq_t power is not allowed in '**' operation in Math::GMPq::overload_pow");
        mpq_init(temp);
        error = mpq_set_str(temp, SvPV_nolen(b), 0);
        if(!error && Rmpq_fits_uint_p(&temp)) {
@@ -2735,7 +2731,7 @@ SV * _overload_pow(pTHX_ SV * a, SV * b, SV * third) {
        }
 
        if(strEQ(h, "Math::GMPz") || strEQ(h, "Math::GMP")) {
-         if(SWITCH_ARGS) croak("Only Math::MPFR's overloading of '**' can handle Math::GMPq exponents");
+         if(SWITCH_ARGS) croak("Raising a value to an mpq_t power is not allowed in '**' operation in Math::GMPq::overload_pow");
          if(mpz_fits_uint_p(*(INT2PTR(mpz_t *, SvIVX(SvRV(b)))))) {
            New(1, mpq_t_obj, 1, mpq_t);
            if(mpq_t_obj == NULL) croak("Failed to allocate memory in overload_pow function");
@@ -2750,7 +2746,7 @@ SV * _overload_pow(pTHX_ SV * a, SV * b, SV * third) {
          }
        }
 
-       if(strEQ(h, "Math::GMPq")) croak("Only Math::MPFR's overloading of '**' can handle Math::GMPq exponents");
+       if(strEQ(h, "Math::GMPq")) croak("Raising a value to an mpq_t power is not allowed in '**' operation in Math::GMPq::overload_pow");
      }
      croak("Invalid argument supplied to Math::GMPq::overload_pow");
 }

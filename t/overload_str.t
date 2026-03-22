@@ -94,7 +94,7 @@ use Test::More;
   my $q = Math::GMPq->new('2/3');
 
   eval{ my $t = $s ** $q;};
-  like($@, qr/Only Math::MPFR's overloading of '\*\*' can handle Math::GMPq exponents/, "**: Overloading of '**' disallows a PV argument");
+  like($@, qr/^Raising a value to an mpq_t power is not allowed/, "**: Overloading of '**' disallows a PV argument");
 
   # FAILURE: The following test passes ... but causes the test suite to fail.
   # I think the failure is triggered by the cleanup when the script exits.
@@ -106,7 +106,7 @@ use Test::More;
   cmp_ok("$t", 'eq', '32/243',        "GMPq ** integer PV returns correct value");
 
   eval{ $s **= $q;};
-  like($@, qr/^Only Math::MPFR's overloading of '\*\*' can handle Math::GMPq exponent/, "**=: Overloading of '**' disallows a PV argument");
+  like($@, qr/^Raising a value to an mpq_t power is not allowed/, "**=: Overloading of '**' disallows a PV argument");
 
   # $q is 2/3, $s is '5'.
 
