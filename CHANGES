@@ -1,5 +1,7 @@
 Revision history for Perl module Math::GMPq
 
+0.71
+
 0.70
  - Enable quadmath builds on cygwin smoker. See (eg):
    https://www.cpantesters.org/cpan/report/3fa2b1f1-71b3-1014-beba-d9dcb6a500a3.
