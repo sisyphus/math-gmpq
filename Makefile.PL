@@ -119,7 +119,7 @@ if($Config{longsize} < $Config{ivsize}) { $defines .= " -D_GMP_INDEX_OVERFLOW"  
 
 my %options = (
   NAME => 'Math::GMPq',
-  AUTHOR => 'Sisyphus (sisyphus at (@) cpan dot (.) org)',
+  AUTHOR => 'Sisyphus (sisyphus359 at (@) gmail dot (.) com)',
   ABSTRACT => 'Perl interface to the GMP rational functions',
   DEFINE   => $defines,
   LIBS => [

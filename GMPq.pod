@@ -819,7 +819,7 @@
 
 =head1 AUTHOR
 
-    Sisyphus <sisyphus at(@) cpan dot (.) org>
+    Sisyphus <sisyphus359 at(@) gmail dot (.) com>
 
 
 =cut
